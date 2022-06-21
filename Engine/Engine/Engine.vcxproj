@@ -154,6 +154,10 @@
   <ItemGroup>
     <ClInclude Include="src\util\FileIO.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\shaders\BasicFragment.fragment" />
+    <None Include="src\shaders\BasicVertex.vertex" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -30,4 +30,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\shaders\BasicVertex.vertex" />
+    <None Include="src\shaders\BasicFragment.fragment" />
+  </ItemGroup>
 </Project>
