@@ -147,11 +147,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\renderer\shaders\Shader.cpp" />
     <ClCompile Include="src\core\glad.c" />
     <ClCompile Include="src\core\Main.cpp" />
     <ClCompile Include="src\util\FileIO.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\shaders\Shader.h" />
     <ClInclude Include="src\util\FileIO.h" />
   </ItemGroup>
   <ItemGroup>
