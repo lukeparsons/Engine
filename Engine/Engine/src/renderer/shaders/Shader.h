@@ -4,9 +4,12 @@
 
 class Shader
 {
-public:
+private:
 	std::optional<GLuint> id;
+public:
 
 	Shader(const char* path);
 	~Shader();
+
+	inline const std::optional<GLuint> GetID() { return id; }
 };

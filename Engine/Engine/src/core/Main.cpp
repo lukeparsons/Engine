@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../util/FileIO.h"
 #include "../renderer/shaders/Shader.h"
+#include "../renderer/shaders/ShaderProgram.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -81,24 +82,9 @@ int main()
 	
 	Shader fragmentShader = Shader("../Engine/src/shaders/BasicFragment.fragment");
 
+	ShaderProgram shaderProgram(vertexShader, fragmentShader);
 
-	unsigned int shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader.id.value());
-	glAttachShader(shaderProgram, fragmentShader.id.value());
-	glLinkProgram(shaderProgram);
-
-	GLint success;
-	char infoLog[512];
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "Error in shader link\n" << infoLog << std::endl;
-	}
-
-	glUseProgram(shaderProgram);
+	glUseProgram(shaderProgram.GetID());
 
 	glBindVertexArray(VAO);
 
