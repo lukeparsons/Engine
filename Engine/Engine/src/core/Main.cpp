@@ -4,6 +4,8 @@
 #include "../util/FileIO.h"
 #include "../renderer/shaders/Shader.h"
 #include "../renderer/shaders/ShaderProgram.h"
+#include "../math/Matrix.h"
+#include "../math/Matrix4f.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -20,6 +22,19 @@ void processInput(GLFWwindow* window)
 
 int main()
 {
+
+	Matrix4f iMat = GetTranslationMatrix(Vector3f(1, 2, 3));
+
+	PrintMatrixf(iMat);
+	std::cout << std::endl;
+
+	Matrix4f iMat2 = GetScaleMatrix(Vector3f(2, 2, 2));
+
+	PrintMatrixf(iMat2);
+	std::cout << std::endl;
+	
+	PrintMatrixf(iMat * iMat2);
+
 	glfwInit();
 	// opengl 3.3 (for now)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

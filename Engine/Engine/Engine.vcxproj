@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\math\Matrix4f.cpp" />
     <ClCompile Include="src\renderer\shaders\ShaderProgram.cpp" />
     <ClCompile Include="src\renderer\shaders\Shader.cpp" />
     <ClCompile Include="src\core\glad.c" />
@@ -154,6 +155,9 @@
     <ClCompile Include="src\util\FileIO.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\math\Matrix.h" />
+    <ClInclude Include="src\math\Matrix4f.h" />
+    <ClInclude Include="src\math\Vector.h" />
     <ClInclude Include="src\renderer\shaders\ShaderProgram.h" />
     <ClInclude Include="src\renderer\shaders\Shader.h" />
     <ClInclude Include="src\util\FileIO.h" />
