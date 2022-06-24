@@ -17,6 +17,49 @@ Matrix4f GetScaleMatrix(const Vector3f& scale)
 	return GetDiagonalMatrixf<4>(scaleValues);
 }
 
+// Angles in radians
+Matrix4f GetXRotationMatrix(float angle)
+{
+	float cosAngle = cos(angle);
+	float sinAngle = sin(angle);
+
+	Matrix4f rotationMatrix = GetIdentityMatrixf<4>();
+	rotationMatrix[1][1] = cosAngle;
+	rotationMatrix[1][2] = -sinAngle;
+	rotationMatrix[2][1] = sinAngle;
+	rotationMatrix[2][2] = cosAngle;
+
+	return rotationMatrix;
+}
+
+Matrix4f GetYRotationMatrix(float angle)
+{
+	float cosAngle = cos(angle);
+	float sinAngle = sin(angle);
+
+	Matrix4f rotationMatrix = GetIdentityMatrixf<4>();
+	rotationMatrix[0][0] = cosAngle;
+	rotationMatrix[0][2] = sinAngle;
+	rotationMatrix[2][0] = -sinAngle;
+	rotationMatrix[2][2] = cosAngle;
+
+	return rotationMatrix;
+}
+
+Matrix4f GetZRotationMatrix(float angle)
+{
+	float cosAngle = cos(angle);
+	float sinAngle = sin(angle);
+
+	Matrix4f rotationMatrix = GetIdentityMatrixf<4>();
+	rotationMatrix[0][0] = cosAngle;
+	rotationMatrix[0][1] = -sinAngle;
+	rotationMatrix[1][0] = sinAngle;
+	rotationMatrix[1][1] = cosAngle;
+
+	return rotationMatrix;
+}
+
 VectorMatrix ApplyTransformationMatrix(const Matrix4f& transformation, const Vector3f& vector)
 {
 	VectorMatrix vectorMatrix;

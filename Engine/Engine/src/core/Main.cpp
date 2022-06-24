@@ -40,6 +40,9 @@ int main()
 	VectorMatrix vm = ApplyTransformationMatrix(iMat * iMat2, Vector3f(2, 2, 2));
 
 	PrintMatrixf(vm);
+	std::cout << std::endl;
+
+	PrintMatrixf(GetXRotationMatrix(50));
 
 	glfwInit();
 	// opengl 3.3 (for now)
