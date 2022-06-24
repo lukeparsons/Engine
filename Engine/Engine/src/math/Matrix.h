@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <algorithm>
 
 template<size_t row, size_t column>
 struct Matrixf
@@ -15,7 +16,6 @@ struct Matrixf
 template<size_t row1, size_t column1, size_t row2, size_t column2>
 Matrixf<row1, column2> operator*(const Matrixf<row1, column1>& lhs, const Matrixf<row2, column2>& rhs)
 {
-
 	Matrixf<row1, column2> resultMatrix;
 
 	if (column1 != row2)
@@ -79,5 +79,6 @@ template<size_t matrixSize>
 SquareMatrixf<matrixSize> GetIdentityMatrixf()
 {
 	float allDiagonalOnes[matrixSize];
+	std::fill_n(allDiagonalOnes, matrixSize, 1);
 	return GetDiagonalMatrixf<matrixSize>(allDiagonalOnes);
 }

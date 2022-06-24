@@ -33,7 +33,13 @@ int main()
 	PrintMatrixf(iMat2);
 	std::cout << std::endl;
 	
-	PrintMatrixf(iMat * iMat2);
+	Matrix4f result = iMat * iMat2;
+	PrintMatrixf(result);
+	std::cout << std::endl;
+
+	VectorMatrix vm = ApplyTransformationMatrix(iMat * iMat2, Vector3f(2, 2, 2));
+
+	PrintMatrixf(vm);
 
 	glfwInit();
 	// opengl 3.3 (for now)
