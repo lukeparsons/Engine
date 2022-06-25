@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <array>
 #include "../util/FileIO.h"
 #include "../renderer/shaders/Shader.h"
 #include "../renderer/shaders/ShaderProgram.h"
@@ -23,26 +24,21 @@ void processInput(GLFWwindow* window)
 int main()
 {
 
-	Matrix4f iMat = GetTranslationMatrix(Vector3f(1, 2, 3));
+	Matrix4f iMat = GetTranslationMatrix(Vector3f(1, 0, 0));
 
-	PrintMatrixf(iMat);
-	std::cout << std::endl;
+	//PrintMatrixf(iMat);
+	//std::cout << std::endl;
 
-	Matrix4f iMat2 = GetScaleMatrix(Vector3f(2, 2, 2));
+	Matrix4f iMat2 = GetScaleMatrix(Vector3f(1, 1, 1));
 
-	PrintMatrixf(iMat2);
-	std::cout << std::endl;
+	//PrintMatrixf(iMat2);
+	//std::cout << std::endl;
+
+	Matrix4f iMat3 = GetZRotationMatrix(0.785398f);
 	
-	Matrix4f result = iMat * iMat2;
+	Matrix4f result = iMat3;
 	PrintMatrixf(result);
 	std::cout << std::endl;
-
-	VectorMatrix vm = ApplyTransformationMatrix(iMat * iMat2, Vector3f(2, 2, 2));
-
-	PrintMatrixf(vm);
-	std::cout << std::endl;
-
-	PrintMatrixf(GetXRotationMatrix(50));
 
 	glfwInit();
 	// opengl 3.3 (for now)
@@ -121,6 +117,9 @@ int main()
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

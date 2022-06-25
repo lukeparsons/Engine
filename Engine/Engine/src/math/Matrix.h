@@ -13,6 +13,13 @@ struct Matrixf
 	}
 };
 
+// Returns in row-major form so GL_TRANSPOSE must be true
+template<size_t row, size_t column>
+float* GetFlatMatrixf(Matrixf<row, column>& mat)
+{
+	return mat.matrix[0];
+}
+
 template<size_t row1, size_t column1, size_t row2, size_t column2>
 Matrixf<row1, column2> operator*(const Matrixf<row1, column1>& lhs, const Matrixf<row2, column2>& rhs)
 {
