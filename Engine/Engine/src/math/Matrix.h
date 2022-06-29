@@ -85,7 +85,7 @@ SquareMatrixf<matrixSize> GetDiagonalMatrixf(float diagValues[matrixSize])
 template<size_t matrixSize>
 SquareMatrixf<matrixSize> GetIdentityMatrixf()
 {
-	float allDiagonalOnes[matrixSize];
+	float allDiagonalOnes[matrixSize] = { 1 };
 	std::fill_n(allDiagonalOnes, matrixSize, 1);
 	return GetDiagonalMatrixf<matrixSize>(allDiagonalOnes);
 }

@@ -10,4 +10,5 @@ Matrix4f GetScaleMatrix(const Vector3f& scale);
 Matrix4f GetXRotationMatrix(float angle);
 Matrix4f GetYRotationMatrix(float angle);
 Matrix4f GetZRotationMatrix(float angle);
+Matrix4f GetProjectionMatrix(float fov);
 Matrixf<4, 1> ApplyTransformationMatrix(const Matrix4f& transformation, const Vector3f& vector);

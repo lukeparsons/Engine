@@ -1,5 +1,7 @@
 #include "Matrix4f.h"
 
+static const float pi = 3.14159265358979323846f;
+
 Matrix4f GetTranslationMatrix(const Vector3f& translation)
 {
 	Matrix4f translationMatrix = GetIdentityMatrixf<4>();
@@ -58,6 +60,23 @@ Matrix4f GetZRotationMatrix(float angle)
 	rotationMatrix[1][1] = cosAngle;
 
 	return rotationMatrix;
+}
+
+Matrix4f GetProjectionMatrix(float verticalFOV)
+{
+	verticalFOV /= 2.0f;
+	verticalFOV *= (pi / 180);
+	float distanceToNearClipPlane = 1 / (tanf(verticalFOV));
+
+	float diagValues[] = { distanceToNearClipPlane, distanceToNearClipPlane, 1, 1 };
+
+	Matrix4f projectionMatrix = GetDiagonalMatrixf<4>(diagValues);
+
+	// temp
+	projectionMatrix[3][3] = 0;
+	projectionMatrix[3][2] = 1;
+
+	return projectionMatrix;
 }
 
 VectorMatrix ApplyTransformationMatrix(const Matrix4f& transformation, const Vector3f& vector)

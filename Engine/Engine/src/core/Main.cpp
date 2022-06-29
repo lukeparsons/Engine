@@ -24,21 +24,29 @@ void processInput(GLFWwindow* window)
 int main()
 {
 
-	Matrix4f iMat = GetTranslationMatrix(Vector3f(1, 0, 0));
-
 	//PrintMatrixf(iMat);
 	//std::cout << std::endl;
 
-	Matrix4f iMat2 = GetScaleMatrix(Vector3f(1, 1, 1));
+	Matrix4f scaleMatrix = GetScaleMatrix(Vector3f(0.5f, 0.5f, 0.5f));
 
 	//PrintMatrixf(iMat2);
 	//std::cout << std::endl;
 
-	Matrix4f iMat3 = GetZRotationMatrix(0.785398f);
+	//Matrix4f iMat3 = GetZRotationMatrix(0.785398f);
 	
-	Matrix4f result = iMat3;
-	PrintMatrixf(result);
+	//Matrix4f result = iMat;
+	//PrintMatrixf(result);
+	//std::cout << std::endl;
+
+	Matrix4f projectionMatrix = GetProjectionMatrix(90.0f);
+
+	PrintMatrixf(projectionMatrix);
 	std::cout << std::endl;
+	
+	//result = projectionMatrix * result;
+
+	//PrintMatrixf(result);
+	//std::cout << std::endl;
 
 	glfwInit();
 	// opengl 3.3 (for now)
@@ -65,17 +73,49 @@ int main()
 	glViewport(0, 0, 800, 600);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	float vertices[] = {
-		0.5f, 0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f
+	GLfloat vertices[] = {
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f, 
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f, 
+		1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
+		1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f
 	};
 
-	unsigned int indices[] = {
-		0, 1, 3,
-		1, 2, 3
-	};
+	//unsigned int indices[] = {
+	//	0, 1, 3,
+	//	1, 2, 3
+	//};
 
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
@@ -92,11 +132,11 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
+	//unsigned int EBO;
+	//glGenBuffers(1, &EBO);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	Shader vertexShader = Shader("../Engine/src/shaders/BasicVertex.vertex");
 	
@@ -118,10 +158,15 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		Matrix4f rotationMat = GetZRotationMatrix((float)glfwGetTime());
+		//rotationMat = rotationMat * GetXRotationMatrix((float)glfwGetTime());
+		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(3.0f, 0.0f, glfwGetTime()));
+		Matrix4f result = projectionMatrix * translateMatrix * rotationMat;
+
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
