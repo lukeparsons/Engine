@@ -7,6 +7,10 @@
 #include "../renderer/shaders/ShaderProgram.h"
 #include "../math/Matrix.h"
 #include "../math/Matrix4f.h"
+#include "window/Window.h"
+
+static const int width = 800;
+static const int height = 600;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -40,8 +44,7 @@ int main()
 
 	Matrix4f projectionMatrix = GetProjectionMatrix(90.0f);
 
-	PrintMatrixf(projectionMatrix);
-	std::cout << std::endl;
+	Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0.0f, 0.0f, 3.0f));
 	
 	//result = projectionMatrix * result;
 
@@ -54,14 +57,14 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Engine", NULL, NULL);
-	if (window == nullptr)
+	std::optional<GLFWwindow*> windowOptional = ConstructWindow(width, height, "Engine");
+	if (!windowOptional.has_value())
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
+		std::cout << "Failed to construct window" << std::endl;
 		return -1;
 	}
-	glfwMakeContextCurrent(window);
+
+	GLFWwindow* window = windowOptional.value();
 
 	// Initalize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -70,7 +73,7 @@ int main()
 		return -1;
 	}
 
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, width, height);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	GLfloat vertices[] = {
@@ -159,9 +162,8 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		Matrix4f rotationMat = GetZRotationMatrix((float)glfwGetTime());
-		//rotationMat = rotationMat * GetXRotationMatrix((float)glfwGetTime());
-		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(3.0f, 0.0f, glfwGetTime()));
-		Matrix4f result = projectionMatrix * translateMatrix * rotationMat;
+		rotationMat = rotationMat * GetXRotationMatrix((float)glfwGetTime());
+		Matrix4f result = projectionMatrix * translateMatrix * rotationMat * scaleMatrix;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));
