@@ -4,9 +4,9 @@
 ShaderProgram::ShaderProgram(Shader& vertexShader, Shader& fragmentShader)
 {
 	id = glCreateProgram();
-	
-	GLuint vertexShaderID = vertexShader.GetID().value();
-	GLuint fragmentShaderID = fragmentShader.GetID().value();
+
+	GLuint vertexShaderID = vertexShader.GetID().fromJust();
+	GLuint fragmentShaderID = fragmentShader.GetID().fromJust();
 
 	glAttachShader(id, vertexShaderID);
 	glAttachShader(id, fragmentShaderID);

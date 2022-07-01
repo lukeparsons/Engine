@@ -1,19 +1,22 @@
 #pragma once
 
+struct Nothing {};
+
 template<typename A>
 class Maybe
 {
 private:
+
 	union
 	{
 		A value;
-		std::nullopt_t nothing;
+		Nothing nothing;
 	};
 
 	bool is_just;
 public:
 
-	Maybe<A>() : nothing(std::nullopt), is_just(false) {};
+	Maybe<A>() : nothing(Nothing()), is_just(false) {};
 
 	Maybe<A>(A val) : value(val), is_just(true) {};
 
@@ -29,12 +32,12 @@ public:
 		return !is_just;
 	}
 
-	A fromJust()
+	const A& fromJust()
 	{
 		return value;
 	}
 
-	A fromMaybe()
+	const A& fromMaybe()
 	{
 		if (is_just)
 		{

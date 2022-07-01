@@ -1,5 +1,5 @@
 #pragma once
 #include <GLFW/glfw3.h>
-#include <optional>
+#include "../../types/Maybe.h"
 
-std::optional<GLFWwindow*> ConstructWindow(const int width, const int height, const char* title);
+Maybe<GLFWwindow*> ConstructWindow(const int width, const int height, const char* title);

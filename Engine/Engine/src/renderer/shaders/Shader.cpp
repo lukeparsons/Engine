@@ -13,7 +13,7 @@ Shader::Shader(const char* path)
 	{
 		std::cout << shaderCode.fromLeft(DEF_STRING) << std::endl;
 		std::cout << "Failed to read shader at path " << path << std::endl;
-		id = std::nullopt;
+		id = Maybe<GLuint>();
 		return;
 	}
 
@@ -23,7 +23,7 @@ Shader::Shader(const char* path)
 	{
 		std::cout << shaderExtension.fromLeft(DEF_STRING) << std::endl;
 		std::cout << "Failed to read shader extension at path " << path << std::endl;
-		id = std::nullopt;
+		id = Maybe<GLuint>();
 		return;
 	}
 
@@ -40,7 +40,7 @@ Shader::Shader(const char* path)
 	} else
 	{
 		std::cout << "Invalid extension for shader at path " << path << std::endl;
-		id = std::nullopt;
+		id = Maybe<GLuint>();
 		return;
 	}
 
@@ -63,8 +63,8 @@ Shader::Shader(const char* path)
 
 Shader::~Shader()
 {
-	if (id.has_value())
+	if (id.isJust())
 	{
-		glDeleteShader(id.value());
+		glDeleteShader(id.fromJust());
 	}
 }

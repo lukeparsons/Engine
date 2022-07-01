@@ -13,9 +13,10 @@ protected:
 	B right;
 
 	bool is_left;
+
 public:
 
-	A& fromLeft(A def)
+	const A& fromLeft(A def)
 	{
 		if (is_left)
 		{
@@ -26,7 +27,7 @@ public:
 		}
 	}
 
-	B& fromRight(B def)
+	const B& fromRight(B def)
 	{
 		if (!is_left)
 		{

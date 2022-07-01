@@ -1,15 +1,15 @@
 #pragma once
 #include <glad/glad.h>
-#include <optional>
+#include "../../types/Maybe.h"
 
 class Shader
 {
 private:
-	std::optional<GLuint> id;
+	Maybe<GLuint> id;
 public:
 
 	Shader(const char* path);
 	~Shader();
 
-	inline const std::optional<GLuint> GetID() { return id; }
+	inline Maybe<GLuint> GetID() { return id; }
 };

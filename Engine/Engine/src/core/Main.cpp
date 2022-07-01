@@ -44,14 +44,14 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	std::optional<GLFWwindow*> windowOptional = ConstructWindow(width, height, "Engine");
-	if (!windowOptional.has_value())
+	Maybe<GLFWwindow*> maybeWindow = ConstructWindow(width, height, "Engine");
+	if (!maybeWindow.isJust())
 	{
 		std::cout << "Failed to construct window" << std::endl;
 		return -1;
 	}
 
-	GLFWwindow* window = windowOptional.value();
+	GLFWwindow* window = maybeWindow.fromJust();
 
 	// Initalize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
