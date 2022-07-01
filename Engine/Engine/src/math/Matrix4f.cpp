@@ -62,19 +62,27 @@ Matrix4f GetZRotationMatrix(float angle)
 	return rotationMatrix;
 }
 
-Matrix4f GetProjectionMatrix(float verticalFOV)
+Matrix4f GetProjectionMatrix(float verticalFOV, float horizontalFOV, float aspectRatio)
 {
 	verticalFOV /= 2.0f;
 	verticalFOV *= (pi / 180);
-	float distanceToNearClipPlane = 1 / (tanf(verticalFOV));
+	float distanceToNearClipPlaneY = 1 / (tanf(verticalFOV));
 
-	float diagValues[] = { distanceToNearClipPlane, distanceToNearClipPlane, 1, 1 };
+	horizontalFOV /= 2.0f;
+	horizontalFOV *= (pi / 180);
+	float distanceToNearClipPlaneZ = 1 / (tanf(horizontalFOV));
 
-	Matrix4f projectionMatrix = GetDiagonalMatrixf<4>(diagValues);
+	float distanceToFarClipPlane = 100;
 
-	// temp
-	projectionMatrix[3][3] = 0;
-	projectionMatrix[3][2] = 1;
+	float a = (-distanceToFarClipPlane - distanceToNearClipPlaneY) / (distanceToNearClipPlaneY - distanceToFarClipPlane);
+	float b = (2 * distanceToFarClipPlane * distanceToNearClipPlaneY) / (distanceToNearClipPlaneY - distanceToFarClipPlane);
+
+	float values[] = { distanceToNearClipPlaneY / aspectRatio, 0, 0, 0,
+					  0, distanceToNearClipPlaneZ,			      0, 0,
+					  0, 0,										  a, b,
+					  0, 0,										  1, 0 };
+
+	Matrix4f projectionMatrix = values;
 
 	return projectionMatrix;
 }

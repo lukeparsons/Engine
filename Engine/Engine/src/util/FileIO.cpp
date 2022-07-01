@@ -2,14 +2,13 @@
 #include <iostream>
 #include "FileIO.h"
 
-std::optional<std::string> ReadFile(const char* path)
+Either<std::string, std::string> ReadFile(const char* path)
 {
 	std::fstream file(path);
 
 	if (!file.is_open())
 	{
-		std::cout << "Failed to open file at path " << path << std::endl;
-		return std::nullopt;
+		return Left<std::string, std::string>("Failed to open file at path");
 	}
 
 	std::string buffer;
@@ -18,10 +17,10 @@ std::optional<std::string> ReadFile(const char* path)
 
 	file.close();
 
-	return std::optional(buffer);
+	return Right<std::string, std::string>(buffer);
 }
 
-std::optional<std::string> ReadFileExtension(const char* path)
+Either<std::string, std::string> ReadFileExtension(const char* path)
 {
 
 	std::string pathStr = std::string(path);
@@ -30,8 +29,7 @@ std::optional<std::string> ReadFileExtension(const char* path)
 
 	if (dotPosition == std::string::npos)
 	{
-		std::cout << "Failed to find extension for a file with path " << path << std::endl;
-		return std::nullopt;
+		return Left<std::string, std::string>(std::string("Failed to find extension for a file with path ").append(path));
 	}
 
 	// Erase all the text in the string up to and including the final dot to just leave the extension text
@@ -40,9 +38,8 @@ std::optional<std::string> ReadFileExtension(const char* path)
 	// Make sure an empty string is not returned
 	if (pathStr.length() == 0)
 	{
-		std::cout << "Failed to find extension for a file with path " << path << std::endl;
-		return std::nullopt;
+		return Left<std::string, std::string>(std::string("Failed to find extension for a file with path ").append(path));
 	}
 
-	return std::optional(pathStr);
+	return Right<std::string, std::string>(pathStr);
 }

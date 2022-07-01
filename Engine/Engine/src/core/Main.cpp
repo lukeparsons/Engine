@@ -9,8 +9,8 @@
 #include "../math/Matrix4f.h"
 #include "window/Window.h"
 
-static const int width = 800;
-static const int height = 600;
+static const int width = 1024;
+static const int height = 576;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -28,28 +28,14 @@ void processInput(GLFWwindow* window)
 int main()
 {
 
-	//PrintMatrixf(iMat);
-	//std::cout << std::endl;
-
 	Matrix4f scaleMatrix = GetScaleMatrix(Vector3f(0.5f, 0.5f, 0.5f));
 
-	//PrintMatrixf(iMat2);
-	//std::cout << std::endl;
-
-	//Matrix4f iMat3 = GetZRotationMatrix(0.785398f);
-	
-	//Matrix4f result = iMat;
-	//PrintMatrixf(result);
-	//std::cout << std::endl;
-
-	Matrix4f projectionMatrix = GetProjectionMatrix(90.0f);
+	float aspectRatio = (float)width / float(height);
+	Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
+	PrintMatrixf(projectionMatrix);
+	std::cout << std::endl;
 
 	Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0.0f, 0.0f, 3.0f));
-	
-	//result = projectionMatrix * result;
-
-	//PrintMatrixf(result);
-	//std::cout << std::endl;
 
 	glfwInit();
 	// opengl 3.3 (for now)
@@ -161,8 +147,8 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		Matrix4f rotationMat = GetZRotationMatrix((float)glfwGetTime());
-		rotationMat = rotationMat * GetXRotationMatrix((float)glfwGetTime());
+		Matrix4f rotationMat = GetXRotationMatrix((float)glfwGetTime());
+		rotationMat = rotationMat * GetYRotationMatrix(0.2f * (float)glfwGetTime()) * GetZRotationMatrix((float)glfwGetTime());
 		Matrix4f result = projectionMatrix * translateMatrix * rotationMat * scaleMatrix;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");

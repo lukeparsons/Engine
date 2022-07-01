@@ -5,11 +5,18 @@
 template<size_t row, size_t column>
 struct Matrixf
 {
-	float matrix[row][column] = {0};
+	float matrix[row][column] = { 0 };
 
 	float* operator[](const int index)
 	{
 		return matrix[index];
+	}
+
+	Matrixf() {}
+
+	Matrixf(float values[row * column])
+	{
+		memcpy(&matrix[0], &values[0], sizeof(float) * row * column);
 	}
 };
 

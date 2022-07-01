@@ -7,19 +7,21 @@
 
 Shader::Shader(const char* path)
 {
-	std::optional<std::string> shaderCode = ReadFile(path);
+	Either<std::string, std::string> shaderCode = ReadFile(path);
 
-	if (!shaderCode.has_value())
+	if (shaderCode.isLeft() == true)
 	{
+		std::cout << shaderCode.fromLeft(DEF_STRING) << std::endl;
 		std::cout << "Failed to read shader at path " << path << std::endl;
 		id = std::nullopt;
 		return;
 	}
 
-	std::optional<std::string> shaderExtension = ReadFileExtension(path);
+	Either<std::string, std::string> shaderExtension = ReadFileExtension(path);
 
-	if (!shaderExtension.has_value())
+	if (shaderExtension.isLeft() == true)
 	{
+		std::cout << shaderExtension.fromLeft(DEF_STRING) << std::endl;
 		std::cout << "Failed to read shader extension at path " << path << std::endl;
 		id = std::nullopt;
 		return;
@@ -27,10 +29,12 @@ Shader::Shader(const char* path)
 
 	GLenum shaderType;
 
-	if (shaderExtension.value().compare(VERTEX_EXTENSION) == 0)
+	std::string extension = shaderExtension.fromRight(DEF_STRING);
+
+	if (extension.compare(VERTEX_EXTENSION) == 0)
 	{
 		shaderType = GL_VERTEX_SHADER;
-	} else if (shaderExtension.value().compare(FRAGMENT_EXTENSION) == 0)
+	} else if (extension.compare(FRAGMENT_EXTENSION) == 0)
 	{
 		shaderType = GL_FRAGMENT_SHADER;
 	} else
@@ -42,8 +46,8 @@ Shader::Shader(const char* path)
 
 	GLuint idValue = glCreateShader(shaderType);
 	id = idValue;
-	
-	const GLchar* shaderCodeStr = shaderCode.value().c_str();
+
+	const GLchar* shaderCodeStr = shaderCode.fromRight(DEF_STRING).c_str();
 	glShaderSource(idValue, 1, &shaderCodeStr, NULL);
 	glCompileShader(idValue);
 

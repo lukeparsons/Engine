@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
-#include <optional>
+#include "../types/Either.h"
 
-std::optional<std::string> ReadFile(const char* path);
+Either<std::string, std::string> ReadFile(const char* path);
 
-std::optional<std::string> ReadFileExtension(const char* path);
+Either<std::string, std::string> ReadFileExtension(const char* path);
