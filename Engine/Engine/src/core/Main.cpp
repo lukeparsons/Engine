@@ -8,6 +8,7 @@
 #include "../math/Matrix.h"
 #include "../math/Matrix4f.h"
 #include "window/Window.h"
+#include "../types/Maybe.h"
 
 static const int width = 1024;
 static const int height = 576;

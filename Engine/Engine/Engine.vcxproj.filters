@@ -62,6 +62,9 @@
     <ClInclude Include="src\types\Either.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\types\Maybe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaders\BasicVertex.vertex" />

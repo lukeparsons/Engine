@@ -163,6 +163,7 @@
     <ClInclude Include="src\renderer\shaders\ShaderProgram.h" />
     <ClInclude Include="src\renderer\shaders\Shader.h" />
     <ClInclude Include="src\types\Either.h" />
+    <ClInclude Include="src\types\Maybe.h" />
     <ClInclude Include="src\util\FileIO.h" />
   </ItemGroup>
   <ItemGroup>
