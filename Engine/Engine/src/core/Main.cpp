@@ -5,7 +5,7 @@
 #include "../util/FileIO.h"
 #include "../renderer/shaders/Shader.h"
 #include "../renderer/shaders/ShaderProgram.h"
-#include "../math/Matrix.h"
+#include "../math/Matrixf.h"
 #include "../math/Matrix4f.h"
 #include "window/Window.h"
 #include "../types/Maybe.h"
@@ -24,19 +24,21 @@ void processInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+
+	}
 }
 
 int main()
 {
-
-	Matrix4f scaleMatrix = GetScaleMatrix(Vector3f(0.5f, 0.5f, 0.5f));
+	Matrix4f scaleMatrix = GetScaleMatrix(VectorMatrix3f(0.5f, 0.5f, 0.5f));
 
 	float aspectRatio = (float)width / float(height);
 	Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
-	PrintMatrixf(projectionMatrix);
-	std::cout << std::endl;
 
-	Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0.0f, 0.0f, 3.0f));
+	Matrix4f translateMatrix = GetTranslationMatrix(VectorMatrix3f(0.0f, 0.0f, 3.0f));
 
 	glfwInit();
 	// opengl 3.3 (for now)

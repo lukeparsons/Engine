@@ -11,5 +11,5 @@ public:
 	Shader(const char* path);
 	~Shader();
 
-	inline Maybe<GLuint> GetID() { return id; }
+	inline Maybe<GLuint> GetID() const { return id; }
 };

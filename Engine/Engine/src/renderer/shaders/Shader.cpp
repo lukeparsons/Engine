@@ -47,8 +47,13 @@ Shader::Shader(const char* path)
 	GLuint idValue = glCreateShader(shaderType);
 	id = idValue;
 
-	const GLchar* shaderCodeStr = shaderCode.fromRight(DEF_STRING).c_str();
-	glShaderSource(idValue, 1, &shaderCodeStr, NULL);
+	std::string shaderCodeStr = shaderCode.fromRight(DEF_STRING);
+	size_t shaderCodeStrLen = shaderCodeStr.length();
+
+	GLchar* shaderCodeStrGL = new GLchar[shaderCodeStrLen + 1];
+	memcpy(shaderCodeStrGL, shaderCodeStr.c_str(), shaderCodeStrLen + 1);
+
+	glShaderSource(idValue, 1, &shaderCodeStrGL, NULL);
 	glCompileShader(idValue);
 
 	GLint success;

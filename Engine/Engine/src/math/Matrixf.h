@@ -7,16 +7,16 @@ struct Matrixf
 {
 	float matrix[row][column] = { 0 };
 
-	float* operator[](const int index)
-	{
-		return matrix[index];
-	}
-
 	Matrixf() {}
 
 	Matrixf(float values[row * column])
 	{
 		memcpy(&matrix[0], &values[0], sizeof(float) * row * column);
+	}
+
+	float* operator[](size_t index)
+	{
+		return matrix[index];
 	}
 };
 
@@ -62,37 +62,4 @@ void PrintMatrixf(const Matrixf<row, column>& mat)
 		}
 		std::cout << "\n";
 	}
-}
-
-template<size_t matrixSize>
-struct SquareMatrixf : Matrixf<matrixSize, matrixSize> {};
-
-template<size_t matrixSize>
-SquareMatrixf<matrixSize> GetDiagonalMatrixf(float diagValues[matrixSize])
-{
-	SquareMatrixf<matrixSize> diagMatrix;
-
-	for (int i = 0; i < matrixSize; i++)
-	{
-		for (int j = 0; j < matrixSize; j++)
-		{
-			if (i == j)
-			{
-				diagMatrix[i][j] = diagValues[i];
-			} else
-			{
-				diagMatrix[i][j] = 0;
-			}
-		}
-	}
-
-	return diagMatrix;
-}
-
-template<size_t matrixSize>
-SquareMatrixf<matrixSize> GetIdentityMatrixf()
-{
-	float allDiagonalOnes[matrixSize] = { 1 };
-	std::fill_n(allDiagonalOnes, matrixSize, 1);
-	return GetDiagonalMatrixf<matrixSize>(allDiagonalOnes);
 }

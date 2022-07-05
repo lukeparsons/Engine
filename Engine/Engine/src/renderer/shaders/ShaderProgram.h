@@ -11,6 +11,6 @@ public:
 	ShaderProgram(Shader& vertexShader, Shader& fragmentShader);
 	~ShaderProgram();
 
-	inline const GLuint GetID() { return id; }
+	inline GLuint GetID() const { return id; }
 };
 

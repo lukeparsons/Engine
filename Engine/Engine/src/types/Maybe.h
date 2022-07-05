@@ -22,22 +22,22 @@ public:
 
 	~Maybe<A>() {};
 
-	bool isJust()
+	bool isJust() const
 	{
 		return is_just;
 	}
 
-	bool isNothing()
+	bool isNothing() const
 	{
 		return !is_just;
 	}
 
-	const A& fromJust()
+	A fromJust() const
 	{
 		return value;
 	}
 
-	const A& fromMaybe()
+	A fromMaybe() const
 	{
 		if (is_just)
 		{

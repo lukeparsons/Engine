@@ -8,7 +8,7 @@ Either<std::string, std::string> ReadFile(const char* path)
 
 	if (!file.is_open())
 	{
-		return Left<std::string, std::string>("Failed to open file at path");
+		return Left<std::string, std::string>(std::string("Failed to open file at path").append(path));
 	}
 
 	std::string buffer;
@@ -22,7 +22,6 @@ Either<std::string, std::string> ReadFile(const char* path)
 
 Either<std::string, std::string> ReadFileExtension(const char* path)
 {
-
 	std::string pathStr = std::string(path);
 
 	size_t dotPosition = pathStr.rfind('.');

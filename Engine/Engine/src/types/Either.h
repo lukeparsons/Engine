@@ -7,6 +7,7 @@ class Either
 {
 protected:
 
+	#pragma warning(once : 26495)
 	Either<A, B>() {};
 
 	A left;
@@ -16,7 +17,7 @@ protected:
 
 public:
 
-	const A& fromLeft(A def)
+	A fromLeft(A def) const
 	{
 		if (is_left)
 		{
@@ -27,7 +28,7 @@ public:
 		}
 	}
 
-	const B& fromRight(B def)
+	B fromRight(B def) const
 	{
 		if (!is_left)
 		{

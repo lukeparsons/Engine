@@ -1,21 +1,22 @@
 #include "Matrix4f.h"
+#include "SquareMatrixf.h"
 
 static const float pi = 3.14159265358979323846f;
 
-Matrix4f GetTranslationMatrix(const Vector3f& translation)
+Matrix4f GetTranslationMatrix(const VectorMatrix3f& translation)
 {
 	Matrix4f translationMatrix = GetIdentityMatrixf<4>();
 
-	translationMatrix[0][3] = translation.x;
-	translationMatrix[1][3] = translation.y;
-	translationMatrix[2][3] = translation.z;
+	translationMatrix[0][3] = translation.matrix[0][0];
+	translationMatrix[1][3] = translation.matrix[0][1];
+	translationMatrix[2][3] = translation.matrix[0][2];
 
 	return translationMatrix;
 }
 
-Matrix4f GetScaleMatrix(const Vector3f& scale)
+Matrix4f GetScaleMatrix(const VectorMatrix3f& scaleVector)
 {
-	float scaleValues[] = { scale.x, scale.y, scale.z, 1 };
+	const float* scaleValues = scaleVector.matrix[0];
 	return GetDiagonalMatrixf<4>(scaleValues);
 }
 
@@ -72,7 +73,7 @@ Matrix4f GetProjectionMatrix(float verticalFOV, float horizontalFOV, float aspec
 	horizontalFOV *= (pi / 180);
 	float distanceToNearClipPlaneZ = 1 / (tanf(horizontalFOV));
 
-	float distanceToFarClipPlane = 100;
+	float distanceToFarClipPlane = 10.0f;
 
 	float a = (-distanceToFarClipPlane - distanceToNearClipPlaneY) / (distanceToNearClipPlaneY - distanceToFarClipPlane);
 	float b = (2 * distanceToFarClipPlane * distanceToNearClipPlaneY) / (distanceToNearClipPlaneY - distanceToFarClipPlane);
@@ -85,15 +86,4 @@ Matrix4f GetProjectionMatrix(float verticalFOV, float horizontalFOV, float aspec
 	Matrix4f projectionMatrix = values;
 
 	return projectionMatrix;
-}
-
-VectorMatrix ApplyTransformationMatrix(const Matrix4f& transformation, const Vector3f& vector)
-{
-	VectorMatrix vectorMatrix;
-	vectorMatrix[0][0] = vector.x;
-	vectorMatrix[1][0] = vector.y;
-	vectorMatrix[2][0] = vector.z;
-	vectorMatrix[3][0] = 1;
-
-	return transformation * vectorMatrix;
 }
