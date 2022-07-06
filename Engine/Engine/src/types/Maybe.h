@@ -6,6 +6,7 @@ template<typename A>
 class Maybe
 {
 private:
+
 	union
 	{
 		A value;
@@ -13,7 +14,9 @@ private:
 	};
 
 	bool is_just;
+
 public:
+
 	Maybe<A>() : nothing(Nothing()), is_just(false) {};
 
 	Maybe<A>(A val) : value(val), is_just(true) {};

@@ -5,7 +5,9 @@
 class ShaderProgram
 {
 private:
+
 	GLuint id;
+
 public:
 
 	ShaderProgram(Shader& vertexShader, Shader& fragmentShader);

@@ -16,7 +16,9 @@ static const int height = 576;
 static const float aspectRatio = (float)width / float(height);
 static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 
+static VectorMatrix3f translate = VectorMatrix3f(0.0f, 0.0f, 2.0f);
 
+static const float cameraMoveSpeed = 0.001f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -29,11 +31,30 @@ void processInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		translate.z() += cameraMoveSpeed;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		translate.z() -= cameraMoveSpeed;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		translate.x() += cameraMoveSpeed;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		translate.x() -= cameraMoveSpeed;
+	}
 }
 
 int main()
 {
-	Matrix4f translateMatrix = GetTranslationMatrix(VectorMatrix3f(0.0f, 0.0f, 3.0f));
 	Matrix4f scaleMatrix = GetScaleMatrix(VectorMatrix3f(0.5f, 0.5f, 0.5f));
 
 	glfwInit();
@@ -141,11 +162,12 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
-		processInput(window);
-
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		processInput(window);
+
+		Matrix4f translateMatrix = GetTranslationMatrix(translate);
 		Matrix4f rotationMat = GetXRotationMatrix((float)glfwGetTime());
 		rotationMat = rotationMat * GetYRotationMatrix(0.2f * (float)glfwGetTime()) * GetZRotationMatrix((float)glfwGetTime());
 		Matrix4f result = projectionMatrix * translateMatrix * rotationMat * scaleMatrix;
