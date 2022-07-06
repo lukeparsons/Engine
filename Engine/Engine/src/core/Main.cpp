@@ -13,6 +13,11 @@
 static const int width = 1024;
 static const int height = 576;
 
+static const float aspectRatio = (float)width / float(height);
+static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
+
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -24,21 +29,12 @@ void processInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-
-	}
 }
 
 int main()
 {
-	Matrix4f scaleMatrix = GetScaleMatrix(VectorMatrix3f(0.5f, 0.5f, 0.5f));
-
-	float aspectRatio = (float)width / float(height);
-	Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
-
 	Matrix4f translateMatrix = GetTranslationMatrix(VectorMatrix3f(0.0f, 0.0f, 3.0f));
+	Matrix4f scaleMatrix = GetScaleMatrix(VectorMatrix3f(0.5f, 0.5f, 0.5f));
 
 	glfwInit();
 	// opengl 3.3 (for now)

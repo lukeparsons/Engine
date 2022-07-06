@@ -5,7 +5,9 @@
 class Shader
 {
 private:
+
 	Maybe<GLuint> id;
+
 public:
 
 	Shader(const char* path);

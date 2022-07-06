@@ -7,10 +7,7 @@ class Either
 {
 protected:
 
-	Either<A, B>() 
-	{
-		is_left = true;
-	};
+	Either<A, B>() : is_left(true) {};
 
 	union
 	{
