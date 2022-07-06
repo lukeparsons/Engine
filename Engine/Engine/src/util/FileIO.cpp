@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include "../types/Either.h"
 #include "FileIO.h"
 
 Either<std::string, std::string> ReadFile(const char* path)
