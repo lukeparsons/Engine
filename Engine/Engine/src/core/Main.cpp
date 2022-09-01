@@ -20,7 +20,9 @@ static VectorMatrix3f translate = VectorMatrix3f(0.0f, 0.0f, 2.0f);
 
 static VectorMatrix3f rotate = VectorMatrix3f(0.0f, 0.0f, 0.0f);
 
-static const float cameraMoveSpeed = 0.001f;
+static VectorMatrix3f cameraPos = VectorMatrix3f(0.0f, 0.0f, 0.0f);
+
+static const float cameraMoveSpeed = 0.01f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -38,21 +40,25 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		translate.z() -= cameraMoveSpeed;
+		cameraPos.z() += cameraMoveSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
 		translate.z() += cameraMoveSpeed;
+		cameraPos.z() -= cameraMoveSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
 		translate.x() += cameraMoveSpeed;
+		cameraPos.x() -= cameraMoveSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		translate.x() -= cameraMoveSpeed;
+		cameraPos.x() += cameraMoveSpeed;
 	}
 }
 
@@ -68,10 +74,7 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 	float sensitivity = 0.001;
 
-	translate.y() += (pypos - ypos) * sensitivity;
 	rotate.x() += (pypos - ypos) * sensitivity;
-
-	translate.x() += (pxpos - xpos) * sensitivity;
 	rotate.y() += (pxpos - xpos) * sensitivity;
 
 	pxpos = xpos;
@@ -196,9 +199,9 @@ int main()
 		processInput(window);
 
 		Matrix4f translateMatrix = GetTranslationMatrix(translate);
-		Matrix4f rotateMatrixX = GetXRotationMatrix(rotate.x());
-		Matrix4f rotateMatrixY = GetYRotationMatrix(rotate.y());
-		Matrix4f rotateMatrixZ = GetZRotationMatrix(rotate.z());
+		Matrix4f rotateMatrixX = GetXRotationMatrix(rotate.x(), cameraPos);
+		Matrix4f rotateMatrixY = GetYRotationMatrix(rotate.y(), cameraPos);
+		Matrix4f rotateMatrixZ = GetZRotationMatrix(rotate.z(), cameraPos);
 		Matrix4f rotateMatrix = rotateMatrixX * rotateMatrixY * rotateMatrixZ;
 
 
@@ -206,6 +209,13 @@ int main()
 		//rotationMat = rotationMat * GetYRotationMatrix(0.2f * (float)glfwGetTime()) * GetZRotationMatrix((float)glfwGetTime());
 
 		Matrix4f result = projectionMatrix * translateMatrix * rotateMatrix * scaleMatrix;
+
+		float values[] = {1.0f, 1.0f, 1.0f, 0.0f};
+		Matrixf<4, 1> pos = values;
+
+		//PrintMatrixf((translateMatrix * rotateMatrix * scaleMatrix) * pos);
+		//std::cout << std::endl;
+		//std::cout << translate.x() << ", " << translate.y() << ", " << translate.z() << std::endl;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));
