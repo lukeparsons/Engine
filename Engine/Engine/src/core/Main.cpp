@@ -16,13 +16,13 @@ static const int height = 576;
 static const float aspectRatio = (float)width / float(height);
 static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 
-static VectorMatrix3f translate = VectorMatrix3f(0.0f, 0.0f, 2.0f);
+static VectorMatrix3f translate = VectorMatrix3f(0.0f, 0.0f, 5.0f);
 
 static VectorMatrix3f rotate = VectorMatrix3f(0.0f, 0.0f, 0.0f);
 
 static VectorMatrix3f cameraPos = VectorMatrix3f(0.0f, 0.0f, 0.0f);
 
-static const float cameraMoveSpeed = 0.01f;
+static const float cameraMoveSpeed = 0.001f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -83,7 +83,7 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
-	Matrix4f scaleMatrix = GetScaleMatrix(VectorMatrix3f(0.5f, 0.5f, 0.5f));
+	//Matrix4f scaleMatrix = GetScaleMatrix(VectorMatrix3f(0.5f, 0.5f, 0.5f));
 
 	glfwInit();
 	// opengl 3.3 (for now)
@@ -199,23 +199,20 @@ int main()
 		processInput(window);
 
 		Matrix4f translateMatrix = GetTranslationMatrix(translate);
-		Matrix4f rotateMatrixX = GetXRotationMatrix(rotate.x(), cameraPos);
-		Matrix4f rotateMatrixY = GetYRotationMatrix(rotate.y(), cameraPos);
-		Matrix4f rotateMatrixZ = GetZRotationMatrix(rotate.z(), cameraPos);
+		Matrix4f rotateMatrixX = GetXRotationMatrix(rotate.x());
+		Matrix4f rotateMatrixY = GetYRotationMatrix(rotate.y());
+		Matrix4f rotateMatrixZ = GetZRotationMatrix(rotate.z());
 		Matrix4f rotateMatrix = rotateMatrixX * rotateMatrixY * rotateMatrixZ;
 
-
-		//Matrix4f rotationMat = GetXRotationMatrix((float)glfwGetTime());
-		//rotationMat = rotationMat * GetYRotationMatrix(0.2f * (float)glfwGetTime()) * GetZRotationMatrix((float)glfwGetTime());
-
-		Matrix4f result = projectionMatrix * translateMatrix * rotateMatrix * scaleMatrix;
+		Matrix4f result = projectionMatrix * translateMatrix * rotateMatrix;
 
 		float values[] = {1.0f, 1.0f, 1.0f, 0.0f};
 		Matrixf<4, 1> pos = values;
 
 		//PrintMatrixf((translateMatrix * rotateMatrix * scaleMatrix) * pos);
 		//std::cout << std::endl;
-		//std::cout << translate.x() << ", " << translate.y() << ", " << translate.z() << std::endl;
+		//std::cout << rotate.x() << ", " << rotate.y() << ", " << rotate.z() << std::endl;
+		std::cout << cameraPos.x() << ", " << cameraPos.y() << ", " << cameraPos.z() << std::endl;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));

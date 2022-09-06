@@ -22,34 +22,19 @@ Matrix4f GetScaleMatrix(const VectorMatrix3f& scaleVector)
 	return GetDiagonalMatrixf<4>(scaleValues);
 }
 
-static Matrix4f xRotationMatrix(float cosAngle, float sinAngle, VectorMatrix3f anchor)
-{
-
-}
-
-static Matrix4f yRotationMatrix(float cosAngle, float sinAngle, VectorMatrix3f anchor)
-{
-
-}
-
-static Matrix4f zRotationMatrix(float cosAngle, float sinAngle, VectorMatrix3f anchor)
-{
-
-}
-
 // Angles in radians
-Matrix4f GetXRotationMatrix(float angle, VectorMatrix3f anchor)
+Matrix4f GetXRotationMatrix(float angle, VectorMatrix3f pivot)
 {
 	float cosAngle = cos(angle);
 	float sinAngle = sin(angle);
 
-	Matrix4f rotationMatrix = GetIdentityMatrixf<4>();
-	rotationMatrix[1][1] = cosAngle + anchor.x();
-	rotationMatrix[1][2] = -sinAngle - anchor.y();
-	rotationMatrix[2][1] = sinAngle + anchor.y();
-	rotationMatrix[2][2] = cosAngle + anchor.x();
+	float values[] = { 1, 0,		0,		  0,
+					   0, cosAngle, sinAngle, -pivot.z() * sinAngle + pivot.y() * (1 - cosAngle),
+					   0, -sinAngle, cosAngle, pivot.y() * sinAngle + pivot.z() * (1 - cosAngle),
+					   0, 0,		0,		  1
+	};
 
-	return rotationMatrix;
+	return Matrix4f(values);
 }
 
 Matrix4f GetXRotationMatrix(float angle)
@@ -57,18 +42,18 @@ Matrix4f GetXRotationMatrix(float angle)
 	return GetXRotationMatrix(angle, origin);
 }
 
-Matrix4f GetYRotationMatrix(float angle, VectorMatrix3f anchor)
+Matrix4f GetYRotationMatrix(float angle, VectorMatrix3f pivot)
 {
 	float cosAngle = cos(angle);
 	float sinAngle = sin(angle);
 
-	Matrix4f rotationMatrix = GetIdentityMatrixf<4>();
-	rotationMatrix[0][0] = cosAngle + anchor.x();
-	rotationMatrix[0][2] = sinAngle + anchor.y();
-	rotationMatrix[2][0] = -sinAngle - anchor.y();
-	rotationMatrix[2][2] = cosAngle + anchor.x();
+	float values[] = { cosAngle, 0, -sinAngle, pivot.z() * sinAngle + pivot.x() * (1 - cosAngle),
+					   0,		 1,	0,		   0,
+					   sinAngle, 0, cosAngle,  -pivot.x() * sinAngle + pivot.z() * (1 - cosAngle),
+					   0,		 0, 0,		   1
+	};
 
-	return rotationMatrix;
+	return Matrix4f(values);
 }
 
 Matrix4f GetYRotationMatrix(float angle)
@@ -76,18 +61,18 @@ Matrix4f GetYRotationMatrix(float angle)
 	return GetYRotationMatrix(angle, origin);
 }
 
-Matrix4f GetZRotationMatrix(float angle, VectorMatrix3f anchor)
+Matrix4f GetZRotationMatrix(float angle, VectorMatrix3f pivot)
 {
 	float cosAngle = cos(angle);
 	float sinAngle = sin(angle);
 
-	Matrix4f rotationMatrix = GetIdentityMatrixf<4>();
-	rotationMatrix[0][0] = cosAngle + anchor.x();
-	rotationMatrix[0][1] = -sinAngle - anchor.y();
-	rotationMatrix[1][0] = sinAngle + anchor.y();
-	rotationMatrix[1][1] = cosAngle + anchor.x();
+	float values[] = { cosAngle, -sinAngle, 0, pivot.y() * sinAngle + pivot.x() * (1 - cosAngle),
+					   sinAngle,  cosAngle, 0, -pivot.x() * sinAngle + pivot.y() * (1 - cosAngle),
+						0,			0,		1,	0,
+						0,			0,		0,	1
+	};
 
-	return rotationMatrix;
+	return Matrix4f(values);
 }
 
 Matrix4f GetZRotationMatrix(float angle)
