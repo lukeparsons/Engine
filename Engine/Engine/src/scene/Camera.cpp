@@ -11,11 +11,11 @@ Camera::Camera(Vector3f location)
 Matrix4f Camera::GetCameraSpaceMatrix()
 {
 
-	Matrix4f translationMatrix = Matrix4f(std::initializer_list<float>
-								{ 1, 0, 0, -location.x,
-								  0, 1, 0, -location.y,
-								  0, 0, 1, -location.z,
-								  0, 0, 0, 1 });
+	Matrix4f translationMatrix = Matrix4f( 
+			{ 1, 0, 0, -location.x,
+				0, 1, 0, -location.y,
+				0, 0, 1, -location.z,
+				0, 0, 0, 1 });
 
 	Vector3f U;
 	Vector3f V;
@@ -38,11 +38,11 @@ Matrix4f Camera::GetCameraSpaceMatrix()
 
 	V = cross(N, U);
 
-	Matrix4f rotationMatrix = Matrix4f(std::initializer_list<float>
-							   {  U.x, U.y, U.z,   0,
-								  V.x, V.y, V.z,   0,
-							     -N.x, -N.y, -N.z, 1,
-								  0,   0,   0,     1 });
+	Matrix4f rotationMatrix = Matrix4f(
+				{  U.x, U.y, U.z,   0,
+					V.x, V.y, V.z,   0,
+					-N.x, -N.y, -N.z, 1,
+					0,   0,   0,     1 });
 
 	return rotationMatrix * translationMatrix;
 }

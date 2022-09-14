@@ -24,7 +24,6 @@ void Vector3f::normalise()
 	z /= length;
 }
 
-
 Vector3f operator+(const Vector3f& left, const Vector3f& right)
 {
 	return Vector3f(left.x + right.x, left.y + right.y, left.z + right.z);

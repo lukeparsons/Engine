@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <array>
 
-// TODO: Move to std::array, implement addition and subtraction
-
 template<size_t row, size_t column>
 struct Matrixf
 {
