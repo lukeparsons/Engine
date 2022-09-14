@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include <array>
 
 Camera::Camera(Vector3f location)
 {
@@ -10,10 +11,11 @@ Camera::Camera(Vector3f location)
 Matrix4f Camera::GetCameraSpaceMatrix()
 {
 
-	float translationValues[] = { 1, 0, 0, -location.x,
+	Matrix4f translationMatrix = Matrix4f(std::initializer_list<float>
+								{ 1, 0, 0, -location.x,
 								  0, 1, 0, -location.y,
 								  0, 0, 1, -location.z,
-								  0, 0, 0, 1 };
+								  0, 0, 0, 1 });
 
 	Vector3f U;
 	Vector3f V;
@@ -28,8 +30,6 @@ Matrix4f Camera::GetCameraSpaceMatrix()
 	dir.z = sin(yaw) * cos(pitch);
 	dir.normalise();
 
-	std::cout << yaw << std::endl;
-
 	N = dir;
 	target = N;
 
@@ -38,17 +38,11 @@ Matrix4f Camera::GetCameraSpaceMatrix()
 
 	V = cross(N, U);
 
-	/*std::cout << std::endl;
-	Print(U);
-	std::cout << std::endl;
-	Print(V);
-	std::cout << std::endl;
-	Print(N);*/
+	Matrix4f rotationMatrix = Matrix4f(std::initializer_list<float>
+							   {  U.x, U.y, U.z,   0,
+								  V.x, V.y, V.z,   0,
+							     -N.x, -N.y, -N.z, 1,
+								  0,   0,   0,     1 });
 
-	float rotationValues[] = {  U.x, U.y, U.z, 0,
-								V.x, V.y, V.z, 0,
-							   -N.x, -N.y, -N.z, 1,
-								0,   0,   0,   1 };
-
-	return Matrix4f(rotationValues) * Matrix4f(translationValues);
+	return rotationMatrix * translationMatrix;
 }

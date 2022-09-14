@@ -1,20 +1,26 @@
 #pragma once
 #include <iostream>
 #include <algorithm>
+#include <array>
 
 // TODO: Move to std::array, implement addition and subtraction
 
 template<size_t row, size_t column>
 struct Matrixf
 {
+
 	float matrix[row][column] = { 0 };
 
 	Matrixf() {}
 
-	// unsafe, use std::array
-	Matrixf(float values[row * column])
+	Matrixf(std::initializer_list<float> values)
 	{
-		memcpy(&matrix[0], &values[0], sizeof(float) * row * column);
+		int i = 0;
+		for (float v : values)
+		{
+			matrix[0][i] = v;
+			i++;
+		}
 	}
 
 	float* operator[](size_t index)

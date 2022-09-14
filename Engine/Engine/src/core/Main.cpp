@@ -81,7 +81,6 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
-
 	glfwInit();
 	// opengl 3.3 (for now)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -199,9 +198,7 @@ int main()
 		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
 
 		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
-		//std::cout << std::endl;
-		//PrintMatrixf(result);
-		//std::cout << std::endl;
+		//PrintMatrixf(cameraMatrix);
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));

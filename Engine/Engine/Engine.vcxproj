@@ -163,7 +163,6 @@
     <ClInclude Include="src\core\window\Window.h" />
     <ClInclude Include="src\math\Matrixf.h" />
     <ClInclude Include="src\math\Matrix4f.h" />
-    <ClInclude Include="src\math\SquareMatrixf.h" />
     <ClInclude Include="src\math\Vector3f.h" />
     <ClInclude Include="src\renderer\shaders\ShaderProgram.h" />
     <ClInclude Include="src\renderer\shaders\Shader.h" />
