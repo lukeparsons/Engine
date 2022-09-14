@@ -39,7 +39,10 @@
     <ClCompile Include="src\scene\WorldObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\math\VectorMatrix3f.cpp">
+    <ClCompile Include="src\math\Vector3f.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,10 +74,13 @@
     <ClInclude Include="src\math\SquareMatrixf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\math\VectorMatrix3f.h">
+    <ClInclude Include="src\math\Vector3f.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\types\Either.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

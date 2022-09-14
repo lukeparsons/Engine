@@ -9,6 +9,7 @@
 #include "../math/Matrix4f.h"
 #include "window/Window.h"
 #include "../types/Maybe.h"
+#include "../scene/Camera.h"
 
 static const int width = 1024;
 static const int height = 576;
@@ -16,13 +17,9 @@ static const int height = 576;
 static const float aspectRatio = (float)width / float(height);
 static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 
-static VectorMatrix3f translate = VectorMatrix3f(0.0f, 0.0f, 5.0f);
+static Vector3f translate = Vector3f(0.0f, 0.0f, -5.0f);
 
-static VectorMatrix3f rotate = VectorMatrix3f(0.0f, 0.0f, 0.0f);
-
-static VectorMatrix3f cameraPos = VectorMatrix3f(0.0f, 0.0f, 0.0f);
-
-static const float cameraMoveSpeed = 0.001f;
+static Camera camera(Vector3f(0, 0, 0));
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -39,43 +36,44 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		translate.z() -= cameraMoveSpeed;
-		cameraPos.z() += cameraMoveSpeed;
+		camera.location += camera.moveSpeed * camera.target;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		translate.z() += cameraMoveSpeed;
-		cameraPos.z() -= cameraMoveSpeed;
+		camera.location -= camera.moveSpeed * camera.target;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		translate.x() += cameraMoveSpeed;
-		cameraPos.x() -= cameraMoveSpeed;
+		Vector3f left = cross(camera.target, Vector3f(0, 1, 0));
+		left.normalise();
+		camera.location += camera.moveSpeed * left;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		translate.x() -= cameraMoveSpeed;
-		cameraPos.x() += cameraMoveSpeed;
+		Vector3f right = cross(Vector3f(0, 1, 0), camera.target);
+		right.normalise();
+		camera.location += camera.moveSpeed * right;
 	}
 }
 
 double pxpos, pypos;
 
+bool firstMouse = true;
 void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-	if (state != GLFW_PRESS)
+	if (firstMouse)
 	{
-		return;
+		pxpos = xpos;
+		pypos = ypos;
+		firstMouse = false;
 	}
+	float sensitivity = 0.1;
 
-	float sensitivity = 0.001;
-
-	rotate.x() += (pypos - ypos) * sensitivity;
-	rotate.y() += (pxpos - xpos) * sensitivity;
+	camera.look.x += (pxpos - xpos) * sensitivity;
+	camera.look.y += (pypos - ypos) * sensitivity;
 
 	pxpos = xpos;
 	pypos = ypos;
@@ -83,7 +81,6 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
-	//Matrix4f scaleMatrix = GetScaleMatrix(VectorMatrix3f(0.5f, 0.5f, 0.5f));
 
 	glfwInit();
 	// opengl 3.3 (for now)
@@ -199,20 +196,12 @@ int main()
 		processInput(window);
 
 		Matrix4f translateMatrix = GetTranslationMatrix(translate);
-		Matrix4f rotateMatrixX = GetXRotationMatrix(rotate.x());
-		Matrix4f rotateMatrixY = GetYRotationMatrix(rotate.y());
-		Matrix4f rotateMatrixZ = GetZRotationMatrix(rotate.z());
-		Matrix4f rotateMatrix = rotateMatrixX * rotateMatrixY * rotateMatrixZ;
+		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
 
-		Matrix4f result = projectionMatrix * translateMatrix * rotateMatrix;
-
-		float values[] = {1.0f, 1.0f, 1.0f, 0.0f};
-		Matrixf<4, 1> pos = values;
-
-		//PrintMatrixf((translateMatrix * rotateMatrix * scaleMatrix) * pos);
+		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
 		//std::cout << std::endl;
-		//std::cout << rotate.x() << ", " << rotate.y() << ", " << rotate.z() << std::endl;
-		std::cout << cameraPos.x() << ", " << cameraPos.y() << ", " << cameraPos.z() << std::endl;
+		//PrintMatrixf(result);
+		//std::cout << std::endl;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));

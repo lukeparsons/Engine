@@ -1,6 +1,8 @@
 #pragma once
 #include "Matrixf.h"
 
+// TODO: Possibly redundant
+
 template<size_t matrixSize>
 struct SquareMatrixf : Matrixf<matrixSize, matrixSize> {};
 

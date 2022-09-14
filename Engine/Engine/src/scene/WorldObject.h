@@ -9,8 +9,8 @@ private:
 
 public:
 
-	VectorMatrix3f location;
-	VectorMatrix3f rotation;
-	VectorMatrix3f scale;
+	Vector3f location;
+	Vector3f rotation;
+	Vector3f scale;
 };
 

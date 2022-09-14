@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 
+// TODO: Move to std::array, implement addition and subtraction
+
 template<size_t row, size_t column>
 struct Matrixf
 {
@@ -9,6 +11,7 @@ struct Matrixf
 
 	Matrixf() {}
 
+	// unsafe, use std::array
 	Matrixf(float values[row * column])
 	{
 		memcpy(&matrix[0], &values[0], sizeof(float) * row * column);
@@ -18,6 +21,7 @@ struct Matrixf
 	{
 		return matrix[index];
 	}
+
 };
 
 // Returns in row-major form so GL_TRANSPOSE must be true
@@ -45,6 +49,22 @@ Matrixf<row1, column2> operator*(const Matrixf<row1, column1>& lhs, const Matrix
 			{
 				resultMatrix[i][j] += lhs.matrix[i][k] * rhs.matrix[k][j];
 			}
+		}
+	}
+
+	return resultMatrix;
+}
+
+template<size_t row, size_t column>
+Matrixf<row, column> operator*(const float& scalar, const Matrixf<row, column>& matrix)
+{
+	Matrixf<row, column> resultMatrix = matrix;
+
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < column; j++)
+		{
+			resultMatrix[i][j] *= scalar;
 		}
 	}
 
