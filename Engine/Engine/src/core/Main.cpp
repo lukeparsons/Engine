@@ -9,17 +9,66 @@
 #include "../math/Matrix4f.h"
 #include "window/Window.h"
 #include "../types/Maybe.h"
-#include "../scene/Camera.h"
+#include "../scene/Camera/Camera.h"
+#include "../util/formats/TGA.h"
+#include "stb_image.h"
 
 static const int width = 1024;
 static const int height = 576;
 
-static const float aspectRatio = (float)width / float(height);
+static constexpr float aspectRatio = (float)width / float(height);
 static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 
-static Vector3f translate = Vector3f(0.0f, 0.0f, -5.0f);
-
 static Camera camera(Vector3f(0, 0, 0));
+
+/*GLfloat vertices[] = {
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f
+}; */
+
+float vertices[] = {
+	// positions          // colors           // texture coords
+	0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
+	0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
+	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left
+	-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left 
+};
+
+//static WorldObject cube(Vector3f(0, 0, -5), vertices);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -34,33 +83,10 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		camera.location += camera.moveSpeed * camera.target;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		camera.location -= camera.moveSpeed * camera.target;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		Vector3f left = cross(camera.target, Vector3f(0, 1, 0));
-		left.normalise();
-		camera.location += camera.moveSpeed * left;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		Vector3f right = cross(Vector3f(0, 1, 0), camera.target);
-		right.normalise();
-		camera.location += camera.moveSpeed * right;
-	}
+	camera.ProcessCameraKeyboardInputs(window);
 }
 
 double pxpos, pypos;
-
 bool firstMouse = true;
 void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -70,10 +96,8 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 		pypos = ypos;
 		firstMouse = false;
 	}
-	float sensitivity = 0.1;
-
-	camera.look.x += (pxpos - xpos) * sensitivity;
-	camera.look.y += (pypos - ypos) * sensitivity;
+	
+	camera.ProcessCameraMouseInputs(xpos, ypos, pxpos, pypos);
 
 	pxpos = xpos;
 	pypos = ypos;
@@ -109,49 +133,10 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 
-	GLfloat vertices[] = {
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, -1.0f, 
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f, 
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f
+	unsigned int indices[] = {
+		0, 1, 3,
+		1, 2, 3
 	};
-
-	//unsigned int indices[] = {
-	//	0, 1, 3,
-	//	1, 2, 3
-	//};
 
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
@@ -165,14 +150,36 @@ int main()
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
-	//unsigned int EBO;
-	//glGenBuffers(1, &EBO);
+	TGAImage image = ReadTGAFile("../Engine/assets/wall.tga");
 
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	//int width, height, nrChannels;
+	//unsigned char* data = stbi_load("../Engine/assets/wall.tga", &width, &height, &nrChannels, 0);
+
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data.c_str());
+	//stbi_image_free(data);
 
 	Shader vertexShader = Shader("../Engine/src/shaders/BasicVertex.vertex");
 	
@@ -181,6 +188,8 @@ int main()
 	ShaderProgram shaderProgram(vertexShader, fragmentShader);
 
 	glUseProgram(shaderProgram.GetID());
+
+	glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
 
 	glBindVertexArray(VAO);
 
@@ -193,24 +202,27 @@ int main()
 	{
 
 		float currentFrameTime = glfwGetTime();
-		std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
+		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
 		previousFrameTime = currentFrameTime;
-
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		processInput(window);
 
-		Matrix4f translateMatrix = GetTranslationMatrix(translate);
+		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0, 0, 0));
 		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
 
-		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
+		Matrix4f result = translateMatrix;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glUseProgram(shaderProgram.GetID());
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

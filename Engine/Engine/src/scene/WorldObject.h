@@ -7,7 +7,13 @@ private:
 
 	float* vertices;
 
+protected:
+
+	WorldObject(Vector3f location);
+
 public:
+
+	WorldObject(Vector3f location, float vertices[]);
 
 	Vector3f location;
 	Vector3f rotation;

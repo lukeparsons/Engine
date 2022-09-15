@@ -7,9 +7,12 @@ template<size_t row, size_t column>
 struct Matrixf
 {
 
-	float matrix[row][column] = { 0 };
+	float matrix[row][column];
 
-	Matrixf() {}
+	Matrixf() 
+	{
+		std::fill(&matrix[0][0], &matrix[0][0] + row * column, 0);
+	}
 
 	Matrixf(std::initializer_list<float> values)
 	{
