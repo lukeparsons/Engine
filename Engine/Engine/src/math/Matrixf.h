@@ -13,6 +13,7 @@ struct Matrixf
 
 	Matrixf(std::initializer_list<float> values)
 	{
+		std::fill(&matrix[0][0], &matrix[0][0] + row * column, 0);
 		int i = 0;
 		for (float v : values)
 		{

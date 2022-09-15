@@ -187,8 +187,16 @@ int main()
 	vertexShader.~Shader();
 	fragmentShader.~Shader();
 
+	float previousFrameTime = 0;
+
 	while (!glfwWindowShouldClose(window))
 	{
+
+		float currentFrameTime = glfwGetTime();
+		std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
+		previousFrameTime = currentFrameTime;
+
+
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -198,7 +206,6 @@ int main()
 		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
 
 		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
-		//PrintMatrixf(cameraMatrix);
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));

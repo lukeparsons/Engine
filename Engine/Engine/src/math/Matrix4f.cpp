@@ -87,10 +87,10 @@ Matrix4f GetZRotationMatrix(float angle)
 	float sinAngle = sin(angle);
 
 	return Matrix4f(
-		{   cosAngle, -sinAngle, 0, 0,
-			sinAngle, cosAngle,  0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1 });
+			{   cosAngle, -sinAngle, 0, 0,
+				sinAngle, cosAngle,  0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1 });
 }
 
 Matrix4f GetProjectionMatrix(float verticalFOV, float horizontalFOV, float aspectRatio)
@@ -109,7 +109,7 @@ Matrix4f GetProjectionMatrix(float verticalFOV, float horizontalFOV, float aspec
 	float b = (2 * distanceToFarClipPlane * distanceToNearClipPlaneY) / (distanceToNearClipPlaneY - distanceToFarClipPlane);
 
 	return Matrix4f(
-			{ distanceToNearClipPlaneY / aspectRatio, 0, 0, 0,
+			{   distanceToNearClipPlaneY / aspectRatio, 0,   0, 0,
 				0, distanceToNearClipPlaneZ,			     0, 0,
 				0, 0,										 a, b,
 				0, 0,										 -1, 0 });
