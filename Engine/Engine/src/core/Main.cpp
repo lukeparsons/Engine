@@ -167,9 +167,10 @@ int main()
 	glEnableVertexAttribArray(2);
 
 	TGAImage image = ReadTGAFile("../Engine/assets/wall.tga");
+	std::cout << +image.dataType << std::endl;
 
-	//int width, height, nrChannels;
-	//unsigned char* data = stbi_load("../Engine/assets/wall.tga", &width, &height, &nrChannels, 0);
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("../Engine/assets/wall.tga", &width, &height, &nrChannels, 0);
 
 	GLuint textureID;
 	glGenTextures(1, &textureID);
@@ -178,8 +179,9 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data.c_str());
-	//stbi_image_free(data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.c_str());
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	stbi_image_free(data);
 
 	Shader vertexShader = Shader("../Engine/src/shaders/BasicVertex.vertex");
 	

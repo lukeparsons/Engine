@@ -28,6 +28,10 @@ TGAImage ReadTGAFile(const char* path)
 
 	image.width = widthB.to_ullong();
 	image.height = heightB.to_ullong();
+	image.numberBitsInPixel = (int)image.data[16];
+	image.dataType = (int)image.data[2];
+
+	image.data.erase(18);
 
 	file.close();
 
