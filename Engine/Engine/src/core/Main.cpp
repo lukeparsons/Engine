@@ -11,7 +11,8 @@
 #include "../types/Maybe.h"
 #include "../scene/Camera/Camera.h"
 #include "../util/formats/TGA.h"
-#include "stb_image.h"
+#include "../util/formats/OBJ.h"
+#include <vector>
 
 static const int width = 1024;
 static const int height = 576;
@@ -60,13 +61,13 @@ static Camera camera(Vector3f(0, 0, 0));
 	1.0f, -1.0f, 1.0f
 }; */
 
-float vertices[] = {
+/*float vertices[] = {
 	// positions          // colors           // texture coords
 	0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
 	0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
 	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left
 	-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left 
-};
+}; */
 
 //static WorldObject cube(Vector3f(0, 0, -5), vertices);
 
@@ -133,10 +134,11 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 
-	unsigned int indices[] = {
-		0, 1, 3,
-		1, 2, 3
-	};
+	OBJModel boxModel = ReadOBJFile("../Engine/assets/box2.obj");
+	float* vertices = boxModel.vertices.data();
+	unsigned int* indices = boxModel.vertexIndices.data();
+
+	glEnable(GL_DEPTH_TEST);
 
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
@@ -148,40 +150,28 @@ int main()
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * boxModel.vertices.size(), vertices, GL_STATIC_DRAW);
 
 	unsigned int EBO;
 	glGenBuffers(1, &EBO);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * boxModel.vertexIndices.size(), indices, GL_STATIC_DRAW);
 
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
 
 	TGAImage image = ReadTGAFile("../Engine/assets/wall.tga");
-	std::cout << +image.dataType << std::endl;
 
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("../Engine/assets/wall.tga", &width, &height, &nrChannels, 0);
-
-	GLuint textureID;
+	/*GLuint textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.c_str());
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	stbi_image_free(data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.get()); */
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); 
 
 	Shader vertexShader = Shader("../Engine/src/shaders/BasicVertex.vertex");
 	
@@ -191,40 +181,40 @@ int main()
 
 	glUseProgram(shaderProgram.GetID());
 
-	glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
+	//glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
 
 	glBindVertexArray(VAO);
 
 	vertexShader.~Shader();
 	fragmentShader.~Shader();
 
-	float previousFrameTime = 0;
+	double previousFrameTime = 0;
 
 	while (!glfwWindowShouldClose(window))
 	{
 
-		float currentFrameTime = glfwGetTime();
+		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
 		previousFrameTime = currentFrameTime;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		processInput(window);
 
-		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0, 0, 0));
+		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
 		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
 
-		Matrix4f result = translateMatrix;
+		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureID);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, textureID);
 		glUseProgram(shaderProgram.GetID());
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, boxModel.vertexIndices.size(), GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

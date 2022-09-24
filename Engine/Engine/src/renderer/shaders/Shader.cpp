@@ -7,6 +7,7 @@
 
 Shader::Shader(const char* path)
 {
+
 	Either<std::string, std::string> shaderCode = ReadFile(path);
 
 	if (shaderCode.isLeft() == true)

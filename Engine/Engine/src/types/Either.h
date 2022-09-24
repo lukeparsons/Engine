@@ -11,8 +11,8 @@ protected:
 
 	union
 	{
-		A left = A();
-		B right;
+		A left;
+		B right = B();
 	};
 
 	bool is_left;

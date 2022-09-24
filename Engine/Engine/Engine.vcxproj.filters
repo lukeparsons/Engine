@@ -48,7 +48,10 @@
     <ClCompile Include="src\util\formats\TGA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\stb.cpp">
+    <ClCompile Include="src\util\formats\OBJ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\StringUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,7 +92,10 @@
     <ClInclude Include="src\util\formats\TGA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\stb_image.h">
+    <ClInclude Include="src\util\formats\OBJ.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\StringUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -102,5 +108,8 @@
     <Image Include="assets\wall2.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\test.txt" />
   </ItemGroup>
 </Project>

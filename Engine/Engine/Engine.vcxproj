@@ -147,7 +147,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\stb.cpp" />
     <ClCompile Include="src\scene\Camera\Camera.cpp" />
     <ClCompile Include="src\core\window\Window.cpp" />
     <ClCompile Include="src\math\Matrix4f.cpp" />
@@ -158,10 +157,11 @@
     <ClCompile Include="src\core\Main.cpp" />
     <ClCompile Include="src\util\FileIO.cpp" />
     <ClCompile Include="src\scene\WorldObject.cpp" />
+    <ClCompile Include="src\util\formats\OBJ.cpp" />
     <ClCompile Include="src\util\formats\TGA.cpp" />
+    <ClCompile Include="src\util\StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\stb_image.h" />
     <ClInclude Include="src\scene\Camera\Camera.h" />
     <ClInclude Include="src\core\window\Window.h" />
     <ClInclude Include="src\math\Matrixf.h" />
@@ -173,7 +173,9 @@
     <ClInclude Include="src\types\Maybe.h" />
     <ClInclude Include="src\util\FileIO.h" />
     <ClInclude Include="src\scene\WorldObject.h" />
+    <ClInclude Include="src\util\formats\OBJ.h" />
     <ClInclude Include="src\util\formats\TGA.h" />
+    <ClInclude Include="src\util\StringUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaders\BasicFragment.fragment" />
@@ -182,6 +184,9 @@
   <ItemGroup>
     <Image Include="assets\wall.tga" />
     <Image Include="assets\wall2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\test.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
