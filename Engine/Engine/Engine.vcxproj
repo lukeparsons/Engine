@@ -93,6 +93,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/std:c++17</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,6 +125,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/std:c++17</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,9 +151,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\math\mat4.cpp" />
     <ClCompile Include="src\scene\Camera\Camera.cpp" />
     <ClCompile Include="src\core\window\Window.cpp" />
-    <ClCompile Include="src\math\Matrix4f.cpp" />
+    <ClCompile Include="src\math\Legacy\Matrix4f.cpp" />
     <ClCompile Include="src\math\Vector3f.cpp" />
     <ClCompile Include="src\renderer\shaders\ShaderProgram.cpp" />
     <ClCompile Include="src\renderer\shaders\Shader.cpp" />
@@ -162,10 +167,12 @@
     <ClCompile Include="src\util\StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\math\mat4.h" />
+    <ClInclude Include="src\math\Vector2f.h" />
     <ClInclude Include="src\scene\Camera\Camera.h" />
     <ClInclude Include="src\core\window\Window.h" />
-    <ClInclude Include="src\math\Matrixf.h" />
-    <ClInclude Include="src\math\Matrix4f.h" />
+    <ClInclude Include="src\math\Legacy\Matrixf.h" />
+    <ClInclude Include="src\math\Legacy\Matrix4f.h" />
     <ClInclude Include="src\math\Vector3f.h" />
     <ClInclude Include="src\renderer\shaders\ShaderProgram.h" />
     <ClInclude Include="src\renderer\shaders\Shader.h" />

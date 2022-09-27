@@ -5,20 +5,21 @@
 #include "../util/FileIO.h"
 #include "../renderer/shaders/Shader.h"
 #include "../renderer/shaders/ShaderProgram.h"
-#include "../math/Matrixf.h"
-#include "../math/Matrix4f.h"
 #include "window/Window.h"
 #include "../types/Maybe.h"
 #include "../scene/Camera/Camera.h"
 #include "../util/formats/TGA.h"
 #include "../util/formats/OBJ.h"
 #include <vector>
+#include "../math/mat4.h"
+#include <chrono>
+#include "../math/Legacy/Matrix4f.h"
 
 static const int width = 1024;
 static const int height = 576;
 
 static constexpr float aspectRatio = (float)width / float(height);
-static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
+static const mat4 projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 
 static Camera camera(Vector3f(0, 0, 0));
 
@@ -113,7 +114,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	Maybe<GLFWwindow*> maybeWindow = ConstructWindow(width, height, "Engine");
-	if (!maybeWindow.isJust())
+	if(!maybeWindow.isJust())
 	{
 		std::cout << "Failed to construct window" << std::endl;
 		return -1;
@@ -122,7 +123,7 @@ int main()
 	GLFWwindow* window = maybeWindow.fromJust();
 
 	// Initalize GLAD
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initalize GLAD" << std::endl;
 		return -1;
@@ -158,39 +159,43 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * boxModel.vertexIndices.size(), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	GLuint textureID;
 
 	TGAImage image = ReadTGAFile("../Engine/assets/wall.tga");
 
-	/*GLuint textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.get()); */
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.get());
 
 	Shader vertexShader = Shader("../Engine/src/shaders/BasicVertex.vertex");
-	
+
 	Shader fragmentShader = Shader("../Engine/src/shaders/BasicFragment.fragment");
 
 	ShaderProgram shaderProgram(vertexShader, fragmentShader);
 
 	glUseProgram(shaderProgram.GetID());
 
-	//glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
 
 	glBindVertexArray(VAO);
 
 	vertexShader.~Shader();
 	fragmentShader.~Shader();
+	GLsizei boxModelVertexIndicesSize = (GLsizei)boxModel.vertexIndices.size();
+	boxModel.~OBJModel();
 
 	double previousFrameTime = 0;
-
-	while (!glfwWindowShouldClose(window))
+	while(!glfwWindowShouldClose(window))
 	{
 
 		double currentFrameTime = glfwGetTime();
@@ -202,19 +207,19 @@ int main()
 
 		processInput(window);
 
-		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
-		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
+		mat4 translateMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
+		mat4 cameraMatrix = camera.GetCameraSpaceMatrix();
 
-		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
+		mat4 result = projectionMatrix * cameraMatrix * translateMatrix;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, GetFlatMatrixf(result));
+		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, result.matrix[0]);
 
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, textureID);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureID);
 		glUseProgram(shaderProgram.GetID());
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, boxModel.vertexIndices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, boxModelVertexIndicesSize, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

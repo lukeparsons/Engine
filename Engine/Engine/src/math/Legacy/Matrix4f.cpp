@@ -1,9 +1,9 @@
 #include "Matrix4f.h"
-#include "Vector3f.h"
+#include "../Vector3f.h"
 
 static const float pi = 3.14159265358979323846f;
 
-Matrix4f GetTranslationMatrix(const Vector3f& translation)
+Matrix4f GetTranslationMat(const Vector3f& translation)
 {
 	return Matrix4f(
 			{	1, 0, 0, translation.x,
@@ -12,16 +12,16 @@ Matrix4f GetTranslationMatrix(const Vector3f& translation)
 				0, 0, 0, 1 });
 }
 
-Matrix4f GetScaleMatrix(const Vector3f& scaleVector)
+Matrix4f GetScaleMat(const Vector3f& scaleVector)
 {
 	return Matrix4f(
 			{	1, 0, 0, scaleVector.x,
 				0, 1, 0, scaleVector.y,
 				0, 0, 1, scaleVector.z,
-				0, 0, 0, 1 });;
+				0, 0, 0, 1 });
 }
 
-Matrix4f GetXRotationMatrix(float angleRadians, const Vector3f& pivot)
+Matrix4f GetXRotationMat(float angleRadians, const Vector3f& pivot)
 {
 	float cosAngle = cos(angleRadians);
 	float sinAngle = sin(angleRadians);
@@ -33,7 +33,7 @@ Matrix4f GetXRotationMatrix(float angleRadians, const Vector3f& pivot)
 				0, 0, 0, 1 });
 }
 
-Matrix4f GetXRotationMatrix(float angleRadians)
+Matrix4f GetXRotationMat(float angleRadians)
 {
 	float cosAngle = cos(angleRadians);
 	float sinAngle = sin(angleRadians);
@@ -45,7 +45,7 @@ Matrix4f GetXRotationMatrix(float angleRadians)
 				0, 0, 0, 1 });
 }
 
-Matrix4f GetYRotationMatrix(float angle, const Vector3f& pivot)
+Matrix4f GetYRotationMat(float angle, const Vector3f& pivot)
 {
 	float cosAngle = cos(angle);
 	float sinAngle = sin(angle);
@@ -57,7 +57,7 @@ Matrix4f GetYRotationMatrix(float angle, const Vector3f& pivot)
 				0, 0, 0, 1 });
 }
 
-Matrix4f GetYRotationMatrix(float angle)
+Matrix4f GetYRotationMat(float angle)
 {
 	float cosAngle = cos(angle);
 	float sinAngle = sin(angle);
@@ -69,7 +69,7 @@ Matrix4f GetYRotationMatrix(float angle)
 				0, 0, 0, 1 });
 }
 
-Matrix4f GetZRotationMatrix(float angle, const Vector3f& pivot)
+Matrix4f GetZRotationMat(float angle, const Vector3f& pivot)
 {
 	float cosAngle = cos(angle);
 	float sinAngle = sin(angle);
@@ -81,7 +81,7 @@ Matrix4f GetZRotationMatrix(float angle, const Vector3f& pivot)
 				0,			0,		0,	1 });
 }
 
-Matrix4f GetZRotationMatrix(float angle)
+Matrix4f GetZRotationMat(float angle)
 {
 	float cosAngle = cos(angle);
 	float sinAngle = sin(angle);
@@ -93,7 +93,7 @@ Matrix4f GetZRotationMatrix(float angle)
 				0, 0, 0, 1 });
 }
 
-Matrix4f GetProjectionMatrix(float verticalFOV, float horizontalFOV, float aspectRatio)
+Matrix4f GetProjectionMat(float verticalFOV, float horizontalFOV, float aspectRatio)
 {
 	verticalFOV /= 2.0f;
 	verticalFOV *= (pi / 180);

@@ -30,7 +30,7 @@
     <ClCompile Include="src\renderer\shaders\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\math\Matrix4f.cpp">
+    <ClCompile Include="src\math\Legacy\Matrix4f.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\window\Window.cpp">
@@ -54,6 +54,9 @@
     <ClCompile Include="src\util\StringUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\math\mat4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\util\FileIO.h">
@@ -65,10 +68,10 @@
     <ClInclude Include="src\renderer\shaders\ShaderProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\math\Matrixf.h">
+    <ClInclude Include="src\math\Legacy\Matrixf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\math\Matrix4f.h">
+    <ClInclude Include="src\math\Legacy\Matrix4f.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\window\Window.h">
@@ -96,6 +99,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\StringUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\mat4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Vector2f.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -65,6 +65,7 @@ Shader::Shader(const char* path)
 		glGetShaderInfoLog(idValue, sizeof(infoLog), NULL, infoLog);
 		std::cout << "Failed to compile shader at path " << path << "\n" << infoLog << std::endl;
 	}
+	delete[] shaderCodeStrGL;
 }
 
 Shader::~Shader()

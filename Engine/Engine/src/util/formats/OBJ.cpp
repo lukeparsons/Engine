@@ -12,16 +12,14 @@ enum class ReadState
 	READ, ELEMENT, VERTEX, TEXCOORD, NORMAL
 };
 
-static unsigned int CharAsReadUIntValue(char c)
-{
-	return static_cast<unsigned int>(c - '0');
-}
-
 static ReadState CheckReadState(std::string firstWord)
 {
 	if(firstWord == "v")
 	{
 		return ReadState::VERTEX;
+	} else if(firstWord == "vt")
+	{
+		return ReadState::TEXCOORD;
 	} else if(firstWord == "f")
 	{
 		return ReadState::ELEMENT;
@@ -30,14 +28,14 @@ static ReadState CheckReadState(std::string firstWord)
 	return ReadState::READ;
 }
 
-static void ReadVertex(std::string values, OBJModel& model)
+static void ReadVertex(std::string values, std::vector<float>& container)
 {
-	for(std::string valueStr : TokenizeString(values, ' '))
+	for(std::string valueStr : TokenizeString(values, " "))
 	{
 		float valueAsFloat;
 		std::from_chars_result result = std::from_chars(valueStr.data(), valueStr.data() + valueStr.size(), valueAsFloat);
 		// TODO: Check for conversion errors
-		model.vertices.push_back(valueAsFloat);
+		container.push_back(valueAsFloat);
 	}
 }
 
@@ -46,70 +44,77 @@ enum class GeometryType
 	TRIANGLE = 3, QUAD = 4
 };
 
-static void ReadElement(std::string values, OBJModel& model)
+static void AddToIndex(GeometryType geomType, std::vector<unsigned int>& index)
 {
-#define VERTEXELEMENT 0
-#define TEXCOORDELEMENT 1
-#define NORMALELEMENT 2
+	if(geomType == GeometryType::TRIANGLE)
+	{
+		return;
+	} else if(geomType == GeometryType::QUAD)
+	{
+		index.push_back(index[index.size() - 4]);
+		index.push_back(index[index.size() - 3]);
+	}
+}
 
-	int elementType = VERTEXELEMENT;
+static void ReadElement(std::string values, OBJModel& model, const std::vector<float>& verticesPos, const std::vector<float>& texCoords)
+{
+
 	GeometryType geomType;
 
 	int spaceCount = std::count(values.begin(), values.end(), ' ');
 
 	geomType = static_cast<GeometryType>(spaceCount + 1);
 
-	std::vector<std::string> spacesList = TokenizeString(values, ' ');
+	std::vector<std::string> spacesList = TokenizeString(values, " ");
 
-	for(std::string valueStr : spacesList)
+	if(spacesList.empty())
 	{
-		elementType = VERTEXELEMENT;
-		for(int i = 0; i < valueStr.length(); i++)
+		return;
+	}
+
+	bool isDoubleSlash = (spacesList[0].find("//") != std::string::npos);
+
+	for(int i = 0; i < spacesList.size(); i++)
+	{
+
+		std::vector<std::string> values = TokenizeString(spacesList[i], "/");
+
+		for(int x = 0; x < values.size(); x++)
 		{
-			char c = valueStr[i];
-			if(std::isdigit(c))
+			unsigned int value = std::stoi(values[x]);
+			if(x == 0)
 			{
-				if(elementType == VERTEXELEMENT)
-				{
-					if(geomType == GeometryType::QUAD)
-					{
-						if(valueStr == spacesList.back())
-						{
-							model.vertexIndices.push_back(model.vertexIndices[model.vertexIndices.size() - 1]);
-							model.vertexIndices.push_back(CharAsReadUIntValue(c) - 1);
-							model.vertexIndices.push_back(model.vertexIndices[model.vertexIndices.size() - 5]);
-						} else
-						{
-							model.vertexIndices.push_back(CharAsReadUIntValue(c) - 1);
-						}
-					}
-					
-				} else if(elementType == TEXCOORDELEMENT)
-				{
-					// Implement
-				} else if(elementType == NORMALELEMENT)
-				{
-					// Implement
-				}
-			}
-			else if(c == '/')
+				// Vertex
+				int start = (value - 1) * 3;
+				model.vertices.push_back(verticesPos[start]);
+				model.vertices.push_back(verticesPos[start + 1]);
+				model.vertices.push_back(verticesPos[start + 2]);
+			} else if(x == 1)
+
 			{
-				if(valueStr[i + 1] < valueStr.length() && valueStr[i + 1] == '/')
+				if(isDoubleSlash)
 				{
-					elementType = NORMALELEMENT;
+					// Vector Normal
 				} else
 				{
-					elementType++;
+					// Tex Coord
+					int start = (value - 1) * 2;
+					model.vertices.push_back(texCoords[start]);
+					model.vertices.push_back(texCoords[start + 1]);
+					model.vertexIndices.push_back(model.highestIndexValue++);
 				}
+			} else if(x == 2)
+			{
+				// Vector normal
 			}
 		}
 	}
-
-	
+	AddToIndex(geomType, model.vertexIndices);
 }
 
 OBJModel ReadOBJFile(const char* path)
 {
+
 	Either<std::string, std::string> eitherFileText = ReadFile(path);
 
 	// TODO: file error handling
@@ -118,13 +123,16 @@ OBJModel ReadOBJFile(const char* path)
 
 	OBJModel model;
 
+	std::vector<float> verticesPos;
+	std::vector<float> texCoords;
+
 	ReadState RS = ReadState::READ;
 
 	/* TokenizeString will return an empty vector on failure
 	*  If a obj file containing invalid lines or no lines is opened, don't warn/throw error
 	*  It's the user's responsibility to provide a valid obj file, it's unlikely they won't as almost certainly exported from 3d modelling software */
 
-	for(std::string line : TokenizeString(fileText, '\n'))
+	for(std::string line : TokenizeString(fileText, "\n"))
 	{
 		if(line.empty())
 		{
@@ -146,10 +154,13 @@ OBJModel ReadOBJFile(const char* path)
 		switch(RS)
 		{
 			case ReadState::VERTEX:
-				ReadVertex(line, model);
+				ReadVertex(line, verticesPos);
+				break;
+			case ReadState::TEXCOORD:
+				ReadVertex(line, texCoords);
 				break;
 			case ReadState::ELEMENT:
-				ReadElement(line, model);
+				ReadElement(line, model, verticesPos, texCoords);
 				break;
 		}
 	}
