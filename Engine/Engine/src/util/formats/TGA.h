@@ -1,11 +1,9 @@
 #pragma once
 #include <string>
-#include <bitset>
-#include <memory>
 
 struct TGAImage
 {
-	std::unique_ptr<char[]> data;
+	std::string data;
 	unsigned __int16 width = 0;
 	unsigned __int16 height = 0;
 	unsigned __int8 numberBitsInPixel = 0;

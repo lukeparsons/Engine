@@ -56,15 +56,6 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
-
-	try
-	{
-		ReadFile("Hello");
-	} catch(std::exception e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
-
 	glfwInit();
 	// opengl 3.3 (for now)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -133,7 +124,7 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.get());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.c_str());
 
 	Shader vertexShader = Shader("../Engine/src/shaders/BasicVertex.vertex");
 

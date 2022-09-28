@@ -1,40 +1,30 @@
 #include "TGA.h"
-#include <fstream>
+#include "../FileIO.h"
 #include <ios>
-#include <memory>
+#include <bitset>
 
-// TODO: this is not particularly good code...
+static std::bitset<16> ReadTwoBytes(char firstByte, char secondByte)
+{
+	std::bitset<8>w1{ static_cast<unsigned __int64>(firstByte) };
+	std::bitset<8>w2{ static_cast<unsigned __int64>(secondByte) };
+	return std::bitset<16>{ w1.to_string() + w2.to_string() };
+}
+
 TGAImage ReadTGAFile(const char* path)
 {
-	std::ifstream file(path, std::ios::out | std::ios::binary);
+	std::string tgaData = ReadFile(path, std::ios::binary);
 
-	file.seekg(0, file.end);
-	size_t size = file.tellg();
-	file.seekg(0, file.beg);
+	std::bitset<16> widthBytes = ReadTwoBytes(tgaData[13], tgaData[12]);
+	std::bitset<16> heightBytes = ReadTwoBytes(tgaData[15], tgaData[14]);
 
 	TGAImage image;
-	image.data = std::make_unique<char[]>(size + 1);
-	char* imageData = image.data.get();
+	image.data = tgaData;
+	image.width = static_cast<unsigned short>(widthBytes.to_ulong());
+	image.height = static_cast<unsigned short>(heightBytes.to_ulong());
+	image.numberBitsInPixel = static_cast<int>(tgaData[16]);
+	image.dataType = static_cast<int>(tgaData[2]);
 
-	file.read(imageData, size);
-	imageData[size] = '\0';
-
-	std::bitset<8>w1{(unsigned long long)imageData[13]};
-	std::bitset<8>w2{(unsigned long long)imageData[12]};
-	std::bitset<16>widthB{w1.to_string() + w2.to_string()};
-
-	std::bitset<8>h1{(unsigned long long)imageData[15]};
-	std::bitset<8>h2{(unsigned long long)imageData[14]};
-	std::bitset<16>heightB{h1.to_string() + h2.to_string()};
-
-	image.width = widthB.to_ullong();
-	image.height = heightB.to_ullong();
-	image.numberBitsInPixel = (int)imageData[16];
-	image.dataType = (int)imageData[2];
-
-	imageData = imageData + 18;
-
-	file.close();
+	tgaData.erase(0, 17);
 
 	return image;
 }

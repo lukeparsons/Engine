@@ -9,7 +9,6 @@ private:
 	GLuint id;
 
 public:
-
 	Shader(const char* path);
 	~Shader();
 
