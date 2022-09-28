@@ -7,9 +7,12 @@
 \item 
 std\+::string \mbox{\hyperlink{_file_i_o_8cpp_ae956c5857c5ba11e80674b03b4288096}{Read\+File}} (const char $\ast$path)
 \item 
-std\+::string \mbox{\hyperlink{_file_i_o_8cpp_ac34f71efc8af585e40c92fb2912fc501}{Read\+File\+Extension}} (const char $\ast$path)
+std\+::string \mbox{\hyperlink{_file_i_o_8cpp_a7f133691a3842d624c864e2f6f35851d}{Read\+File\+Extension}} (const char $\ast$file\+Name)
 \end{DoxyCompactItemize}
 
+
+\doxysubsection{Detailed Description}
+A collection of functions for reading and writing to files 
 
 \doxysubsection{Function Documentation}
 \mbox{\Hypertarget{_file_i_o_8cpp_ae956c5857c5ba11e80674b03b4288096}\label{_file_i_o_8cpp_ae956c5857c5ba11e80674b03b4288096}} 
@@ -18,14 +21,35 @@ std\+::string \mbox{\hyperlink{_file_i_o_8cpp_ac34f71efc8af585e40c92fb2912fc501}
 \doxysubsubsection{\texorpdfstring{ReadFile()}{ReadFile()}}
 {\footnotesize\ttfamily std\+::string Read\+File (\begin{DoxyParamCaption}\item[{const char $\ast$}]{path }\end{DoxyParamCaption})}
 
-Reads a file 
+Reads a file at a specified path 
 \begin{DoxyParams}{Parameters}
 {\em path} & Path of file to read \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{_file_i_o_8cpp_ac34f71efc8af585e40c92fb2912fc501}\label{_file_i_o_8cpp_ac34f71efc8af585e40c92fb2912fc501}} 
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::ifstream\+::failure} & Exception on failure to open or read file \\
+\hline
+\end{DoxyExceptions}
+\begin{DoxyReturn}{Returns}
+The text in the file 
+\end{DoxyReturn}
+\mbox{\Hypertarget{_file_i_o_8cpp_a7f133691a3842d624c864e2f6f35851d}\label{_file_i_o_8cpp_a7f133691a3842d624c864e2f6f35851d}} 
 \index{FileIO.cpp@{FileIO.cpp}!ReadFileExtension@{ReadFileExtension}}
 \index{ReadFileExtension@{ReadFileExtension}!FileIO.cpp@{FileIO.cpp}}
 \doxysubsubsection{\texorpdfstring{ReadFileExtension()}{ReadFileExtension()}}
-{\footnotesize\ttfamily std\+::string Read\+File\+Extension (\begin{DoxyParamCaption}\item[{const char $\ast$}]{path }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily std\+::string Read\+File\+Extension (\begin{DoxyParamCaption}\item[{const char $\ast$}]{file\+Name }\end{DoxyParamCaption})}
 
+Reads the extension of a file name 
+\begin{DoxyParams}{Parameters}
+{\em file\+Name} & The full name of the file to read the extension of \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::ifstream\+::invalid\+\_\+argument} & Exception on failure to read extension \\
+\hline
+\end{DoxyExceptions}
+\begin{DoxyReturn}{Returns}
+The extension of the file, not including the dot (.) 
+\end{DoxyReturn}

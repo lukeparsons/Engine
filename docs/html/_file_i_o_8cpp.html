@@ -102,10 +102,12 @@ $(document).ready(function(){initNavTree('_file_i_o_8cpp.html',''); initResizabl
 Functions</h2></td></tr>
 <tr class="memitem:ae956c5857c5ba11e80674b03b4288096"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_file_i_o_8cpp.html#ae956c5857c5ba11e80674b03b4288096">ReadFile</a> (const char *path)</td></tr>
 <tr class="separator:ae956c5857c5ba11e80674b03b4288096"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac34f71efc8af585e40c92fb2912fc501"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_file_i_o_8cpp.html#ac34f71efc8af585e40c92fb2912fc501">ReadFileExtension</a> (const char *path)</td></tr>
-<tr class="separator:ac34f71efc8af585e40c92fb2912fc501"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f133691a3842d624c864e2f6f35851d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_file_i_o_8cpp.html#a7f133691a3842d624c864e2f6f35851d">ReadFileExtension</a> (const char *fileName)</td></tr>
+<tr class="separator:a7f133691a3842d624c864e2f6f35851d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p >A collection of functions for reading and writing to files </p>
+</div><h2 class="groupheader">Function Documentation</h2>
 <a id="ae956c5857c5ba11e80674b03b4288096" name="ae956c5857c5ba11e80674b03b4288096"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae956c5857c5ba11e80674b03b4288096">&#9670;&#160;</a></span>ReadFile()</h2>
 
@@ -121,17 +123,24 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Reads a file </p><dl class="params"><dt>Parameters</dt><dd>
+<p >Reads a file at a specified path </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">path</td><td>Path of file to read </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::ifstream::failure</td><td>Exception on failure to open or read file </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The text in the file </dd></dl>
 
 </div>
 </div>
-<a id="ac34f71efc8af585e40c92fb2912fc501" name="ac34f71efc8af585e40c92fb2912fc501"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac34f71efc8af585e40c92fb2912fc501">&#9670;&#160;</a></span>ReadFileExtension()</h2>
+<a id="a7f133691a3842d624c864e2f6f35851d" name="a7f133691a3842d624c864e2f6f35851d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f133691a3842d624c864e2f6f35851d">&#9670;&#160;</a></span>ReadFileExtension()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -140,11 +149,24 @@ Functions</h2></td></tr>
           <td class="memname">std::string ReadFileExtension </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>path</em></td><td>)</td>
+          <td class="paramname"><em>fileName</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p >Reads the extension of a file name </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fileName</td><td>The full name of the file to read the extension of </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::ifstream::invalid_argument</td><td>Exception on failure to read extension </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The extension of the file, not including the dot (.) </dd></dl>
 
 </div>
 </div>

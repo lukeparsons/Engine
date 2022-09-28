@@ -57,6 +57,14 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 int main()
 {
 
+	try
+	{
+		ReadFile("Hello");
+	} catch(std::exception e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
+
 	glfwInit();
 	// opengl 3.3 (for now)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

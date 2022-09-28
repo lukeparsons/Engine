@@ -17,14 +17,35 @@ std\+::string \mbox{\hyperlink{_file_i_o_8h_ac34f71efc8af585e40c92fb2912fc501}{R
 \doxysubsubsection{\texorpdfstring{ReadFile()}{ReadFile()}}
 {\footnotesize\ttfamily std\+::string Read\+File (\begin{DoxyParamCaption}\item[{const char $\ast$}]{path }\end{DoxyParamCaption})}
 
-Reads a file 
+Reads a file at a specified path 
 \begin{DoxyParams}{Parameters}
 {\em path} & Path of file to read \\
 \hline
 \end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::ifstream\+::failure} & Exception on failure to open or read file \\
+\hline
+\end{DoxyExceptions}
+\begin{DoxyReturn}{Returns}
+The text in the file 
+\end{DoxyReturn}
 \mbox{\Hypertarget{_file_i_o_8h_ac34f71efc8af585e40c92fb2912fc501}\label{_file_i_o_8h_ac34f71efc8af585e40c92fb2912fc501}} 
 \index{FileIO.h@{FileIO.h}!ReadFileExtension@{ReadFileExtension}}
 \index{ReadFileExtension@{ReadFileExtension}!FileIO.h@{FileIO.h}}
 \doxysubsubsection{\texorpdfstring{ReadFileExtension()}{ReadFileExtension()}}
-{\footnotesize\ttfamily std\+::string Read\+File\+Extension (\begin{DoxyParamCaption}\item[{const char $\ast$}]{path }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily std\+::string Read\+File\+Extension (\begin{DoxyParamCaption}\item[{const char $\ast$}]{file\+Name }\end{DoxyParamCaption})}
 
+Reads the extension of a file name 
+\begin{DoxyParams}{Parameters}
+{\em file\+Name} & The full name of the file to read the extension of \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::ifstream\+::invalid\+\_\+argument} & Exception on failure to read extension \\
+\hline
+\end{DoxyExceptions}
+\begin{DoxyReturn}{Returns}
+The extension of the file, not including the dot (.) 
+\end{DoxyReturn}
