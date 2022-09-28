@@ -11,66 +11,15 @@
 #include "../util/formats/TGA.h"
 #include "../util/formats/OBJ.h"
 #include <vector>
-#include "../math/mat4.h"
-#include <chrono>
-#include "../math/Legacy/Matrix4f.h"
+#include "../math/Matrix4f.h"
 
 static const int width = 1024;
 static const int height = 576;
 
 static constexpr float aspectRatio = (float)width / float(height);
-static const mat4 projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
+static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 
 static Camera camera(Vector3f(0, 0, 0));
-
-/*GLfloat vertices[] = {
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, 1.0f, -1.0f,
-	1.0f, -1.0f, 1.0f,
-	-1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, 1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, -1.0f,
-	1.0f, -1.0f, 1.0f,
-	-1.0f, -1.0f, 1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, -1.0f, 1.0f,
-	1.0f, -1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, 1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, -1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, -1.0f,
-	-1.0f, 1.0f, -1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, -1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, -1.0f, 1.0f
-}; */
-
-/*float vertices[] = {
-	// positions          // colors           // texture coords
-	0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
-	0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
-	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left
-	-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left 
-}; */
-
-//static WorldObject cube(Vector3f(0, 0, -5), vertices);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -107,6 +56,7 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
+
 	glfwInit();
 	// opengl 3.3 (for now)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -207,10 +157,10 @@ int main()
 
 		processInput(window);
 
-		mat4 translateMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
-		mat4 cameraMatrix = camera.GetCameraSpaceMatrix();
+		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
+		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
 
-		mat4 result = projectionMatrix * cameraMatrix * translateMatrix;
+		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, result.matrix[0]);

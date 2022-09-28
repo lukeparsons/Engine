@@ -1,0 +1,98 @@
+\hypertarget{class_camera}{}\doxysection{Camera Class Reference}
+\label{class_camera}\index{Camera@{Camera}}
+
+
+{\ttfamily \#include $<$Camera.\+h$>$}
+
+Inheritance diagram for Camera\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_camera}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_camera_a62d2241ae197bbac9002759708570100}{Camera}} (\mbox{\hyperlink{struct_vector3f}{Vector3f}} \mbox{\hyperlink{class_world_object_ac7c1ce30b3135d3914197467475e35df}{location}})
+\item 
+void \mbox{\hyperlink{class_camera_a069a5aaf7d03fbbf4a1ae0ee113dfd6a}{Process\+Camera\+Keyboard\+Inputs}} (GLFWwindow $\ast$window)
+\item 
+void \mbox{\hyperlink{class_camera_a785e1f3229ee46ff27aa3af655e41b14}{Process\+Camera\+Mouse\+Inputs}} (double Xpos, double Ypos, double prev\+Xpos, double prev\+Ypos)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{class_camera_a34d6b444bc2d165b891c324c249c20e1}{Get\+Camera\+Space\+Matrix}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const float \mbox{\hyperlink{class_camera_a32e3e689cd4de3ae7fc73bb51f6c83f5}{move\+Speed}} = 0.\+001f
+\item 
+const float \mbox{\hyperlink{class_camera_a0a249e9d278727d71a3f4274c90c9e2b}{sensitivity}} = 0.\+1f
+\item 
+\mbox{\hyperlink{struct_vector3f}{Vector3f}} \mbox{\hyperlink{class_camera_a31df17dbec3f54628fc0f0614f738ee6}{target}}
+\item 
+\mbox{\hyperlink{struct_vector3f}{Vector3f}} \mbox{\hyperlink{class_camera_aba68001e04673499bc110d940379ccd0}{look}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_camera_a62d2241ae197bbac9002759708570100}\label{class_camera_a62d2241ae197bbac9002759708570100}} 
+\index{Camera@{Camera}!Camera@{Camera}}
+\index{Camera@{Camera}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{Camera()}{Camera()}}
+{\footnotesize\ttfamily Camera\+::\+Camera (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_vector3f}{Vector3f}}}]{location }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_camera_a34d6b444bc2d165b891c324c249c20e1}\label{class_camera_a34d6b444bc2d165b891c324c249c20e1}} 
+\index{Camera@{Camera}!GetCameraSpaceMatrix@{GetCameraSpaceMatrix}}
+\index{GetCameraSpaceMatrix@{GetCameraSpaceMatrix}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{GetCameraSpaceMatrix()}{GetCameraSpaceMatrix()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Camera\+::\+Get\+Camera\+Space\+Matrix (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_camera_a069a5aaf7d03fbbf4a1ae0ee113dfd6a}\label{class_camera_a069a5aaf7d03fbbf4a1ae0ee113dfd6a}} 
+\index{Camera@{Camera}!ProcessCameraKeyboardInputs@{ProcessCameraKeyboardInputs}}
+\index{ProcessCameraKeyboardInputs@{ProcessCameraKeyboardInputs}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{ProcessCameraKeyboardInputs()}{ProcessCameraKeyboardInputs()}}
+{\footnotesize\ttfamily void Camera\+::\+Process\+Camera\+Keyboard\+Inputs (\begin{DoxyParamCaption}\item[{GLFWwindow $\ast$}]{window }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_camera_a785e1f3229ee46ff27aa3af655e41b14}\label{class_camera_a785e1f3229ee46ff27aa3af655e41b14}} 
+\index{Camera@{Camera}!ProcessCameraMouseInputs@{ProcessCameraMouseInputs}}
+\index{ProcessCameraMouseInputs@{ProcessCameraMouseInputs}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{ProcessCameraMouseInputs()}{ProcessCameraMouseInputs()}}
+{\footnotesize\ttfamily void Camera\+::\+Process\+Camera\+Mouse\+Inputs (\begin{DoxyParamCaption}\item[{double}]{Xpos,  }\item[{double}]{Ypos,  }\item[{double}]{prev\+Xpos,  }\item[{double}]{prev\+Ypos }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_camera_aba68001e04673499bc110d940379ccd0}\label{class_camera_aba68001e04673499bc110d940379ccd0}} 
+\index{Camera@{Camera}!look@{look}}
+\index{look@{look}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{look}{look}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_vector3f}{Vector3f}} Camera\+::look}
+
+\mbox{\Hypertarget{class_camera_a32e3e689cd4de3ae7fc73bb51f6c83f5}\label{class_camera_a32e3e689cd4de3ae7fc73bb51f6c83f5}} 
+\index{Camera@{Camera}!moveSpeed@{moveSpeed}}
+\index{moveSpeed@{moveSpeed}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{moveSpeed}{moveSpeed}}
+{\footnotesize\ttfamily const float Camera\+::move\+Speed = 0.\+001f}
+
+\mbox{\Hypertarget{class_camera_a0a249e9d278727d71a3f4274c90c9e2b}\label{class_camera_a0a249e9d278727d71a3f4274c90c9e2b}} 
+\index{Camera@{Camera}!sensitivity@{sensitivity}}
+\index{sensitivity@{sensitivity}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{sensitivity}{sensitivity}}
+{\footnotesize\ttfamily const float Camera\+::sensitivity = 0.\+1f}
+
+\mbox{\Hypertarget{class_camera_a31df17dbec3f54628fc0f0614f738ee6}\label{class_camera_a31df17dbec3f54628fc0f0614f738ee6}} 
+\index{Camera@{Camera}!target@{target}}
+\index{target@{target}!Camera@{Camera}}
+\doxysubsubsection{\texorpdfstring{target}{target}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_vector3f}{Vector3f}} Camera\+::target}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Engine/\+Engine/src/scene/\+Camera/\mbox{\hyperlink{_camera_8h}{Camera.\+h}}\item 
+Engine/\+Engine/src/scene/\+Camera/\mbox{\hyperlink{_camera_8cpp}{Camera.\+cpp}}\end{DoxyCompactItemize}

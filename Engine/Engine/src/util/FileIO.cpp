@@ -1,43 +1,50 @@
-#include <iostream>
 #include "FileIO.h"
+#include <fstream>
 
-Either<std::string, std::string> ReadFile(const char* path)
+/**
+* Reads a file
+* @param path Path of file to read
+*/
+std::string ReadFile(const char* path)
 {
-	std::fstream file(path);
-
-	if (!file.is_open())
+	try
 	{
-		return Left<std::string, std::string>(std::string("Failed to open file at path").append(path));
+		std::ifstream file;
+		file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+		file.open(path, std::ios::in);
+
+		std::string buffer;
+
+		std::getline(file, buffer, '\0');
+
+		file.close();
+
+		return buffer;
+	} catch(std::ifstream::failure e)
+	{
+		throw e.what();
 	}
-
-	std::string buffer;
-
-	std::getline(file, buffer, '\0');
-
-	file.close();
-
-	return Right<std::string, std::string>(buffer);
 }
 
-Either<std::string, std::string> ReadFileExtension(const char* path)
+std::string ReadFileExtension(const char* path)
 {
-	std::string pathStr = std::string(path);
+	std::string pathStr = std::move(std::string(path));
 
 	size_t dotPosition = pathStr.rfind('.');
 
-	if (dotPosition == std::string::npos)
+	if(dotPosition == std::string::npos)
 	{
-		return Left<std::string, std::string>(std::string("Failed to find extension for a file with path ").append(path));
+		throw std::invalid_argument(std::string("Failed to find extension for a file with path").append(path));
 	}
 
 	// Erase all the text in the string up to and including the final dot to just leave the extension text
 	pathStr.erase(pathStr.begin(), pathStr.begin() + dotPosition + 1);
 
 	// Make sure an empty string is not returned
-	if (pathStr.length() == 0)
+	if(pathStr.length() == 0)
 	{
-		return Left<std::string, std::string>(std::string("Failed to find extension for a file with path ").append(path));
+		throw std::invalid_argument(std::string("Failed to find extension for a file with path").append(path));
 	}
 
-	return Right<std::string, std::string>(pathStr);
+	return pathStr;
 }

@@ -7,55 +7,42 @@
 
 Shader::Shader(const char* path)
 {
-
-	Either<std::string, std::string> shaderCode = ReadFile(path);
-
-	if (shaderCode.isLeft() == true)
+	std::string shaderCode;
+	std::string shaderExtension;
+	try
 	{
-		std::cout << shaderCode.fromLeft(DEF_STRING) << std::endl;
-		std::cout << "Failed to read shader at path " << path << std::endl;
-		id = Maybe<GLuint>();
-		return;
-	}
-
-	Either<std::string, std::string> shaderExtension = ReadFileExtension(path);
-
-	if (shaderExtension.isLeft() == true)
+		shaderCode = ReadFile(path);
+		shaderExtension = ReadFileExtension(path);
+	} catch(std::invalid_argument e)
 	{
-		std::cout << shaderExtension.fromLeft(DEF_STRING) << std::endl;
-		std::cout << "Failed to read shader extension at path " << path << std::endl;
-		id = Maybe<GLuint>();
-		return;
+		throw e.what();
 	}
 
 	GLenum shaderType;
 
-	std::string extension = shaderExtension.fromRight(DEF_STRING);
-
-	if (extension.compare(VERTEX_EXTENSION) == 0)
+	if (shaderExtension.compare(VERTEX_EXTENSION) == 0)
 	{
 		shaderType = GL_VERTEX_SHADER;
-	} else if (extension.compare(FRAGMENT_EXTENSION) == 0)
+	} else if (shaderExtension.compare(FRAGMENT_EXTENSION) == 0)
 	{
 		shaderType = GL_FRAGMENT_SHADER;
 	} else
 	{
-		std::cout << "Invalid extension for shader at path " << path << std::endl;
-		id = Maybe<GLuint>();
-		return;
+		throw std::invalid_argument(std::string("Invalid extension provided for shader with path ").append(path));
 	}
 
 	GLuint idValue = glCreateShader(shaderType);
 	id = idValue;
 
-	std::string shaderCodeStr = shaderCode.fromRight(DEF_STRING);
-	size_t shaderCodeStrLen = shaderCodeStr.length();
+	size_t shaderCodeLen = shaderCode.length();
 
-	GLchar* shaderCodeStrGL = new GLchar[shaderCodeStrLen + 1];
-	memcpy(shaderCodeStrGL, shaderCodeStr.c_str(), shaderCodeStrLen + 1);
+	GLchar* shaderCodeGL = new GLchar[shaderCodeLen + 1];
+	memcpy(shaderCodeGL, shaderCode.c_str(), shaderCodeLen + 1);
 
-	glShaderSource(idValue, 1, &shaderCodeStrGL, NULL);
+	glShaderSource(idValue, 1, &shaderCodeGL, NULL);
 	glCompileShader(idValue);
+
+	delete[] shaderCodeGL;
 
 	GLint success;
 	GLchar infoLog[512];
@@ -63,15 +50,11 @@ Shader::Shader(const char* path)
 	if (!success)
 	{
 		glGetShaderInfoLog(idValue, sizeof(infoLog), NULL, infoLog);
-		std::cout << "Failed to compile shader at path " << path << "\n" << infoLog << std::endl;
+		throw std::runtime_error(std::string("Failed to compile shader at path ") + path + "\n" + infoLog);
 	}
-	delete[] shaderCodeStrGL;
 }
 
 Shader::~Shader()
 {
-	if (id.isJust())
-	{
-		glDeleteShader(id.fromJust());
-	}
+	glDeleteShader(id);
 }

@@ -1,0 +1,52 @@
+\hypertarget{_matrixf_8h}{}\doxysection{Engine/\+Engine/src/math/\+Legacy/\+Matrixf.h File Reference}
+\label{_matrixf_8h}\index{Engine/Engine/src/math/Legacy/Matrixf.h@{Engine/Engine/src/math/Legacy/Matrixf.h}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$array$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_matrixf}{Matrixf$<$ row, column $>$}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$size\+\_\+t row, size\+\_\+t column$>$ }\\float $\ast$ \mbox{\hyperlink{_matrixf_8h_aaf2756a06faad51c2c304dad6e54a89e}{Get\+Flat\+Matrixf}} (\mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ \&mat)
+\item 
+{\footnotesize template$<$size\+\_\+t row1, size\+\_\+t column1, size\+\_\+t row2, size\+\_\+t column2$>$ }\\\mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row1, column2 $>$ \mbox{\hyperlink{_matrixf_8h_a2ccda3a1fbadb5597c4777757ad446a8}{operator$\ast$}} (const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row1, column1 $>$ \&lhs, const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row2, column2 $>$ \&rhs)
+\item 
+{\footnotesize template$<$size\+\_\+t row, size\+\_\+t column$>$ }\\\mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ \mbox{\hyperlink{_matrixf_8h_a4dde5e542e83336a7eff9854a17b1eab}{operator$\ast$}} (const float \&scalar, const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ \&matrix)
+\item 
+{\footnotesize template$<$size\+\_\+t row, size\+\_\+t column$>$ }\\void \mbox{\hyperlink{_matrixf_8h_a01be8e19f8a5f9c752b0216a0f6f2946}{Print\+Matrixf}} (const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ \&mat)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{_matrixf_8h_aaf2756a06faad51c2c304dad6e54a89e}\label{_matrixf_8h_aaf2756a06faad51c2c304dad6e54a89e}} 
+\index{Matrixf.h@{Matrixf.h}!GetFlatMatrixf@{GetFlatMatrixf}}
+\index{GetFlatMatrixf@{GetFlatMatrixf}!Matrixf.h@{Matrixf.h}}
+\doxysubsubsection{\texorpdfstring{GetFlatMatrixf()}{GetFlatMatrixf()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t row, size\+\_\+t column$>$ \\
+float $\ast$ Get\+Flat\+Matrixf (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ \&}]{mat }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrixf_8h_a4dde5e542e83336a7eff9854a17b1eab}\label{_matrixf_8h_a4dde5e542e83336a7eff9854a17b1eab}} 
+\index{Matrixf.h@{Matrixf.h}!operator$\ast$@{operator$\ast$}}
+\index{operator$\ast$@{operator$\ast$}!Matrixf.h@{Matrixf.h}}
+\doxysubsubsection{\texorpdfstring{operator$\ast$()}{operator*()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t row, size\+\_\+t column$>$ \\
+\mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ operator$\ast$ (\begin{DoxyParamCaption}\item[{const float \&}]{scalar,  }\item[{const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ \&}]{matrix }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrixf_8h_a2ccda3a1fbadb5597c4777757ad446a8}\label{_matrixf_8h_a2ccda3a1fbadb5597c4777757ad446a8}} 
+\index{Matrixf.h@{Matrixf.h}!operator$\ast$@{operator$\ast$}}
+\index{operator$\ast$@{operator$\ast$}!Matrixf.h@{Matrixf.h}}
+\doxysubsubsection{\texorpdfstring{operator$\ast$()}{operator*()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t row1, size\+\_\+t column1, size\+\_\+t row2, size\+\_\+t column2$>$ \\
+\mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row1, column2 $>$ operator$\ast$ (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row1, column1 $>$ \&}]{lhs,  }\item[{const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row2, column2 $>$ \&}]{rhs }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrixf_8h_a01be8e19f8a5f9c752b0216a0f6f2946}\label{_matrixf_8h_a01be8e19f8a5f9c752b0216a0f6f2946}} 
+\index{Matrixf.h@{Matrixf.h}!PrintMatrixf@{PrintMatrixf}}
+\index{PrintMatrixf@{PrintMatrixf}!Matrixf.h@{Matrixf.h}}
+\doxysubsubsection{\texorpdfstring{PrintMatrixf()}{PrintMatrixf()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t row, size\+\_\+t column$>$ \\
+void Print\+Matrixf (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_matrixf}{Matrixf}}$<$ row, column $>$ \&}]{mat }\end{DoxyParamCaption})}
+

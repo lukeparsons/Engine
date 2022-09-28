@@ -6,12 +6,12 @@ class Shader
 {
 private:
 
-	Maybe<GLuint> id;
+	GLuint id;
 
 public:
 
 	Shader(const char* path);
 	~Shader();
 
-	inline Maybe<GLuint> GetID() const { return id; }
+	inline GLuint GetID() const { return id; }
 };

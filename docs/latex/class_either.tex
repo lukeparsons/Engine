@@ -1,0 +1,133 @@
+\hypertarget{class_either}{}\doxysection{Either\texorpdfstring{$<$}{<} A, B \texorpdfstring{$>$}{>} Class Template Reference}
+\label{class_either}\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+
+
+{\ttfamily \#include $<$Either.\+h$>$}
+
+Inheritance diagram for Either\texorpdfstring{$<$}{<} A, B \texorpdfstring{$>$}{>}\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_either}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_either_a595636c8c9636e525bdf8fa13735eb4a}{$\sim$\+Either}} ()
+\item 
+\mbox{\hyperlink{class_either_a35d94aa91e08907750b00d664dc71c77}{Either}} (const \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$ \&either)
+\item 
+A \mbox{\hyperlink{class_either_a35af47382ac069333d16bdeda601e57a}{from\+Left}} (A def) const
+\item 
+B \mbox{\hyperlink{class_either_af1063a13a348d4e8044d24078594ff3c}{from\+Right}} (B def) const
+\item 
+bool \mbox{\hyperlink{class_either_a21178676eae9425fc96ccaf76d634978}{is\+Left}} ()
+\item 
+bool \mbox{\hyperlink{class_either_a26cb750beb309bcfbf7394f40cb0624d}{is\+Right}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_either_a7cfae55de7374ac9ee547b28643e0f2d}{Either}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+union \{\\
+\>A \mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}}\\
+\>B \mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}} = B()\\
+\}; \\
+
+\end{tabbing}\item 
+bool \mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\+\_\+left}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_either_a7cfae55de7374ac9ee547b28643e0f2d}\label{class_either_a7cfae55de7374ac9ee547b28643e0f2d}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!Either@{Either}}
+\index{Either@{Either}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{Either()}{Either()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+\mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\mbox{\hyperlink{class_either}{\+::\+Either}} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_either_a595636c8c9636e525bdf8fa13735eb4a}\label{class_either_a595636c8c9636e525bdf8fa13735eb4a}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!````~Either@{$\sim$Either}}
+\index{````~Either@{$\sim$Either}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{$\sim$Either()}{~Either()}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+\mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::$\sim$\mbox{\hyperlink{class_either}{Either}} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{class_either_a35d94aa91e08907750b00d664dc71c77}\label{class_either_a35d94aa91e08907750b00d664dc71c77}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!Either@{Either}}
+\index{Either@{Either}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{Either()}{Either()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+\mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\mbox{\hyperlink{class_either}{\+::\+Either}} (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$ \&}]{either }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_either_a35af47382ac069333d16bdeda601e57a}\label{class_either_a35af47382ac069333d16bdeda601e57a}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!fromLeft@{fromLeft}}
+\index{fromLeft@{fromLeft}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{fromLeft()}{fromLeft()}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+A \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::from\+Left (\begin{DoxyParamCaption}\item[{A}]{def }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{class_either_af1063a13a348d4e8044d24078594ff3c}\label{class_either_af1063a13a348d4e8044d24078594ff3c}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!fromRight@{fromRight}}
+\index{fromRight@{fromRight}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{fromRight()}{fromRight()}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+B \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::from\+Right (\begin{DoxyParamCaption}\item[{B}]{def }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{class_either_a21178676eae9425fc96ccaf76d634978}\label{class_either_a21178676eae9425fc96ccaf76d634978}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!isLeft@{isLeft}}
+\index{isLeft@{isLeft}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{isLeft()}{isLeft()}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+bool \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::is\+Left (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{class_either_a26cb750beb309bcfbf7394f40cb0624d}\label{class_either_a26cb750beb309bcfbf7394f40cb0624d}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!isRight@{isRight}}
+\index{isRight@{isRight}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{isRight()}{isRight()}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+bool \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::is\+Right (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_either_ab2196ee30400c28e511294ce8ef714f1}\label{class_either_ab2196ee30400c28e511294ce8ef714f1}} 
+\doxysubsubsection{\texorpdfstring{}{}}
+{\footnotesize\ttfamily union  \{ ... \}  \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::@1\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_either_ac371f30a22ea99c1bd8eadf40276467d}\label{class_either_ac371f30a22ea99c1bd8eadf40276467d}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!is\_left@{is\_left}}
+\index{is\_left@{is\_left}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{is\_left}{is\_left}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+bool \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::is\+\_\+left\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_either_ab0f13d3127d15852f4e0e4901657a3b5}\label{class_either_ab0f13d3127d15852f4e0e4901657a3b5}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!left@{left}}
+\index{left@{left}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{left}{left}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+A \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::left}
+
+\mbox{\Hypertarget{class_either_a423fe0dde144044367b4b10fc76de77b}\label{class_either_a423fe0dde144044367b4b10fc76de77b}} 
+\index{Either$<$ A, B $>$@{Either$<$ A, B $>$}!right@{right}}
+\index{right@{right}!Either$<$ A, B $>$@{Either$<$ A, B $>$}}
+\doxysubsubsection{\texorpdfstring{right}{right}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+B \mbox{\hyperlink{class_either}{Either}}$<$ A, B $>$\+::right = B()}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+Engine/\+Engine/src/types/\mbox{\hyperlink{_either_8h}{Either.\+h}}\end{DoxyCompactItemize}

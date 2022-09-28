@@ -1,0 +1,103 @@
+\hypertarget{_either_8h_source}{}\doxysection{Either.\+h}
+\label{_either_8h_source}\index{Engine/Engine/src/types/Either.h@{Engine/Engine/src/types/Either.h}}
+\mbox{\hyperlink{_either_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 }
+\DoxyCodeLine{3 \textcolor{preprocessor}{\#define DEF\_STRING "{}Error in accessing value in Either type"{}}}
+\DoxyCodeLine{4 }
+\DoxyCodeLine{5 \textcolor{keyword}{template}<\textcolor{keyword}{typename} A, \textcolor{keyword}{typename} B>}
+\DoxyCodeLine{6 \textcolor{keyword}{class }\mbox{\hyperlink{class_either}{Either}}}
+\DoxyCodeLine{7 \{}
+\DoxyCodeLine{8 \textcolor{keyword}{protected}:}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10     \mbox{\hyperlink{class_either}{Either<A, B>}}() : \mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}}(\textcolor{keyword}{true}) \{\};}
+\DoxyCodeLine{11 }
+\DoxyCodeLine{12     \textcolor{keyword}{union}}
+\DoxyCodeLine{13     \{}
+\DoxyCodeLine{14         A \mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}};}
+\DoxyCodeLine{15         B \mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}} = B();}
+\DoxyCodeLine{16     \};}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18     \textcolor{keywordtype}{bool} \mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}};}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{keyword}{public}:}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22     \mbox{\hyperlink{class_either}{\string~Either<A, B>}}()}
+\DoxyCodeLine{23     \{}
+\DoxyCodeLine{24         \textcolor{keywordflow}{if} (\mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}})}
+\DoxyCodeLine{25         \{}
+\DoxyCodeLine{26             \mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}}.\string~A();}
+\DoxyCodeLine{27         \} \textcolor{keywordflow}{else}}
+\DoxyCodeLine{28         \{}
+\DoxyCodeLine{29             \mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}}.\string~B();}
+\DoxyCodeLine{30         \}}
+\DoxyCodeLine{31     \}}
+\DoxyCodeLine{32 }
+\DoxyCodeLine{33     \mbox{\hyperlink{class_either}{Either<A, B>}}(\textcolor{keyword}{const} \mbox{\hyperlink{class_either}{Either<A, B>}}\& either)}
+\DoxyCodeLine{34     \{}
+\DoxyCodeLine{35         \mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}} = either.\mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}};}
+\DoxyCodeLine{36 }
+\DoxyCodeLine{37         \textcolor{keywordflow}{if} (\mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}})}
+\DoxyCodeLine{38         \{}
+\DoxyCodeLine{39             \mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}} = either.\mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}};}
+\DoxyCodeLine{40         \} \textcolor{keywordflow}{else}}
+\DoxyCodeLine{41         \{}
+\DoxyCodeLine{42             \mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}} = either.\mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}};}
+\DoxyCodeLine{43         \}}
+\DoxyCodeLine{44     \}}
+\DoxyCodeLine{45 }
+\DoxyCodeLine{46     A \mbox{\hyperlink{class_either_a35af47382ac069333d16bdeda601e57a}{fromLeft}}(A def)\textcolor{keyword}{ const}}
+\DoxyCodeLine{47 \textcolor{keyword}{    }\{}
+\DoxyCodeLine{48         \textcolor{keywordflow}{if} (\mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}})}
+\DoxyCodeLine{49         \{}
+\DoxyCodeLine{50             \textcolor{keywordflow}{return} \mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}};}
+\DoxyCodeLine{51         \} \textcolor{keywordflow}{else}}
+\DoxyCodeLine{52         \{}
+\DoxyCodeLine{53             \textcolor{keywordflow}{return} def;}
+\DoxyCodeLine{54         \}}
+\DoxyCodeLine{55     \}}
+\DoxyCodeLine{56 }
+\DoxyCodeLine{57     B \mbox{\hyperlink{class_either_af1063a13a348d4e8044d24078594ff3c}{fromRight}}(B def)\textcolor{keyword}{ const}}
+\DoxyCodeLine{58 \textcolor{keyword}{    }\{}
+\DoxyCodeLine{59         \textcolor{keywordflow}{if} (!\mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}})}
+\DoxyCodeLine{60         \{}
+\DoxyCodeLine{61             \textcolor{keywordflow}{return} \mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}};}
+\DoxyCodeLine{62         \} \textcolor{keywordflow}{else}}
+\DoxyCodeLine{63         \{}
+\DoxyCodeLine{64             \textcolor{keywordflow}{return} def;}
+\DoxyCodeLine{65         \}}
+\DoxyCodeLine{66     \}}
+\DoxyCodeLine{67 }
+\DoxyCodeLine{68     \textcolor{keywordtype}{bool} \mbox{\hyperlink{class_either_a21178676eae9425fc96ccaf76d634978}{isLeft}}()}
+\DoxyCodeLine{69     \{}
+\DoxyCodeLine{70         \textcolor{keywordflow}{return} \mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}};}
+\DoxyCodeLine{71     \}}
+\DoxyCodeLine{72 }
+\DoxyCodeLine{73     \textcolor{keywordtype}{bool} \mbox{\hyperlink{class_either_a26cb750beb309bcfbf7394f40cb0624d}{isRight}}()}
+\DoxyCodeLine{74     \{}
+\DoxyCodeLine{75         \textcolor{keywordflow}{return} !\mbox{\hyperlink{class_either_ac371f30a22ea99c1bd8eadf40276467d}{is\_left}};}
+\DoxyCodeLine{76     \}}
+\DoxyCodeLine{77 \};}
+\DoxyCodeLine{78 }
+\DoxyCodeLine{79 \textcolor{keyword}{template}<\textcolor{keyword}{typename} A, \textcolor{keyword}{typename} B>}
+\DoxyCodeLine{80 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_left}{Left}} : \textcolor{keyword}{public} \mbox{\hyperlink{class_either}{Either}}<A, B>}
+\DoxyCodeLine{81 \{}
+\DoxyCodeLine{82     \mbox{\hyperlink{struct_left_afcbc6b3f5ec1bb47dae4788e2783aa02}{Left}}(A \mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}})}
+\DoxyCodeLine{83     \{}
+\DoxyCodeLine{84         this-\/>is\_left = \textcolor{keyword}{false};}
+\DoxyCodeLine{85         this-\/>left = \mbox{\hyperlink{class_either_ab0f13d3127d15852f4e0e4901657a3b5}{left}};}
+\DoxyCodeLine{86     \}}
+\DoxyCodeLine{87 \};}
+\DoxyCodeLine{88 }
+\DoxyCodeLine{89 \textcolor{keyword}{template}<\textcolor{keyword}{typename} A, \textcolor{keyword}{typename} B>}
+\DoxyCodeLine{90 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_right}{Right}} : \textcolor{keyword}{public} \mbox{\hyperlink{class_either}{Either}}<A, B>}
+\DoxyCodeLine{91 \{}
+\DoxyCodeLine{92     \mbox{\hyperlink{struct_right_a6665b03497af07ef7dc990d07f75bfce}{Right}}(B \mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}})}
+\DoxyCodeLine{93     \{}
+\DoxyCodeLine{94         this-\/>is\_left = \textcolor{keyword}{false};}
+\DoxyCodeLine{95         this-\/>right = \mbox{\hyperlink{class_either_a423fe0dde144044367b4b10fc76de77b}{right}};}
+\DoxyCodeLine{96     \}}
+\DoxyCodeLine{97 \};}
+
+\end{DoxyCode}

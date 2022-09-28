@@ -1,0 +1,87 @@
+\hypertarget{_matrix4f_8h}{}\doxysection{Engine/\+Engine/src/math/\+Matrix4f.h File Reference}
+\label{_matrix4f_8h}\index{Engine/Engine/src/math/Matrix4f.h@{Engine/Engine/src/math/Matrix4f.h}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include \char`\"{}Vector3f.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{class_matrix4f}{Matrix4f}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_a3dc9fe41974d73ca7a62c565dcb70f30}{Get\+Translation\+Matrix}} (const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&translation)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_aa09d0e61f626d52740a31d6ce444ab34}{Get\+Scale\+Matrix}} (const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&scale)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_ad2faf99cacb299e23499d39607a0ef04}{Get\+XRotation\+Matrix}} (float angle\+Radians, const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&pivot)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_ae1ad1a16e30e0bf4947cfa7865fb1b07}{Get\+XRotation\+Matrix}} (float angle\+Radians)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_a01d05dbc756973d5ff1bad6196c21f55}{Get\+YRotation\+Matrix}} (float angle\+Radians, const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&pivot)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_aea9c842fe12a96c4cf16a9e1192b45f3}{Get\+YRotation\+Matrix}} (float angle\+Radians)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_adf5565a241009c7af165745a6391531f}{Get\+ZRotation\+Matrix}} (float angle\+Radians, const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&pivot)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_aa120b96c898bfe937355b879c58464ca}{Get\+ZRotation\+Matrix}} (float angle\+Radians)
+\item 
+\mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_a18d2ac8561f9cea390024bdd27924164}{Get\+Projection\+Matrix}} (float vertical\+FOV, float horizontal\+FOV, float aspect\+Ratio)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{_matrix4f_8h_a18d2ac8561f9cea390024bdd27924164}\label{_matrix4f_8h_a18d2ac8561f9cea390024bdd27924164}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetProjectionMatrix@{GetProjectionMatrix}}
+\index{GetProjectionMatrix@{GetProjectionMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetProjectionMatrix()}{GetProjectionMatrix()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+Projection\+Matrix (\begin{DoxyParamCaption}\item[{float}]{vertical\+FOV,  }\item[{float}]{horizontal\+FOV,  }\item[{float}]{aspect\+Ratio }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_aa09d0e61f626d52740a31d6ce444ab34}\label{_matrix4f_8h_aa09d0e61f626d52740a31d6ce444ab34}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetScaleMatrix@{GetScaleMatrix}}
+\index{GetScaleMatrix@{GetScaleMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetScaleMatrix()}{GetScaleMatrix()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+Scale\+Matrix (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&}]{scale }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_a3dc9fe41974d73ca7a62c565dcb70f30}\label{_matrix4f_8h_a3dc9fe41974d73ca7a62c565dcb70f30}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetTranslationMatrix@{GetTranslationMatrix}}
+\index{GetTranslationMatrix@{GetTranslationMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetTranslationMatrix()}{GetTranslationMatrix()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+Translation\+Matrix (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&}]{translation }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_ae1ad1a16e30e0bf4947cfa7865fb1b07}\label{_matrix4f_8h_ae1ad1a16e30e0bf4947cfa7865fb1b07}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetXRotationMatrix@{GetXRotationMatrix}}
+\index{GetXRotationMatrix@{GetXRotationMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetXRotationMatrix()}{GetXRotationMatrix()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+XRotation\+Matrix (\begin{DoxyParamCaption}\item[{float}]{angle\+Radians }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_ad2faf99cacb299e23499d39607a0ef04}\label{_matrix4f_8h_ad2faf99cacb299e23499d39607a0ef04}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetXRotationMatrix@{GetXRotationMatrix}}
+\index{GetXRotationMatrix@{GetXRotationMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetXRotationMatrix()}{GetXRotationMatrix()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+XRotation\+Matrix (\begin{DoxyParamCaption}\item[{float}]{angle\+Radians,  }\item[{const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&}]{pivot }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_aea9c842fe12a96c4cf16a9e1192b45f3}\label{_matrix4f_8h_aea9c842fe12a96c4cf16a9e1192b45f3}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetYRotationMatrix@{GetYRotationMatrix}}
+\index{GetYRotationMatrix@{GetYRotationMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetYRotationMatrix()}{GetYRotationMatrix()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+YRotation\+Matrix (\begin{DoxyParamCaption}\item[{float}]{angle\+Radians }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_a01d05dbc756973d5ff1bad6196c21f55}\label{_matrix4f_8h_a01d05dbc756973d5ff1bad6196c21f55}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetYRotationMatrix@{GetYRotationMatrix}}
+\index{GetYRotationMatrix@{GetYRotationMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetYRotationMatrix()}{GetYRotationMatrix()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+YRotation\+Matrix (\begin{DoxyParamCaption}\item[{float}]{angle\+Radians,  }\item[{const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&}]{pivot }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_aa120b96c898bfe937355b879c58464ca}\label{_matrix4f_8h_aa120b96c898bfe937355b879c58464ca}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetZRotationMatrix@{GetZRotationMatrix}}
+\index{GetZRotationMatrix@{GetZRotationMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetZRotationMatrix()}{GetZRotationMatrix()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+ZRotation\+Matrix (\begin{DoxyParamCaption}\item[{float}]{angle\+Radians }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{_matrix4f_8h_adf5565a241009c7af165745a6391531f}\label{_matrix4f_8h_adf5565a241009c7af165745a6391531f}} 
+\index{Matrix4f.h@{Matrix4f.h}!GetZRotationMatrix@{GetZRotationMatrix}}
+\index{GetZRotationMatrix@{GetZRotationMatrix}!Matrix4f.h@{Matrix4f.h}}
+\doxysubsubsection{\texorpdfstring{GetZRotationMatrix()}{GetZRotationMatrix()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_matrix4f}{Matrix4f}} Get\+ZRotation\+Matrix (\begin{DoxyParamCaption}\item[{float}]{angle\+Radians,  }\item[{const \mbox{\hyperlink{struct_vector3f}{Vector3f}} \&}]{pivot }\end{DoxyParamCaption})}
+

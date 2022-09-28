@@ -1,6 +1,6 @@
 #pragma once
 #include "../WorldObject.h"
-#include "../../math/mat4.h"
+#include "../../math/Matrix4f.h"
 #include <GLFW/glfw3.h>
 
 class Camera : public WorldObject {
@@ -17,6 +17,6 @@ public:
 
 	void ProcessCameraKeyboardInputs(GLFWwindow* window);
 	void ProcessCameraMouseInputs(double Xpos, double Ypos, double prevXpos, double prevYpos);
-	mat4 GetCameraSpaceMatrix();
+	Matrix4f GetCameraSpaceMatrix();
 
 };

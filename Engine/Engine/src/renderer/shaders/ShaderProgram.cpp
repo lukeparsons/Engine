@@ -5,8 +5,8 @@ ShaderProgram::ShaderProgram(Shader& vertexShader, Shader& fragmentShader)
 {
 	id = glCreateProgram();
 
-	GLuint vertexShaderID = vertexShader.GetID().fromJust();
-	GLuint fragmentShaderID = fragmentShader.GetID().fromJust();
+	GLuint vertexShaderID = vertexShader.GetID();
+	GLuint fragmentShaderID = fragmentShader.GetID();
 
 	glAttachShader(id, vertexShaderID);
 	glAttachShader(id, fragmentShaderID);
@@ -19,6 +19,7 @@ ShaderProgram::ShaderProgram(Shader& vertexShader, Shader& fragmentShader)
 	if (!success)
 	{
 		glGetShaderInfoLog(id, sizeof(infoLog), NULL, infoLog);
+		throw std::runtime_error(std::string("Failed to link shader program \n") + infoLog);
 		std::cout << "Failed to link shader program \n" << infoLog << std::endl;
 	}
 }

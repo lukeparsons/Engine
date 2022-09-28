@@ -1,0 +1,28 @@
+\hypertarget{_camera_8h_source}{}\doxysection{Camera.\+h}
+\label{_camera_8h_source}\index{Engine/Engine/src/scene/Camera/Camera.h@{Engine/Engine/src/scene/Camera/Camera.h}}
+\mbox{\hyperlink{_camera_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#include "{}../WorldObject.h"{}}}
+\DoxyCodeLine{3 \textcolor{preprocessor}{\#include "{}../../math/Matrix4f.h"{}}}
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include <GLFW/glfw3.h>}}
+\DoxyCodeLine{5 }
+\DoxyCodeLine{6 \textcolor{keyword}{class }\mbox{\hyperlink{class_camera}{Camera}} : \textcolor{keyword}{public} \mbox{\hyperlink{class_world_object}{WorldObject}} \{}
+\DoxyCodeLine{7 }
+\DoxyCodeLine{8 \textcolor{keyword}{public}:}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10     \mbox{\hyperlink{class_camera}{Camera}}(\mbox{\hyperlink{struct_vector3f}{Vector3f}} \mbox{\hyperlink{class_world_object_ac7c1ce30b3135d3914197467475e35df}{location}});}
+\DoxyCodeLine{11 }
+\DoxyCodeLine{12     \textcolor{keyword}{const} \textcolor{keywordtype}{float} \mbox{\hyperlink{class_camera_a32e3e689cd4de3ae7fc73bb51f6c83f5}{moveSpeed}} = 0.001f;}
+\DoxyCodeLine{13     \textcolor{keyword}{const} \textcolor{keywordtype}{float} \mbox{\hyperlink{class_camera_a0a249e9d278727d71a3f4274c90c9e2b}{sensitivity}} = 0.1f;}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15     \mbox{\hyperlink{struct_vector3f}{Vector3f}} \mbox{\hyperlink{class_camera_a31df17dbec3f54628fc0f0614f738ee6}{target}};}
+\DoxyCodeLine{16     \mbox{\hyperlink{struct_vector3f}{Vector3f}} \mbox{\hyperlink{class_camera_aba68001e04673499bc110d940379ccd0}{look}};}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18     \textcolor{keywordtype}{void} \mbox{\hyperlink{class_camera_a069a5aaf7d03fbbf4a1ae0ee113dfd6a}{ProcessCameraKeyboardInputs}}(GLFWwindow* window);}
+\DoxyCodeLine{19     \textcolor{keywordtype}{void} \mbox{\hyperlink{class_camera_a785e1f3229ee46ff27aa3af655e41b14}{ProcessCameraMouseInputs}}(\textcolor{keywordtype}{double} Xpos, \textcolor{keywordtype}{double} Ypos, \textcolor{keywordtype}{double} prevXpos, \textcolor{keywordtype}{double} prevYpos);}
+\DoxyCodeLine{20     \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{class_camera_a34d6b444bc2d165b891c324c249c20e1}{GetCameraSpaceMatrix}}();}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \};}
+
+\end{DoxyCode}

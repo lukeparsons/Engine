@@ -1,0 +1,57 @@
+\hypertarget{_maybe_8h_source}{}\doxysection{Maybe.\+h}
+\label{_maybe_8h_source}\index{Engine/Engine/src/types/Maybe.h@{Engine/Engine/src/types/Maybe.h}}
+\mbox{\hyperlink{_maybe_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 }
+\DoxyCodeLine{3 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_nothing}{Nothing}} \{\};}
+\DoxyCodeLine{4 }
+\DoxyCodeLine{5 \textcolor{keyword}{template}<\textcolor{keyword}{typename} A>}
+\DoxyCodeLine{6 \textcolor{keyword}{class }\mbox{\hyperlink{class_maybe}{Maybe}}}
+\DoxyCodeLine{7 \{}
+\DoxyCodeLine{8 \textcolor{keyword}{private}:}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10     \textcolor{keyword}{union}}
+\DoxyCodeLine{11     \{}
+\DoxyCodeLine{12         A \mbox{\hyperlink{class_maybe_a6fdf5f2fa3de846dee493d28700f995b}{value}};}
+\DoxyCodeLine{13         \mbox{\hyperlink{struct_nothing}{Nothing}} \mbox{\hyperlink{class_maybe_a615af6fd28b207a61cfc6846533622e0}{nothing}};}
+\DoxyCodeLine{14     \};}
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16     \textcolor{keywordtype}{bool} is\_just;}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18 \textcolor{keyword}{public}:}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20     \mbox{\hyperlink{class_maybe}{Maybe<A>}}() : \mbox{\hyperlink{class_maybe_a615af6fd28b207a61cfc6846533622e0}{nothing}}(\mbox{\hyperlink{struct_nothing}{Nothing}}()), is\_just(false) \{\};}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22     \mbox{\hyperlink{class_maybe}{Maybe<A>}}(A val) : \mbox{\hyperlink{class_maybe_a6fdf5f2fa3de846dee493d28700f995b}{value}}(val), is\_just(true) \{\};}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24     \mbox{\hyperlink{class_maybe}{\string~Maybe<A>}}() \{\};}
+\DoxyCodeLine{25 }
+\DoxyCodeLine{26     \textcolor{keywordtype}{bool} \mbox{\hyperlink{class_maybe_a7b11b746e84ff7a196efab7fc2a80a1b}{isJust}}()\textcolor{keyword}{ const}}
+\DoxyCodeLine{27 \textcolor{keyword}{    }\{}
+\DoxyCodeLine{28         \textcolor{keywordflow}{return} is\_just;}
+\DoxyCodeLine{29     \}}
+\DoxyCodeLine{30 }
+\DoxyCodeLine{31     \textcolor{keywordtype}{bool} \mbox{\hyperlink{class_maybe_ab9ac8e99c1faa8c05bf105b9d7e196f4}{isNothing}}()\textcolor{keyword}{ const}}
+\DoxyCodeLine{32 \textcolor{keyword}{    }\{}
+\DoxyCodeLine{33         \textcolor{keywordflow}{return} !is\_just;}
+\DoxyCodeLine{34     \}}
+\DoxyCodeLine{35 }
+\DoxyCodeLine{36     A \mbox{\hyperlink{class_maybe_a81c35cf7ef5ba9f97cc33d74f4220611}{fromJust}}()\textcolor{keyword}{ const}}
+\DoxyCodeLine{37 \textcolor{keyword}{    }\{}
+\DoxyCodeLine{38         \textcolor{keywordflow}{return} \mbox{\hyperlink{class_maybe_a6fdf5f2fa3de846dee493d28700f995b}{value}};}
+\DoxyCodeLine{39     \}}
+\DoxyCodeLine{40 }
+\DoxyCodeLine{41     A \mbox{\hyperlink{class_maybe_a2247261f0f33c7424644fe2e0a0af78a}{fromMaybe}}()\textcolor{keyword}{ const}}
+\DoxyCodeLine{42 \textcolor{keyword}{    }\{}
+\DoxyCodeLine{43         \textcolor{keywordflow}{if} (is\_just)}
+\DoxyCodeLine{44         \{}
+\DoxyCodeLine{45             \textcolor{keywordflow}{return} \mbox{\hyperlink{class_maybe_a6fdf5f2fa3de846dee493d28700f995b}{value}};}
+\DoxyCodeLine{46         \} \textcolor{keywordflow}{else}}
+\DoxyCodeLine{47         \{}
+\DoxyCodeLine{48             \textcolor{keywordflow}{return} A();}
+\DoxyCodeLine{49         \}}
+\DoxyCodeLine{50     \}}
+\DoxyCodeLine{51 \};}
+
+\end{DoxyCode}

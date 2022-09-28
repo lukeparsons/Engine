@@ -114,12 +114,15 @@ static void ReadElement(std::string values, OBJModel& model, const std::vector<f
 
 OBJModel ReadOBJFile(const char* path)
 {
-
-	Either<std::string, std::string> eitherFileText = ReadFile(path);
-
-	// TODO: file error handling
-
-	std::string fileText = eitherFileText.fromRight(DEF_STRING);
+	
+	std::string fileText;
+	try
+	{
+		fileText = ReadFile(path);
+	} catch(std::invalid_argument e)
+	{
+		throw e.what();
+	}
 
 	OBJModel model;
 

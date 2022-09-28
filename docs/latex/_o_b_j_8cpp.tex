@@ -1,0 +1,87 @@
+\hypertarget{_o_b_j_8cpp}{}\doxysection{Engine/\+Engine/src/util/formats/\+OBJ.cpp File Reference}
+\label{_o_b_j_8cpp}\index{Engine/Engine/src/util/formats/OBJ.cpp@{Engine/Engine/src/util/formats/OBJ.cpp}}
+{\ttfamily \#include \char`\"{}../../types/\+Either.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}OBJ.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include \char`\"{}../\+File\+IO.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$charconv$>$}\newline
+{\ttfamily \#include \char`\"{}../\+String\+Util.\+h\char`\"{}}\newline
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum class \mbox{\hyperlink{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0e}{Read\+State}} \{ \newline
+\mbox{\hyperlink{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea3466fab4975481651940ed328aa990e4}{READ}}
+, \mbox{\hyperlink{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea88be69b0577a14f4fa3bbfa0ff17a41d}{ELEMENT}}
+, \mbox{\hyperlink{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea0c3e47aef93a7f244f41ab309a33634b}{VERTEX}}
+, \mbox{\hyperlink{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0eae406d3f48e0ec122e180637b66787651}{TEXCOORD}}
+, \newline
+\mbox{\hyperlink{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea1e23852820b9154316c7c06e2b7ba051}{NORMAL}}
+ \}
+\item 
+enum class \mbox{\hyperlink{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6}{Geometry\+Type}} \{ \mbox{\hyperlink{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6a9bcd89070cae224dce305f5011659ef4}{TRIANGLE}} = 3
+, \mbox{\hyperlink{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6ac88da92039291f825814816096db2ea2}{QUAD}} = 4
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{struct_o_b_j_model}{OBJModel}} \mbox{\hyperlink{_o_b_j_8cpp_abbc276da9cf4bf6f93bfd57119d88dec}{Read\+OBJFile}} (const char $\ast$path)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6}\label{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6}} 
+\index{OBJ.cpp@{OBJ.cpp}!GeometryType@{GeometryType}}
+\index{GeometryType@{GeometryType}!OBJ.cpp@{OBJ.cpp}}
+\doxysubsubsection{\texorpdfstring{GeometryType}{GeometryType}}
+{\footnotesize\ttfamily enum class \mbox{\hyperlink{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6}{Geometry\+Type}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{TRIANGLE@{TRIANGLE}!OBJ.cpp@{OBJ.cpp}}\index{OBJ.cpp@{OBJ.cpp}!TRIANGLE@{TRIANGLE}}}\mbox{\Hypertarget{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6a9bcd89070cae224dce305f5011659ef4}\label{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6a9bcd89070cae224dce305f5011659ef4}} 
+TRIANGLE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{QUAD@{QUAD}!OBJ.cpp@{OBJ.cpp}}\index{OBJ.cpp@{OBJ.cpp}!QUAD@{QUAD}}}\mbox{\Hypertarget{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6ac88da92039291f825814816096db2ea2}\label{_o_b_j_8cpp_a1b753fd9c2659910ca1a042a05b56be6ac88da92039291f825814816096db2ea2}} 
+QUAD&\\
+\hline
+
+\end{DoxyEnumFields}
+\mbox{\Hypertarget{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0e}\label{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0e}} 
+\index{OBJ.cpp@{OBJ.cpp}!ReadState@{ReadState}}
+\index{ReadState@{ReadState}!OBJ.cpp@{OBJ.cpp}}
+\doxysubsubsection{\texorpdfstring{ReadState}{ReadState}}
+{\footnotesize\ttfamily enum class \mbox{\hyperlink{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0e}{Read\+State}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{READ@{READ}!OBJ.cpp@{OBJ.cpp}}\index{OBJ.cpp@{OBJ.cpp}!READ@{READ}}}\mbox{\Hypertarget{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea3466fab4975481651940ed328aa990e4}\label{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea3466fab4975481651940ed328aa990e4}} 
+READ&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ELEMENT@{ELEMENT}!OBJ.cpp@{OBJ.cpp}}\index{OBJ.cpp@{OBJ.cpp}!ELEMENT@{ELEMENT}}}\mbox{\Hypertarget{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea88be69b0577a14f4fa3bbfa0ff17a41d}\label{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea88be69b0577a14f4fa3bbfa0ff17a41d}} 
+ELEMENT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{VERTEX@{VERTEX}!OBJ.cpp@{OBJ.cpp}}\index{OBJ.cpp@{OBJ.cpp}!VERTEX@{VERTEX}}}\mbox{\Hypertarget{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea0c3e47aef93a7f244f41ab309a33634b}\label{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea0c3e47aef93a7f244f41ab309a33634b}} 
+VERTEX&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{TEXCOORD@{TEXCOORD}!OBJ.cpp@{OBJ.cpp}}\index{OBJ.cpp@{OBJ.cpp}!TEXCOORD@{TEXCOORD}}}\mbox{\Hypertarget{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0eae406d3f48e0ec122e180637b66787651}\label{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0eae406d3f48e0ec122e180637b66787651}} 
+TEXCOORD&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{NORMAL@{NORMAL}!OBJ.cpp@{OBJ.cpp}}\index{OBJ.cpp@{OBJ.cpp}!NORMAL@{NORMAL}}}\mbox{\Hypertarget{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea1e23852820b9154316c7c06e2b7ba051}\label{_o_b_j_8cpp_a05517d1215fb6c503efe6db94374bd0ea1e23852820b9154316c7c06e2b7ba051}} 
+NORMAL&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{_o_b_j_8cpp_abbc276da9cf4bf6f93bfd57119d88dec}\label{_o_b_j_8cpp_abbc276da9cf4bf6f93bfd57119d88dec}} 
+\index{OBJ.cpp@{OBJ.cpp}!ReadOBJFile@{ReadOBJFile}}
+\index{ReadOBJFile@{ReadOBJFile}!OBJ.cpp@{OBJ.cpp}}
+\doxysubsubsection{\texorpdfstring{ReadOBJFile()}{ReadOBJFile()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_o_b_j_model}{OBJModel}} Read\+OBJFile (\begin{DoxyParamCaption}\item[{const char $\ast$}]{path }\end{DoxyParamCaption})}
+

@@ -40,9 +40,9 @@ void Camera::ProcessCameraMouseInputs(double Xpos, double Ypos, double prevXpos,
 	look.y += float((prevYpos - Ypos) * sensitivity);
 }
 
-mat4 Camera::GetCameraSpaceMatrix()
+Matrix4f Camera::GetCameraSpaceMatrix()
 {
-	mat4 translationMatrix = mat4( 
+	Matrix4f translationMatrix = Matrix4f( 
 				1, 0, 0, -location.x,
 				0, 1, 0, -location.y,
 				0, 0, 1, -location.z,
@@ -69,7 +69,7 @@ mat4 Camera::GetCameraSpaceMatrix()
 
 	V = cross(N, U);
 
-	mat4 rotationMatrix = mat4(
+	Matrix4f rotationMatrix = Matrix4f(
 					U.x, U.y, U.z,   0,
 					V.x, V.y, V.z,   0,
 					-N.x, -N.y, -N.z, 1,

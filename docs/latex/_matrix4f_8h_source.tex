@@ -1,0 +1,77 @@
+\hypertarget{_matrix4f_8h_source}{}\doxysection{Matrix4f.\+h}
+\label{_matrix4f_8h_source}\index{Engine/Engine/src/math/Matrix4f.h@{Engine/Engine/src/math/Matrix4f.h}}
+\mbox{\hyperlink{_matrix4f_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#include <iostream>}}
+\DoxyCodeLine{3 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{_vector3f_8h}{Vector3f.h}}"{}}}
+\DoxyCodeLine{4 \textcolor{keyword}{class }\mbox{\hyperlink{class_matrix4f}{Matrix4f}}}
+\DoxyCodeLine{5 \{}
+\DoxyCodeLine{6 \textcolor{keyword}{private}:}
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#pragma warning( suppress: 26495 )}}
+\DoxyCodeLine{8     \mbox{\hyperlink{class_matrix4f}{Matrix4f}}() \{\};}
+\DoxyCodeLine{9 \textcolor{keyword}{public}:}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11     \textcolor{keywordtype}{float} \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[4][4];}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13     \mbox{\hyperlink{class_matrix4f_acc3c8ea82220fc7e7dd72b23b33b7437}{Matrix4f}}(\textcolor{keywordtype}{float} a11, \textcolor{keywordtype}{float} a12, \textcolor{keywordtype}{float} a13, \textcolor{keywordtype}{float} a14,}
+\DoxyCodeLine{14         \textcolor{keywordtype}{float} a21, \textcolor{keywordtype}{float} a22, \textcolor{keywordtype}{float} a23, \textcolor{keywordtype}{float} a24,}
+\DoxyCodeLine{15         \textcolor{keywordtype}{float} a31, \textcolor{keywordtype}{float} a32, \textcolor{keywordtype}{float} a33, \textcolor{keywordtype}{float} a34,}
+\DoxyCodeLine{16         \textcolor{keywordtype}{float} a41, \textcolor{keywordtype}{float} a42, \textcolor{keywordtype}{float} a43, \textcolor{keywordtype}{float} a44)}
+\DoxyCodeLine{17     \{}
+\DoxyCodeLine{18         \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[0][0] = a11; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[0][1] = a12; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[0][2] = a13; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[0][3] = a14;}
+\DoxyCodeLine{19         \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[1][0] = a21; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[1][1] = a22; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[1][2] = a23; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[1][3] = a24;}
+\DoxyCodeLine{20         \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[2][0] = a31; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[2][1] = a32; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[2][2] = a33; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[2][3] = a34;}
+\DoxyCodeLine{21         \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[3][0] = a41; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[3][1] = a42; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[3][2] = a43; \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[3][3] = a44;}
+\DoxyCodeLine{22     \}}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24     \textcolor{keywordtype}{float}* \mbox{\hyperlink{class_matrix4f_a5e7ea55088728dbca35c14a735307d7f}{operator[]}}(\textcolor{keywordtype}{size\_t} index)}
+\DoxyCodeLine{25     \{}
+\DoxyCodeLine{26         \textcolor{keywordflow}{return} \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[index];}
+\DoxyCodeLine{27     \}}
+\DoxyCodeLine{28 }
+\DoxyCodeLine{29     \textcolor{keyword}{const} \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{class_matrix4f_a7cf4442464a6255ae4a7fb05649d2a88}{operator*}}(\textcolor{keyword}{const} \mbox{\hyperlink{class_matrix4f}{Matrix4f}}\& other)\textcolor{keyword}{ const}}
+\DoxyCodeLine{30 \textcolor{keyword}{    }\{}
+\DoxyCodeLine{31         \mbox{\hyperlink{class_matrix4f}{Matrix4f}} resultMatrix;}
+\DoxyCodeLine{32         \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int} i = 0; i < 4; i++)}
+\DoxyCodeLine{33         \{}
+\DoxyCodeLine{34             \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int} j = 0; j < 4; j++)}
+\DoxyCodeLine{35             \{}
+\DoxyCodeLine{36                 resultMatrix[i][j] = \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[i][0] * other.\mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[0][j] + }
+\DoxyCodeLine{37                                      \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[i][1] * other.\mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[1][j] +}
+\DoxyCodeLine{38                                      \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[i][2] * other.\mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[2][j] +}
+\DoxyCodeLine{39                                      \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[i][3] * other.\mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[3][j];}
+\DoxyCodeLine{40             \}}
+\DoxyCodeLine{41         \}}
+\DoxyCodeLine{42         \textcolor{keywordflow}{return} resultMatrix;}
+\DoxyCodeLine{43     \}}
+\DoxyCodeLine{44 }
+\DoxyCodeLine{45     \textcolor{keywordtype}{void} \mbox{\hyperlink{class_matrix4f_a92e061cc59afca08179915a734e97f25}{PrintMatrix4f}}()}
+\DoxyCodeLine{46     \{}
+\DoxyCodeLine{47         \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int} i = 0; i < 4; i++)}
+\DoxyCodeLine{48         \{}
+\DoxyCodeLine{49             \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int} j = 0; j < 4; j++)}
+\DoxyCodeLine{50             \{}
+\DoxyCodeLine{51                 std::cout << \mbox{\hyperlink{class_matrix4f_a554e1b5ab605b160279dfed446eb4cb7}{matrix}}[i][j] << \textcolor{stringliteral}{"{} "{}};}
+\DoxyCodeLine{52             \}}
+\DoxyCodeLine{53             std::cout << std::endl;}
+\DoxyCodeLine{54         \}}
+\DoxyCodeLine{55     \}}
+\DoxyCodeLine{56 \};}
+\DoxyCodeLine{57 }
+\DoxyCodeLine{58 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_a3dc9fe41974d73ca7a62c565dcb70f30}{GetTranslationMatrix}}(\textcolor{keyword}{const} \mbox{\hyperlink{struct_vector3f}{Vector3f}}\& translation);}
+\DoxyCodeLine{59 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_aa09d0e61f626d52740a31d6ce444ab34}{GetScaleMatrix}}(\textcolor{keyword}{const} \mbox{\hyperlink{struct_vector3f}{Vector3f}}\& scale);}
+\DoxyCodeLine{60 }
+\DoxyCodeLine{61 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_ad2faf99cacb299e23499d39607a0ef04}{GetXRotationMatrix}}(\textcolor{keywordtype}{float} angleRadians, \textcolor{keyword}{const} \mbox{\hyperlink{struct_vector3f}{Vector3f}}\& pivot);}
+\DoxyCodeLine{62 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_ad2faf99cacb299e23499d39607a0ef04}{GetXRotationMatrix}}(\textcolor{keywordtype}{float} angleRadians);}
+\DoxyCodeLine{63 }
+\DoxyCodeLine{64 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_a01d05dbc756973d5ff1bad6196c21f55}{GetYRotationMatrix}}(\textcolor{keywordtype}{float} angleRadians, \textcolor{keyword}{const} \mbox{\hyperlink{struct_vector3f}{Vector3f}}\& pivot);}
+\DoxyCodeLine{65 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_a01d05dbc756973d5ff1bad6196c21f55}{GetYRotationMatrix}}(\textcolor{keywordtype}{float} angleRadians);}
+\DoxyCodeLine{66 }
+\DoxyCodeLine{67 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_adf5565a241009c7af165745a6391531f}{GetZRotationMatrix}}(\textcolor{keywordtype}{float} angleRadians, \textcolor{keyword}{const} \mbox{\hyperlink{struct_vector3f}{Vector3f}}\& pivot);}
+\DoxyCodeLine{68 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_adf5565a241009c7af165745a6391531f}{GetZRotationMatrix}}(\textcolor{keywordtype}{float} angleRadians);}
+\DoxyCodeLine{69 }
+\DoxyCodeLine{70 \mbox{\hyperlink{class_matrix4f}{Matrix4f}} \mbox{\hyperlink{_matrix4f_8h_a18d2ac8561f9cea390024bdd27924164}{GetProjectionMatrix}}(\textcolor{keywordtype}{float} verticalFOV, \textcolor{keywordtype}{float} horizontalFOV, \textcolor{keywordtype}{float} aspectRatio);}
+\DoxyCodeLine{71 }
+
+\end{DoxyCode}

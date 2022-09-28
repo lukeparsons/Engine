@@ -1,0 +1,21 @@
+\hypertarget{_o_b_j_8h_source}{}\doxysection{OBJ.\+h}
+\label{_o_b_j_8h_source}\index{Engine/Engine/src/util/formats/OBJ.h@{Engine/Engine/src/util/formats/OBJ.h}}
+\mbox{\hyperlink{_o_b_j_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_o_b_j_model}{OBJModel}}}
+\DoxyCodeLine{5 \{}
+\DoxyCodeLine{6     std::vector<float> \mbox{\hyperlink{struct_o_b_j_model_a808bc7cdd09e681b208f06ab17fa1615}{vertices}};}
+\DoxyCodeLine{7     std::vector<unsigned int> \mbox{\hyperlink{struct_o_b_j_model_acbc624a27d93b8e498b1f76fbfb98d15}{vertexIndices}};}
+\DoxyCodeLine{8     \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} \mbox{\hyperlink{struct_o_b_j_model_a8adeacd1363d52fd4cd6331836791b9b}{highestIndexValue}} = 0;}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10     \mbox{\hyperlink{struct_o_b_j_model_ac631051588a43bba9f7bdd5a8a244510}{OBJModel}}() \{\};}
+\DoxyCodeLine{11     \mbox{\hyperlink{struct_o_b_j_model_a8cf15c71fd49f5955eba723d0739d041}{OBJModel}}(std::vector<float> \mbox{\hyperlink{struct_o_b_j_model_a808bc7cdd09e681b208f06ab17fa1615}{vertices}}, std::vector<unsigned int> vertexElements, \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} vertexCount) }
+\DoxyCodeLine{12         : \mbox{\hyperlink{struct_o_b_j_model_a808bc7cdd09e681b208f06ab17fa1615}{vertices}}(\mbox{\hyperlink{struct_o_b_j_model_a808bc7cdd09e681b208f06ab17fa1615}{vertices}}) \{\};}
+\DoxyCodeLine{13 \};}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 \mbox{\hyperlink{struct_o_b_j_model}{OBJModel}} \mbox{\hyperlink{_o_b_j_8h_abbc276da9cf4bf6f93bfd57119d88dec}{ReadOBJFile}}(\textcolor{keyword}{const} \textcolor{keywordtype}{char}* path);}
+
+\end{DoxyCode}
