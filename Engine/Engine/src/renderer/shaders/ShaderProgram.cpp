@@ -1,5 +1,5 @@
 #include "ShaderProgram.h"
-#include <iostream>
+#include <stdexcept>
 
 ShaderProgram::ShaderProgram(Shader& vertexShader, Shader& fragmentShader)
 {

@@ -1,5 +1,4 @@
 #include "Camera.h"
-#include <array>
 
 Camera::Camera(Vector3f location) : WorldObject(location)
 {
