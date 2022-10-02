@@ -3,7 +3,7 @@
 #include <ios>
 #include <bitset>
 
-static std::bitset<16> ReadTwoBytes(char firstByte, char secondByte)
+static std::bitset<16> ReadTwoBytes(const char firstByte, const char secondByte)
 {
 	std::bitset<8>w1{ static_cast<unsigned __int64>(firstByte) };
 	std::bitset<8>w2{ static_cast<unsigned __int64>(secondByte) };

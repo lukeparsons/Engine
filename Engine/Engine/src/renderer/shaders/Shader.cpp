@@ -1,22 +1,13 @@
 #include "Shader.h"
 #include "../../util/FileIO.h"
-#include <iostream>
 
 #define VERTEX_EXTENSION "vertex"
 #define FRAGMENT_EXTENSION "fragment"
 
 Shader::Shader(const char* path)
 {
-	std::string shaderCode;
-	std::string shaderExtension;
-	try
-	{
-		shaderCode = ReadFile(path);
-		shaderExtension = ReadFileExtension(path);
-	} catch(std::invalid_argument e)
-	{
-		throw e.what();
-	}
+	std::string shaderCode = ReadFile(path);
+	std::string shaderExtension = ReadFileExtension(path);
 
 	GLenum shaderType;
 

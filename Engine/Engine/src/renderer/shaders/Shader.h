@@ -5,7 +5,6 @@
 class Shader
 {
 private:
-
 	GLuint id;
 
 public:

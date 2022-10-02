@@ -42,4 +42,4 @@ Vector3f& normalise(Vector3f& vector);
 
 Vector3f cross(const Vector3f& left, const Vector3f& right);
 
-void Print(const Vector3f& vector);
+void PrintVector(const Vector3f& vector);

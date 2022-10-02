@@ -1,11 +1,11 @@
-#include "../../types/Either.h"
 #include "OBJ.h"
+#include "../FileIO.h"
+#include "../../types/Either.h"
+#include "../StringUtil.h"
 #include <string>
 #include <sstream>
-#include "../FileIO.h"
 #include <iostream>
 #include <charconv>
-#include "../StringUtil.h"
 
 enum class ReadState
 {
@@ -58,7 +58,6 @@ static void AddToIndex(GeometryType geomType, std::vector<unsigned int>& index)
 
 static void ReadElement(std::string values, OBJModel& model, const std::vector<float>& verticesPos, const std::vector<float>& texCoords)
 {
-
 	GeometryType geomType;
 
 	int spaceCount = std::count(values.begin(), values.end(), ' ');
@@ -115,14 +114,7 @@ static void ReadElement(std::string values, OBJModel& model, const std::vector<f
 OBJModel ReadOBJFile(const char* path)
 {
 	
-	std::string fileText;
-	try
-	{
-		fileText = ReadFile(path);
-	} catch(std::invalid_argument e)
-	{
-		throw e.what();
-	}
+	std::string fileText = ReadFile(path);
 
 	OBJModel model;
 

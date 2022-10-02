@@ -20,7 +20,6 @@ ShaderProgram::ShaderProgram(Shader& vertexShader, Shader& fragmentShader)
 	{
 		glGetShaderInfoLog(id, sizeof(infoLog), NULL, infoLog);
 		throw std::runtime_error(std::string("Failed to link shader program \n") + infoLog);
-		std::cout << "Failed to link shader program \n" << infoLog << std::endl;
 	}
 }
 

@@ -1,6 +1,5 @@
 #include "Vector3f.h"
 #include <cmath>
-#include <functional>
 #include <iostream>
 
 Vector3f& normalise(Vector3f& vector)
@@ -22,7 +21,7 @@ Vector3f cross(const Vector3f& left, const Vector3f& right)
 	return Vector3f(x, y, z);
 }
 
-void Print(const Vector3f& vector)
+void PrintVector(const Vector3f& vector)
 {
 	std::cout << vector.x << ", " << vector.y << ", " << vector.z << std::endl;
 }

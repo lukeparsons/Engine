@@ -1,6 +1,6 @@
 #include "Matrix4f.h"
 
-static const float pi = 3.14159265358979323846f;
+static const float pi = 3.1415f;
 
 Matrix4f GetTranslationMatrix(const Vector3f& translation)
 {
@@ -56,10 +56,10 @@ Matrix4f GetYRotationMatrix(float angleRadians, const Vector3f& pivot)
 		0, 0, 0, 1);
 }
 
-Matrix4f GetYRotationMatrix(float angle)
+Matrix4f GetYRotationMatrix(float angleRadians)
 {
-	float cosAngle = cos(angle);
-	float sinAngle = sin(angle);
+	float cosAngle = cos(angleRadians);
+	float sinAngle = sin(angleRadians);
 
 	return Matrix4f(
 		cosAngle, 0, -sinAngle, 0,
@@ -68,10 +68,10 @@ Matrix4f GetYRotationMatrix(float angle)
 		0, 0, 0, 1);
 }
 
-Matrix4f GetZRotationMatrix(float angle, const Vector3f& pivot)
+Matrix4f GetZRotationMatrix(float angleRadians, const Vector3f& pivot)
 {
-	float cosAngle = cos(angle);
-	float sinAngle = sin(angle);
+	float cosAngle = cos(angleRadians);
+	float sinAngle = sin(angleRadians);
 
 	return Matrix4f(
 		cosAngle, -sinAngle, 0, pivot.y * sinAngle + pivot.x * (1 - cosAngle),
@@ -80,10 +80,10 @@ Matrix4f GetZRotationMatrix(float angle, const Vector3f& pivot)
 		0,			0,		0,	1);
 }
 
-Matrix4f GetZRotationMatrix(float angle)
+Matrix4f GetZRotationMatrix(float angleRadians)
 {
-	float cosAngle = cos(angle);
-	float sinAngle = sin(angle);
+	float cosAngle = cos(angleRadians);
+	float sinAngle = sin(angleRadians);
 
 	return Matrix4f(
 		cosAngle, -sinAngle, 0, 0,

@@ -1,6 +1,7 @@
 #pragma once
-#include <iostream>
 #include "Vector3f.h"
+#include <iostream>
+
 class Matrix4f
 {
 private:
