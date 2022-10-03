@@ -84,7 +84,7 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 
-	OBJModel boxModel = ReadOBJFile("../Engine/assets/box2.obj");
+	OBJModel boxModel = ReadOBJFile("../Engine/assets/box.obj");
 	float* vertices = boxModel.vertices.data();
 	unsigned int* indices = boxModel.vertexIndices.data();
 

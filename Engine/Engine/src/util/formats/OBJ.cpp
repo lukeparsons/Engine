@@ -113,8 +113,7 @@ static void ReadElement(std::string values, OBJModel& model, const std::vector<f
 
 OBJModel ReadOBJFile(const char* path)
 {
-	
-	std::string fileText = ReadFile(path);
+	std::string fileText = ReadFile(path, std::ios::binary);
 
 	OBJModel model;
 
