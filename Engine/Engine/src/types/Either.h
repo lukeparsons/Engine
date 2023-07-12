@@ -1,6 +1,7 @@
 #pragma once
 
 #define DEF_STRING "Error in accessing value in Either type"
+#define DEF_INT 0
 
 template<typename A, typename B>
 class Either
