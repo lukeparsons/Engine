@@ -1,8 +1,8 @@
 #include "OBJ.h"
 #include "../FileIO.h"
 #include "../../types/Either.h"
-#include "../StringUtil.h"
 #include <string>
+#include <fstream>
 #include <sstream>
 #include <iostream>
 #include <charconv>
@@ -28,14 +28,12 @@ static ReadState CheckReadState(std::string firstWord)
 	return ReadState::READ;
 }
 
-static void ReadVertex(std::string values, std::vector<float>& container)
+static void ReadVertex(std::istringstream& line, std::vector<float>& container)
 {
-	for(std::string valueStr : TokenizeString(values, " "))
+	float value;
+	while(line >> value)
 	{
-		float valueAsFloat;
-		std::from_chars_result result = std::from_chars(valueStr.data(), valueStr.data() + valueStr.size(), valueAsFloat);
-		// TODO: Check for conversion errors
-		container.push_back(valueAsFloat);
+		container.push_back(value);
 	}
 }
 
@@ -56,64 +54,56 @@ static void AddToIndex(GeometryType geomType, std::vector<unsigned int>& index)
 	}
 }
 
-static void ReadElement(std::string values, OBJModel& model, const std::vector<float>& verticesPos, const std::vector<float>& texCoords)
+static void ReadElement(std::istringstream& values, OBJModel& model, const std::vector<float>& verticesPos, const std::vector<float>& texCoords)
 {
-	GeometryType geomType;
 
-	int spaceCount = std::count(values.begin(), values.end(), ' ');
+	// TODO: Double slash support
 
-	geomType = static_cast<GeometryType>(spaceCount + 1);
-
-	std::vector<std::string> spacesList = TokenizeString(values, " ");
-
-	if(spacesList.empty())
+	std::string vertexIndices;
+	unsigned short numberOfVerticesInFace = 0;
+	while(std::getline(values, vertexIndices, ' '))
 	{
-		return;
-	}
-
-	bool isDoubleSlash = (spacesList[0].find("//") != std::string::npos);
-
-	for(int i = 0; i < spacesList.size(); i++)
-	{
-
-		std::vector<std::string> values = TokenizeString(spacesList[i], "/");
-
-		for(int x = 0; x < values.size(); x++)
+		std::istringstream valueStream(vertexIndices);
+		std::string individualValue;
+		int slashPos = 0;
+		while(std::getline(valueStream, individualValue, '/'))
 		{
-			unsigned int value = std::stoi(values[x]);
-			if(x == 0)
+			unsigned int indexValue = std::stoi(individualValue);
+			if(slashPos == 0)
 			{
 				// Vertex
-				int start = (value - 1) * 3;
+				int start = (indexValue - 1) * 3;
 				model.vertices.push_back(verticesPos[start]);
 				model.vertices.push_back(verticesPos[start + 1]);
 				model.vertices.push_back(verticesPos[start + 2]);
-			} else if(x == 1)
-
+			} else if(slashPos == 1)
 			{
-				if(isDoubleSlash)
-				{
-					// Vector Normal
-				} else
-				{
-					// Tex Coord
-					int start = (value - 1) * 2;
-					model.vertices.push_back(texCoords[start]);
-					model.vertices.push_back(texCoords[start + 1]);
-					model.vertexIndices.push_back(model.highestIndexValue++);
-				}
-			} else if(x == 2)
+				// Tex Coord
+				int start = (indexValue - 1) * 2;
+				model.vertices.push_back(texCoords[start]);
+				model.vertices.push_back(texCoords[start + 1]);
+				model.vertexIndices.push_back(model.highestIndexValue++);
+			} else if(slashPos == 2)
 			{
-				// Vector normal
+				// Vector Normal
 			}
+			slashPos++;
 		}
+		numberOfVerticesInFace++;
 	}
+	GeometryType geomType = static_cast<GeometryType>(numberOfVerticesInFace - 1);
 	AddToIndex(geomType, model.vertexIndices);
 }
 
 OBJModel ReadOBJFile(const char* path)
 {
-	std::string fileText = ReadFile(path, std::ios::binary);
+
+	std::ifstream fileStream(path, std::ios_base::in);
+
+	if(!fileStream)
+	{
+		// Throw error
+	}
 
 	OBJModel model;
 
@@ -121,43 +111,37 @@ OBJModel ReadOBJFile(const char* path)
 	std::vector<float> texCoords;
 
 	ReadState RS = ReadState::READ;
-
-	/* TokenizeString will return an empty vector on failure
-	*  If a obj file containing invalid lines or no lines is opened, don't warn/throw error
-	*  It's the user's responsibility to provide a valid obj file, it's unlikely they won't as almost certainly exported from 3d modelling software */
-
-	for(std::string line : TokenizeString(fileText, "\n"))
+	
+	std::string line;
+	while(std::getline(fileStream, line))
 	{
 		if(line.empty())
 		{
 			continue;
 		}
 
-		size_t spacePos = line.find(" ");
-		if(spacePos == std::string::npos)
-		{
-			continue;
-		}
+		std::istringstream lineStream(line);
 
-		std::string firstWord = line.substr(0, spacePos);
-
-		RS = CheckReadState(firstWord);
-
-		line.erase(0, spacePos + 1);
+		std::string word;
+		lineStream >> word;
+		RS = CheckReadState(word);
 
 		switch(RS)
 		{
 			case ReadState::VERTEX:
-				ReadVertex(line, verticesPos);
+				ReadVertex(lineStream, verticesPos);
 				break;
 			case ReadState::TEXCOORD:
-				ReadVertex(line, texCoords);
+				ReadVertex(lineStream, texCoords);
 				break;
 			case ReadState::ELEMENT:
-				ReadElement(line, model, verticesPos, texCoords);
-				break;
+				ReadElement(lineStream, model, verticesPos, texCoords);
 		}
+
+		//lineStream.clear();
 	}
 
+	fileStream.close();
+		
 	return model;
 }

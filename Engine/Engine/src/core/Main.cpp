@@ -56,6 +56,7 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
+
 	glfwInit();
 	// opengl 3.3 (for now)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

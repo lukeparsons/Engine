@@ -48,9 +48,6 @@
     <ClCompile Include="src\util\formats\OBJ.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\StringUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\math\Matrix4f.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -90,9 +87,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\formats\OBJ.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\StringUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\math\Matrix4f.h">
