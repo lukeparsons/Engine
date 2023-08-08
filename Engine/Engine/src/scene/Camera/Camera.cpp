@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "../../math/Vectorf.h"
 
 Camera::Camera(Vector3f location) : WorldObject(location)
 {

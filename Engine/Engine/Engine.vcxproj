@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -142,7 +142,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Projects\Engine\External Libraries\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -167,35 +167,41 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\math\Vectorf.cpp" />
+    <ClCompile Include="src\renderer\Mesh.cpp" />
     <ClCompile Include="src\math\Matrix4f.cpp" />
+    <ClCompile Include="src\util\formats\old\Model.cpp" />
+    <ClCompile Include="src\util\formats\old\Polygon.cpp" />
     <ClCompile Include="src\scene\Camera\Camera.cpp" />
     <ClCompile Include="src\core\window\Window.cpp" />
-    <ClCompile Include="src\math\Vector3f.cpp" />
     <ClCompile Include="src\renderer\shaders\ShaderProgram.cpp" />
     <ClCompile Include="src\renderer\shaders\Shader.cpp" />
     <ClCompile Include="src\core\glad.c" />
     <ClCompile Include="src\core\Main.cpp" />
     <ClCompile Include="src\util\FileIO.cpp" />
-    <ClCompile Include="src\scene\WorldObject.cpp" />
-    <ClCompile Include="src\util\formats\OBJ.cpp" />
+    <ClCompile Include="src\util\formats\old\OBJ.cpp" />
     <ClCompile Include="src\util\formats\TGA.cpp" />
+    <ClCompile Include="src\scene\WorldObject.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\Mesh.h" />
     <ClInclude Include="src\math\Matrix4f.h" />
+    <ClInclude Include="src\util\formats\old\Model.h" />
+    <ClInclude Include="src\util\formats\old\Polygon.h" />
     <ClInclude Include="src\scene\Camera\Camera.h" />
     <ClInclude Include="src\core\window\Window.h" />
-    <ClInclude Include="src\math\Legacy\Matrixf.h" />
-    <ClInclude Include="src\math\Vector3f.h" />
     <ClInclude Include="src\renderer\shaders\ShaderProgram.h" />
     <ClInclude Include="src\renderer\shaders\Shader.h" />
     <ClInclude Include="src\types\Either.h" />
     <ClInclude Include="src\types\Maybe.h" />
     <ClInclude Include="src\util\FileIO.h" />
-    <ClInclude Include="src\scene\WorldObject.h" />
-    <ClInclude Include="src\util\formats\OBJ.h" />
+    <ClInclude Include="src\util\formats\old\OBJ.h" />
     <ClInclude Include="src\util\formats\TGA.h" />
+    <ClInclude Include="src\math\Vectorf.h" />
+    <ClInclude Include="src\scene\WorldObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assimp-vc142-mtd.dll" />
     <None Include="src\shaders\BasicFragment.fragment" />
     <None Include="src\shaders\BasicVertex.vertex" />
   </ItemGroup>

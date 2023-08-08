@@ -9,9 +9,9 @@
 #include "../types/Maybe.h"
 #include "../scene/Camera/Camera.h"
 #include "../util/formats/TGA.h"
-#include "../util/formats/OBJ.h"
 #include <vector>
 #include "../math/Matrix4f.h"
+#include "../renderer/Mesh.h"
 
 static const int width = 1024;
 static const int height = 576;
@@ -85,64 +85,14 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 
-	OBJModel boxModel = ReadOBJFile("../Engine/assets/box.obj");
-	float* vertices = boxModel.vertices.data();
-	unsigned int* indices = boxModel.vertexIndices.data();
-
 	glEnable(GL_DEPTH_TEST);
 
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
+	Shader basicVertexShader("../Engine/src/shaders/BasicVertex.vertex");
+	Shader basicFragmentShader("../Engine/src/shaders/BasicFragment.fragment");
+	ShaderProgram basicShader(basicVertexShader, basicFragmentShader);
 
-	glBindVertexArray(VAO);
-
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * boxModel.vertices.size(), vertices, GL_STATIC_DRAW);
-
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * boxModel.vertexIndices.size(), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	GLuint textureID;
-
-	TGAImage image = ReadTGAFile("../Engine/assets/wall.tga");
-
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.c_str());
-
-	Shader vertexShader = Shader("../Engine/src/shaders/BasicVertex.vertex");
-
-	Shader fragmentShader = Shader("../Engine/src/shaders/BasicFragment.fragment");
-
-	ShaderProgram shaderProgram(vertexShader, fragmentShader);
-
-	glUseProgram(shaderProgram.GetID());
-
-	glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
-
-	glBindVertexArray(VAO);
-
-	vertexShader.~Shader();
-	fragmentShader.~Shader();
-	GLsizei boxModelVertexIndicesSize = (GLsizei)boxModel.vertexIndices.size();
-	boxModel.~OBJModel();
+	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
+	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall.tga", basicShader);
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
@@ -162,14 +112,7 @@ int main()
 
 		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
 
-		unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, result.matrix[0]);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glUseProgram(shaderProgram.GetID());
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, boxModelVertexIndicesSize, GL_UNSIGNED_INT, 0);
+		model.Draw(result);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

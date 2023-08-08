@@ -1,4 +1,6 @@
 #include "FileIO.h"
+#include <iostream>
+#include <cassert>
 
 /**
 * \file
@@ -11,28 +13,39 @@
 * @throws std::ifstream::failure Exception on failure to open or read file
 * @returns The text in the file
 */
+
+// TODO: this needs cleaning up
 std::string ReadFile(const char* path, std::ios_base::openmode openMode)
 {
 	std::ifstream file;
-	file.open(path, openMode);
-
-	file.seekg(0, file.end);
-	std::streamoff length = file.tellg();
-	file.seekg(0, file.beg);
-
-	if(!file.is_open())
+	std::string buffer;
+	try
 	{
-		throw std::ifstream::failure(std::string("Error opening file at path ") + path);
+		file.open(path, openMode);
+
+		file.seekg(0, file.end);
+		std::streamoff length = file.tellg();
+		file.seekg(0, file.beg);
+
+		assert(length >= 0);
+
+		buffer = std::string(length, 0);
+
+		file.read(&buffer[0], length);
+	} catch(const std::ifstream::failure& e)
+	{
+		std::cout << "Error " << e.what() << std::endl;
+		throw std::ifstream::failure(std::string("Error opening file at path ") + path + " error " + e.what());
+	} catch(std::exception e)
+	{
+		std::cout << "Error " << e.what() << std::endl;
 	}
 
-	std::string buffer = std::string(length, 0);
-
-	file.read(&buffer[0], length);
-
 	// A file is "bad" (the badbit is set) a error has occured which prevents the stream being read
+	// TODO: probably wrong way to do this
 	if(file.bad())
 	{
-		throw std::ifstream::failure(std::string("Error reading file at path ") + path);
+		//throw std::ifstream::failure(std::string("Error reading file at path ") + path);
 	}
 
 	file.close();
