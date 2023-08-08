@@ -5,7 +5,7 @@ class WorldObject
 {
 public:
 
-	WorldObject(Vector3f location);
+	WorldObject(Vector3f location = Vector3f(0, 0, 0));
 
 	Vector3f location;
 	Vector3f rotation;

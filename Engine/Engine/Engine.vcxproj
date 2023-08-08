@@ -184,6 +184,7 @@
     <ClCompile Include="src\scene\WorldObject.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\scene\RenderedObject.h" />
     <ClInclude Include="src\renderer\Mesh.h" />
     <ClInclude Include="src\math\Matrix4f.h" />
     <ClInclude Include="src\util\formats\old\Model.h" />

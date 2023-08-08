@@ -14,9 +14,9 @@ Matrix4f GetTranslationMatrix(const Vector3f& translation)
 Matrix4f GetScaleMatrix(const Vector3f& scaleVector)
 {
 	return Matrix4f(
-		1, 0, 0, scaleVector.x,
-		0, 1, 0, scaleVector.y,
-		0, 0, 1, scaleVector.z,
+		scaleVector.x, 0, 0, 0,
+		0, scaleVector.y, 0, 0,
+		0, 0, scaleVector.z, 0,
 		0, 0, 0, 1);
 }
 

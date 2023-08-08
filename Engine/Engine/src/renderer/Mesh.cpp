@@ -78,6 +78,8 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, const ShaderProgra
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
+	glBindVertexArray(0);
+
 	TGAImage image = ReadTGAFile(textureFileName);
 
 	glGenTextures(1, &textureID);
@@ -88,21 +90,28 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, const ShaderProgra
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.c_str());
 
-	glUseProgram(shaderProgram.GetID());
-
 	glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
 
+	transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
+	modelLoc = glGetUniformLocation(shaderProgram.GetID(), "mesh");
 }
 
-void Mesh::Draw(const Matrix4f& cameraMatrix)
+void const Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale)
 {
-
-	unsigned int transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_TRUE, cameraMatrix.matrix[0]);
 
+	// TODO: Include rotation matrix
+	Matrix4f modelMatrix = GetScaleMatrix(scale) * GetTranslationMatrix(location);
+	glUniformMatrix4fv(modelLoc, 1, GL_TRUE, modelMatrix.matrix[0]);
+
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBindVertexArray(VAO);
 	glActiveTexture(GL_TEXTURE0);
-	glUseProgram(shaderProgram.GetID());
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glUseProgram(shaderProgram.GetID());
+
+	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+	glActiveTexture(GL_TEXTURE0);
 }

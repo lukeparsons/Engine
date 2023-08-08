@@ -12,6 +12,7 @@
 #include <vector>
 #include "../math/Matrix4f.h"
 #include "../renderer/Mesh.h"
+#include "../scene/RenderedObject.h"
 
 static const int width = 1024;
 static const int height = 576;
@@ -93,6 +94,14 @@ int main()
 
 	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
 	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall.tga", basicShader);
+	RenderedObject doughnut(model);
+	doughnut.scale = Vector3f(1, 1, 1);
+
+	Mesh box("../Engine/assets/box.obj", "../Engine/assets/wall.tga", basicShader);
+	RenderedObject boxobj(box, Vector3f(1, 1, 1));
+	boxobj.scale = Vector3f(3, 3, 3);
+
+	Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
@@ -107,12 +116,12 @@ int main()
 
 		processInput(window);
 
-		Matrix4f translateMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
 		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
-
+		
 		Matrix4f result = projectionMatrix * cameraMatrix * translateMatrix;
 
-		model.Draw(result);
+		doughnut.DrawObject(result);
+		boxobj.DrawObject(result);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
