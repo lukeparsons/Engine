@@ -1,7 +1,8 @@
 #include "TGA.h"
-#include "../FileIO.h"
+#include "../../FileIO.h"
 #include <ios>
 #include <bitset>
+#include <iostream>
 
 static std::bitset<16> ReadTwoBytes(const char firstByte, const char secondByte)
 {
@@ -19,10 +20,10 @@ TGAImage ReadTGAFile(const char* path)
 
 	TGAImage image;
 	image.data = tgaData;
-	image.width = static_cast<unsigned short>(widthBytes.to_ulong());
-	image.height = static_cast<unsigned short>(heightBytes.to_ulong());
-	image.numberBitsInPixel = static_cast<int>(tgaData[16]);
-	image.dataType = static_cast<int>(tgaData[2]);
+	image.width = static_cast<__int16>(widthBytes.to_ulong());
+	image.height = static_cast<__int16>(heightBytes.to_ulong());
+	image.numberBitsInPixel = static_cast<__int8>(tgaData[16]);
+	image.dataType = static_cast<__int8>(tgaData[2]);
 
 	tgaData.erase(0, 17);
 

@@ -72,19 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <ExternalIncludePath>C:\Projects\Engine\External Libraries\Include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>C:\Projects\Engine\External Libraries\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <ExternalIncludePath>C:\Users\lukeh\source\repos\Engine\External Libraries\Include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>C:\Users\lukeh\source\repos\Engine\External Libraries\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,6 +98,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Projects\Engine\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,8 +116,9 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions />
+      <AdditionalOptions>-isystem ext</AdditionalOptions>
       <AdditionalIncludeDirectories>C:\Projects\Engine\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +140,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Projects\Engine\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,8 +158,9 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions />
+      <AdditionalOptions>-isystem ext</AdditionalOptions>
       <AdditionalIncludeDirectories>C:\Projects\Engine\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -167,6 +171,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\renderer\fluids\eulerian\EulerianGrid.cpp" />
     <ClCompile Include="src\math\Vectorf.cpp" />
     <ClCompile Include="src\renderer\Mesh.cpp" />
     <ClCompile Include="src\math\Matrix4f.cpp" />
@@ -180,10 +185,12 @@
     <ClCompile Include="src\core\Main.cpp" />
     <ClCompile Include="src\util\FileIO.cpp" />
     <ClCompile Include="src\util\formats\old\OBJ.cpp" />
-    <ClCompile Include="src\util\formats\TGA.cpp" />
-    <ClCompile Include="src\scene\WorldObject.cpp" />
+    <ClCompile Include="src\util\formats\old\TGA.cpp" />
+    <ClCompile Include="src\util\formats\png\lodepng.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\fluids\eulerian\EulerianGrid.h" />
+    <ClInclude Include="src\renderer\materials\Texture.h" />
     <ClInclude Include="src\scene\RenderedObject.h" />
     <ClInclude Include="src\renderer\Mesh.h" />
     <ClInclude Include="src\math\Matrix4f.h" />
@@ -197,9 +204,10 @@
     <ClInclude Include="src\types\Maybe.h" />
     <ClInclude Include="src\util\FileIO.h" />
     <ClInclude Include="src\util\formats\old\OBJ.h" />
-    <ClInclude Include="src\util\formats\TGA.h" />
+    <ClInclude Include="src\util\formats\old\TGA.h" />
     <ClInclude Include="src\math\Vectorf.h" />
     <ClInclude Include="src\scene\WorldObject.h" />
+    <ClInclude Include="src\util\formats\png\lodepng.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />

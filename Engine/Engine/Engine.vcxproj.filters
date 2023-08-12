@@ -36,7 +36,7 @@
     <ClCompile Include="src\scene\Camera\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\formats\TGA.cpp">
+    <ClCompile Include="src\util\formats\old\TGA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\util\formats\old\OBJ.cpp">
@@ -54,10 +54,13 @@
     <ClCompile Include="src\renderer\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\WorldObject.cpp">
+    <ClCompile Include="src\math\Vectorf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\math\Vectorf.cpp">
+    <ClCompile Include="src\renderer\fluids\eulerian\EulerianGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\formats\png\lodepng.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,7 +86,7 @@
     <ClInclude Include="src\scene\Camera\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\formats\TGA.h">
+    <ClInclude Include="src\util\formats\old\TGA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\formats\old\OBJ.h">
@@ -108,6 +111,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\RenderedObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\fluids\eulerian\EulerianGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\formats\png\lodepng.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\materials\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -35,35 +35,17 @@ public:
 	{
 		is_left = either.is_left;
 
-		if (is_left)
-		{
-			left = either.left;
-		} else
-		{
-			right = either.right;
-		}
+		is_left ? left = either.left : right = either.right;
 	}
 
 	A fromLeft(A def) const
 	{
-		if (is_left)
-		{
-			return left;
-		} else
-		{
-			return def;
-		}
+		return is_left ? left : def;
 	}
 
 	B fromRight(B def) const
 	{
-		if (!is_left)
-		{
-			return right;
-		} else
-		{
-			return def;
-		}
+		return !is_left ? right : def;
 	}
 
 	bool isLeft()

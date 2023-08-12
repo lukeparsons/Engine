@@ -6,6 +6,7 @@
 #include "../math/Matrix4f.h"
 #include "../math/Vectorf.h"
 #include <assimp/scene.h>
+#include "materials/Texture.h"
 
 struct Vertex
 {

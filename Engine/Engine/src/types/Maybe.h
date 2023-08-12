@@ -40,12 +40,6 @@ public:
 
 	A fromMaybe() const
 	{
-		if (is_just)
-		{
-			return value;
-		} else
-		{
-			return A();
-		}
+		return is_just ? value : A();
 	}
 };

@@ -9,6 +9,7 @@ public:
 
 	RenderedObject(const Mesh& mesh) : mesh(mesh) {};
 	RenderedObject(const Mesh& mesh, const Vector3f& location) : mesh(mesh), WorldObject(location) {};
+	RenderedObject(const Mesh& mesh, const Vector3f& location, const Vector3f& scale) : mesh(mesh), WorldObject(location, scale) {};
 
 	void DrawObject(const Matrix4f& cameraMatrix)
 	{

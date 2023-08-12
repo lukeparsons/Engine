@@ -4,9 +4,9 @@
 #include <assimp/scene.h>
 #include <glad/glad.h>
 #include <iostream>
-#include "../util/formats/TGA.h"
 #include "shaders/Shader.h"
 #include <filesystem>
+#include <vector>
 
 static Assimp::Importer importer;
 
@@ -80,7 +80,7 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, const ShaderProgra
 
 	glBindVertexArray(0);
 
-	TGAImage image = ReadTGAFile(textureFileName);
+	Texture tex(textureFileName);
 
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -88,7 +88,8 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, const ShaderProgra
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data.c_str());
+
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &tex.data[0]);
 
 	glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
 

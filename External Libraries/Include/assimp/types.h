@@ -50,6 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma GCC system_header
 #endif
 
+#pragma warning( push )
+#pragma warning( disable : 26451 )
+
 // Some runtime headers
 #include <limits.h>
 #include <stddef.h>
@@ -522,6 +525,8 @@ struct aiMemoryInfo {
     /** Total storage allocated for the full import. */
     unsigned int total;
 }; // !struct aiMemoryInfo
+
+#pragma warning( pop )
 
 #ifdef __cplusplus
 }
