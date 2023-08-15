@@ -19,6 +19,8 @@ public:
 
 	Maybe<A>() : nothing(Nothing()), is_just(false) {};
 
+	Maybe<A>(Nothing n) : nothing(n), is_just(false) {};
+
 	Maybe<A>(A val) : value(val), is_just(true) {};
 
 	~Maybe<A>() {};

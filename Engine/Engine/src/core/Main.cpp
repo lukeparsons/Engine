@@ -11,7 +11,11 @@
 #include "../scene/Camera/Camera.h"
 #include "../math/Matrix4f.h"
 #include "../renderer/Mesh.h"
-#include "../scene/RenderedObject.h"
+#include "../scene/Scene.h"
+#include "../scene/objects/components/active/RenderComponent.h"
+#include "../scene/objects/WorldObject.h"
+#include "Global.h"
+#include "../scene/objects/components/active/fluids/EulerianGrid.h"
 
 /* Task list TODO:
 * Convert std::cout for errors to proper error handling
@@ -26,7 +30,7 @@ static const int viewportY = 0;
 
 static constexpr float aspectRatio = (float)width / float(height);
 static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
-static const Matrix4f startMatrix = GetTranslationMatrix(Vector3f(0, 0, -5));
+Matrix4f cameraMatrix;
 
 static Camera camera(Vector3f(0, 0, 0));
 
@@ -37,7 +41,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow* window)
 {
-
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
@@ -104,11 +107,19 @@ int main()
 	ShaderProgram basicShader(basicVertexShader, basicFragmentShader);
 
 	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
-	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", basicShader);
-	RenderedObject doughnut(model);
+	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
+	WorldObject* doughnut = CreateModel(model);
 
-	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", basicShader);
-	RenderedObject boxobj(box, Vector3f(1, 1, 1), Vector3f(0.5f, 0.5f, 0.5f));
+	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &basicShader);
+
+	EulerianGrid grid(5, 2, box, Vector3f(1, 1, -2));
+	WorldObject eulerGrid = WorldObject();
+	eulerGrid.AddComponent(&grid);
+
+	Scene scene;
+	//scene.AddWorldObject(&boxobj);
+	scene.AddWorldObject(doughnut);
+	scene.AddWorldObject(&eulerGrid);
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
@@ -122,13 +133,10 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		processInput(window);
-
-		Matrix4f cameraMatrix = camera.GetCameraSpaceMatrix();
 		
-		Matrix4f result = projectionMatrix * cameraMatrix * startMatrix;
+		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
 
-		doughnut.DrawObject(result);
-		boxobj.DrawObject(result);
+		scene.FrameUpdateActiveComponents();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

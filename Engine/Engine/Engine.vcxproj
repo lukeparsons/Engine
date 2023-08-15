@@ -171,13 +171,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\renderer\fluids\eulerian\EulerianGrid.cpp" />
+    <ClCompile Include="src\scene\objects\components\active\RenderComponent.cpp" />
+    <ClCompile Include="src\scene\Scene.cpp" />
+    <ClCompile Include="src\scene\objects\components\active\fluids\EulerianGrid.cpp" />
     <ClCompile Include="src\math\Vectorf.cpp" />
     <ClCompile Include="src\renderer\Mesh.cpp" />
     <ClCompile Include="src\math\Matrix4f.cpp" />
+    <ClCompile Include="src\scene\objects\WorldObject.cpp" />
     <ClCompile Include="src\util\formats\old\Model.cpp" />
     <ClCompile Include="src\util\formats\old\Polygon.cpp" />
-    <ClCompile Include="src\scene\Camera\Camera.cpp" />
+    <ClCompile Include="src\scene\camera\Camera.cpp" />
     <ClCompile Include="src\core\window\Window.cpp" />
     <ClCompile Include="src\renderer\shaders\ShaderProgram.cpp" />
     <ClCompile Include="src\renderer\shaders\Shader.cpp" />
@@ -189,14 +192,19 @@
     <ClCompile Include="src\util\formats\png\lodepng.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\renderer\fluids\eulerian\EulerianGrid.h" />
+    <ClInclude Include="src\core\Global.h" />
+    <ClInclude Include="src\scene\objects\components\active\ActiveComponent.h" />
+    <ClInclude Include="src\scene\objects\components\active\RenderComponent.h" />
+    <ClInclude Include="src\scene\objects\components\Component.h" />
+    <ClInclude Include="src\scene\objects\components\static\TransformComponent.h" />
+    <ClInclude Include="src\scene\Scene.h" />
+    <ClInclude Include="src\scene\objects\components\active\fluids\EulerianGrid.h" />
     <ClInclude Include="src\renderer\materials\Texture.h" />
-    <ClInclude Include="src\scene\RenderedObject.h" />
     <ClInclude Include="src\renderer\Mesh.h" />
     <ClInclude Include="src\math\Matrix4f.h" />
     <ClInclude Include="src\util\formats\old\Model.h" />
     <ClInclude Include="src\util\formats\old\Polygon.h" />
-    <ClInclude Include="src\scene\Camera\Camera.h" />
+    <ClInclude Include="src\scene\camera\Camera.h" />
     <ClInclude Include="src\core\window\Window.h" />
     <ClInclude Include="src\renderer\shaders\ShaderProgram.h" />
     <ClInclude Include="src\renderer\shaders\Shader.h" />
@@ -206,7 +214,7 @@
     <ClInclude Include="src\util\formats\old\OBJ.h" />
     <ClInclude Include="src\util\formats\old\TGA.h" />
     <ClInclude Include="src\math\Vectorf.h" />
-    <ClInclude Include="src\scene\WorldObject.h" />
+    <ClInclude Include="src\scene\objects\WorldObject.h" />
     <ClInclude Include="src\util\formats\png\lodepng.h" />
   </ItemGroup>
   <ItemGroup>

@@ -33,7 +33,7 @@
     <ClCompile Include="src\core\window\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\Camera\Camera.cpp">
+    <ClCompile Include="src\scene\camera\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\util\formats\old\TGA.cpp">
@@ -57,10 +57,19 @@
     <ClCompile Include="src\math\Vectorf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\fluids\eulerian\EulerianGrid.cpp">
+    <ClCompile Include="src\scene\objects\components\active\fluids\EulerianGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\util\formats\png\lodepng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\objects\WorldObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\objects\components\active\RenderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,7 +92,7 @@
     <ClInclude Include="src\types\Either.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\Camera\Camera.h">
+    <ClInclude Include="src\scene\camera\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\formats\old\TGA.h">
@@ -107,19 +116,34 @@
     <ClInclude Include="src\math\Vectorf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\WorldObject.h">
+    <ClInclude Include="src\scene\objects\WorldObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\RenderedObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\fluids\eulerian\EulerianGrid.h">
+    <ClInclude Include="src\scene\objects\components\active\fluids\EulerianGrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\formats\png\lodepng.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\materials\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\objects\components\active\RenderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\objects\components\active\ActiveComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\objects\components\static\TransformComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\objects\components\Component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

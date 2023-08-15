@@ -23,18 +23,16 @@ struct Vertex
 
 class Mesh
 {
-	friend class RenderedObject;
 private:
-	const ShaderProgram& shaderProgram;
+	ShaderProgram *const shaderProgram;
 	GLuint textureID;
 	GLuint VAO;
 	unsigned int transformLoc;
 	unsigned int modelLoc;
+public:
+	Mesh(const char* fileName, const char* textureFileName, ShaderProgram *const shaderProgram);
 
 	void const Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale);
-public:
-	Mesh(const char* fileName, const char* textureFileName, const ShaderProgram& shaderProgram);
-
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 };

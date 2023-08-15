@@ -10,9 +10,8 @@
 
 static Assimp::Importer importer;
 
-Mesh::Mesh(const char* fileName, const char* textureFileName, const ShaderProgram& shaderProgram) : shaderProgram(shaderProgram)
+Mesh::Mesh(const char* fileName, const char* textureFileName, ShaderProgram *const shaderProgram) : shaderProgram(shaderProgram)
 {
-
 	const aiScene* scene = importer.ReadFile(fileName, 
 		aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
 
@@ -91,10 +90,12 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, const ShaderProgra
 
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &tex.data[0]);
 
-	glUniform1i(glGetUniformLocation(shaderProgram.GetID(), "textureID"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram->GetID(), "textureID"), 0);
 
-	transformLoc = glGetUniformLocation(shaderProgram.GetID(), "transform");
-	modelLoc = glGetUniformLocation(shaderProgram.GetID(), "mesh");
+	transformLoc = glGetUniformLocation(shaderProgram->GetID(), "transform");
+	modelLoc = glGetUniformLocation(shaderProgram->GetID(), "mesh");
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void const Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale)
@@ -109,7 +110,7 @@ void const Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, co
 	glBindVertexArray(VAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glUseProgram(shaderProgram.GetID());
+	glUseProgram(shaderProgram->GetID());
 
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 

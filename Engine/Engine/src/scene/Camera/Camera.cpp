@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "../../math/Vectorf.h"
+#include <iostream>
 
 Camera::Camera(Vector3f location) : WorldObject(location)
 {
@@ -11,26 +12,26 @@ void Camera::ProcessCameraKeyboardInputs(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		location += target * moveSpeed;
+		transform.location += target * moveSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		location -= target * moveSpeed;
+		transform.location -= target * moveSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
 		Vector3f left = cross(target, Vector3f(0, 1, 0));
 		normalise(left);
-		location += left * moveSpeed;
+		transform.location += left * moveSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		Vector3f right = cross(Vector3f(0, 1, 0), target);
 		normalise(right);
-		location += right * moveSpeed;
+		transform.location += right * moveSpeed;
 	}
 }
 
@@ -43,9 +44,9 @@ void Camera::ProcessCameraMouseInputs(double Xpos, double Ypos, double prevXpos,
 Matrix4f Camera::GetCameraSpaceMatrix()
 {
 	Matrix4f translationMatrix = Matrix4f( 
-				1, 0, 0, -location.x,
-				0, 1, 0, -location.y,
-				0, 0, 1, -location.z,
+				1, 0, 0, -transform.location.x,
+				0, 1, 0, -transform.location.y,
+				0, 0, 1, -transform.location.z,
 				0, 0, 0, 1 );
 
 	Vector3f U;

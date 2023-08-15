@@ -4,17 +4,14 @@
 
 class Matrix4f
 {
-private:
-#pragma warning( suppress: 26495 )
-	Matrix4f() {};
 public:
 
 	float matrix[4][4];
 
-	Matrix4f(float a11, float a12, float a13, float a14,
-		float a21, float a22, float a23, float a24,
-		float a31, float a32, float a33, float a34,
-		float a41, float a42, float a43, float a44)
+	Matrix4f(float a11 = 1, float a12 = 0, float a13 = 0, float a14 = 0,
+		float a21 = 0, float a22 = 1, float a23 = 0, float a24 = 0,
+		float a31 = 0, float a32 = 0, float a33 = 1, float a34 = 0,
+		float a41 = 0, float a42 = 0, float a43 = 0, float a44 = 1)
 	{
 		matrix[0][0] = a11; matrix[0][1] = a12; matrix[0][2] = a13; matrix[0][3] = a14;
 		matrix[1][0] = a21; matrix[1][1] = a22; matrix[1][2] = a23; matrix[1][3] = a24;

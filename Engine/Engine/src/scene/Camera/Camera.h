@@ -1,7 +1,7 @@
 #pragma once
 #include "../../math/Matrix4f.h"
+#include "../objects/WorldObject.h"
 #include <GLFW/glfw3.h>
-#include "../WorldObject.h"
 
 class Camera : public WorldObject {
 
