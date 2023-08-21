@@ -3,6 +3,7 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <optional>
 #include "../util/FileIO.h"
 #include "../renderer/shaders/Shader.h"
 #include "../renderer/shaders/ShaderProgram.h"
@@ -68,7 +69,6 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
-
 	glfwInit();
 	// opengl 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -102,24 +102,24 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	Shader basicVertexShader("../Engine/src/shaders/BasicVertex.vertex");
-	Shader basicFragmentShader("../Engine/src/shaders/BasicFragment.fragment");
+	Shader basicVertexShader("../Engine/src/shaderfiles/BasicVertex.vertex");
+	Shader basicFragmentShader("../Engine/src/shaderfiles/BasicFragment.fragment");
 	ShaderProgram basicShader(basicVertexShader, basicFragmentShader);
 
 	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
 	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
-	WorldObject* doughnut = CreateModel(model);
+	WorldObject doughnut = CreateModel(model);
 
 	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &basicShader);
 
 	EulerianGrid grid(5, 2, box, Vector3f(1, 1, -2));
 	WorldObject eulerGrid = WorldObject();
-	eulerGrid.AddComponent(&grid);
+	eulerGrid.AddComponent(grid);
 
 	Scene scene;
 	//scene.AddWorldObject(&boxobj);
 	scene.AddWorldObject(doughnut);
-	scene.AddWorldObject(&eulerGrid);
+	scene.AddWorldObject(eulerGrid);
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
@@ -136,7 +136,7 @@ int main()
 		
 		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
 
-		scene.FrameUpdateActiveComponents();
+		scene.FrameUpdateActiveObjects();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

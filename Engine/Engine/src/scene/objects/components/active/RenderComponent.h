@@ -6,15 +6,19 @@
 
 class RenderComponent : public ActiveComponent
 {
+private:
+	virtual ActiveComponent* cloneComponent(WorldObject& newWorldObject) const
+	{
+		return new RenderComponent(*this, newWorldObject);
+	}
 public:
-	// TODO: Use pointer to mesh?
-	Mesh mesh;
+	const Mesh *const mesh;
 	TransformComponent *const transform;
 
-	RenderComponent(const Mesh& mesh, TransformComponent *const transform) : 
+	RenderComponent(const Mesh *const mesh, TransformComponent *const transform) : 
 		mesh(mesh), transform(transform) {};
 
-	RenderComponent(const RenderComponent& other) : mesh(other.mesh), transform(other.transform) {};
+	RenderComponent(const RenderComponent& other, WorldObject& newWorldObject);
 
 	void FrameUpdate();
 };

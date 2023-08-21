@@ -98,7 +98,7 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, ShaderProgram *con
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void const Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale)
+void Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const
 {
 	glUniformMatrix4fv(transformLoc, 1, GL_TRUE, cameraMatrix.matrix[0]);
 

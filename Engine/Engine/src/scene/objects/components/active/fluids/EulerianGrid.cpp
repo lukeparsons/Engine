@@ -17,6 +17,6 @@ void EulerianGrid::FrameUpdate()
 {
 	for(Cell* c : cells)
 	{
-		c->object->FrameUpdateActiveComponents();
+		c->object.FrameUpdateActiveComponents();
 	}
 }

@@ -8,7 +8,7 @@ Maybe<GLFWwindow*> ConstructWindow(const int width, const int height, const char
 	if (window == nullptr)
 	{
 		glfwTerminate();
-		return Maybe<GLFWwindow*>();
+		return Nothing();
 	}
 
 	glfwMakeContextCurrent(window);

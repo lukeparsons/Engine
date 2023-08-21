@@ -2,38 +2,40 @@
 #include <cassert>
 #include <algorithm>
 
-Scene::~Scene()
+void Scene::AddWorldObject(const WorldObject& worldObject)
 {
-	for(std::multiset<WorldObject*, ComponentCompare>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
+	if(worldObject.activeComponents.size() > 0)
 	{
-		(*it)->~WorldObject();
-	}
-}
-
-void Scene::AddWorldObject(WorldObject *const worldObject)
-{
-	worldObjects.insert(worldObject);
-	if(worldObject->activeComponents.size() > 0)
 		numberActiveObjects++;
+
+	}
+	worldObjects.insert(std::make_shared<WorldObject>(worldObject));
 }
 
-void Scene::DeleteWorldObject(WorldObject *const worldObject)
-{
-	assert(worldObjects.contains(worldObject)); // "Trying to delete object not in scene");
+void Scene::DeleteWorldObject(std::shared_ptr<WorldObject>& worldObject)
+{ 
+	assert(worldObjects.contains(worldObject));
 	worldObjects.erase(worldObject);
-	worldObject->~WorldObject();
+	worldObject.reset();
 }
 
-void Scene::FrameUpdateActiveComponents() const
+/*void Scene::AddWorldObject(WorldObject&& worldObject)
+{
+	if(worldObject.activeComponents.size() > 0)
+	{
+		numberActiveObjects++;
+	}
+	worldObjects.insert(std::move(worldObject));
+} */
+
+
+void Scene::FrameUpdateActiveObjects() const
 {
 	int i = 0;
-	std::multiset<WorldObject*, ComponentCompare>::iterator it = worldObjects.begin();
+	std::multiset<std::shared_ptr<WorldObject>, ComponentCompare>::iterator it = worldObjects.begin();
 	while(i < numberActiveObjects)
 	{
-		for(ActiveComponent* component : (*it)->activeComponents)
-		{
-			component->FrameUpdate();
-		}
+		(*it).get()->FrameUpdateActiveComponents();
 		it = std::next(it, 1);
 		i++;
 	}

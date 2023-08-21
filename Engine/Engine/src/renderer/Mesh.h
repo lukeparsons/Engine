@@ -32,7 +32,7 @@ private:
 public:
 	Mesh(const char* fileName, const char* textureFileName, ShaderProgram *const shaderProgram);
 
-	void const Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale);
+	void Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 };

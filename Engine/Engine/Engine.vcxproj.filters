@@ -148,8 +148,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\BasicVertex.vertex" />
-    <None Include="src\shaders\BasicFragment.fragment" />
+    <None Include="src\shaderfiles\BasicVertex.vertex" />
+    <None Include="src\shaderfiles\BasicFragment.fragment" />
     <None Include="assimp-vc142-mtd.dll" />
   </ItemGroup>
   <ItemGroup>

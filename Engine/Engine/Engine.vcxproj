@@ -219,8 +219,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />
-    <None Include="src\shaders\BasicFragment.fragment" />
-    <None Include="src\shaders\BasicVertex.vertex" />
+    <None Include="src\shaderfiles\BasicFragment.fragment" />
+    <None Include="src\shaderfiles\BasicVertex.vertex" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\wall.tga" />
