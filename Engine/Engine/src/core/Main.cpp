@@ -111,13 +111,14 @@ int main()
 	WorldObject doughnut = CreateModel(model);
 
 	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &basicShader);
+	WorldObject boxobj = CreateModel(box);
 
 	EulerianGrid grid(5, 2, box, Vector3f(1, 1, -2));
 	WorldObject eulerGrid = WorldObject();
 	eulerGrid.AddComponent(grid);
 
 	Scene scene;
-	//scene.AddWorldObject(&boxobj);
+	scene.AddWorldObject(boxobj);
 	scene.AddWorldObject(doughnut);
 	scene.AddWorldObject(eulerGrid);
 

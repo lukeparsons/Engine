@@ -7,15 +7,9 @@
 #include "components/active/ActiveComponent.h"
 #include "../../renderer/Mesh.h"
 
-class Scene;
-
 class WorldObject
 {
 private:
-	std::unique_ptr<std::set<std::weak_ptr<WorldObject>, std::owner_less<std::weak_ptr<WorldObject>>>> childList = nullptr;
-	WorldObject* parentObject = nullptr;
-
-	void PreInsertChildInScene(const Scene& scene, std::shared_ptr<WorldObject>& child);
 	void CopyActiveComponents(const WorldObject& other);
 public:
 
@@ -23,10 +17,8 @@ public:
 	std::unordered_set<std::unique_ptr<ActiveComponent>> activeComponents;
 
 	WorldObject(const TransformComponent transform = TransformComponent()) : transform(transform) {};
-	~WorldObject();
 
 	WorldObject(const WorldObject& other);
-	WorldObject(const WorldObject& other, Scene& scene);
 	WorldObject(WorldObject&& source) noexcept;
 	WorldObject& operator=(const WorldObject& other);
 
@@ -37,22 +29,12 @@ public:
 		activeComponents.emplace(std::make_unique<T>(component));
 	}
 
-	void AddChildInScene(Scene& scene, std::shared_ptr<WorldObject>& child);
-	void AddChildInScene(Scene& scene, std::shared_ptr<WorldObject>&& child);
-	void RemoveChildFromList(std::shared_ptr<WorldObject>& child);
-	void RemoveChildFromList(const WorldObject& child);
-
 	inline void FrameUpdateActiveComponents() const
 	{
 		for(const std::unique_ptr<ActiveComponent>& component : activeComponents)
 		{
 			component->FrameUpdate();
 		}
-	}
-
-	const std::set<std::weak_ptr<WorldObject>, std::owner_less<std::weak_ptr<WorldObject>>>& GetChildren() const
-	{
-		return *childList.get();
 	}
 };
 
