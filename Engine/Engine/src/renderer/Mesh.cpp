@@ -100,6 +100,7 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, ShaderProgram *con
 
 void Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const
 {
+	glUseProgram(shaderProgram->GetID());
 	glUniformMatrix4fv(transformLoc, 1, GL_TRUE, cameraMatrix.matrix[0]);
 
 	// TODO: Include rotation matrix
@@ -108,9 +109,9 @@ void Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Ve
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBindVertexArray(VAO);
+	//std::cout << "Using shader id " << shaderProgram->GetID() << std::endl;
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glUseProgram(shaderProgram->GetID());
 
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 

@@ -33,7 +33,7 @@ WorldObject& WorldObject::operator=(const WorldObject& other)
 
 WorldObject CreateModel(const Mesh& model, const TransformComponent& transform)
 {
-	WorldObject newObject =WorldObject(transform);
+	WorldObject newObject = WorldObject(transform);
 	RenderComponent renderComponent = RenderComponent(&model, &newObject.transform);
 	newObject.AddComponent(renderComponent);
 	return newObject;

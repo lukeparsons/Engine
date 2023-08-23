@@ -7,7 +7,7 @@ EulerianGrid::EulerianGrid(const size_t row, const size_t column, const Mesh& gr
 	{
 		for(int j = 0; j < column; j++)
 		{
-			cells.push_back(new Cell(gridModel, 
+			cells.emplace_back(new Cell(gridModel, 
 				TransformComponent(location + Vector3f((float)(i * 2), 0, (float)(j * 2)), Vector3f(0.5f, 0.5f, 0.5f))));
 		}
 	}

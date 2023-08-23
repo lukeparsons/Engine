@@ -102,23 +102,26 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	// These shader programs have to stay in scope (for now)
 	Shader basicVertexShader("../Engine/src/shaderfiles/BasicVertex.vertex");
 	Shader basicFragmentShader("../Engine/src/shaderfiles/BasicFragment.fragment");
 	ShaderProgram basicShader(basicVertexShader, basicFragmentShader);
+
+	Shader fluidVertexShader("../Engine/src/shaderfiles/fluids/FluidVertex.vertex");
+	Shader fluidFragmentShader("../Engine/src/shaderfiles/fluids/FluidFragment.fragment");
+	ShaderProgram fluidShader(fluidVertexShader, fluidFragmentShader);
 
 	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
 	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
 	WorldObject doughnut = CreateModel(model);
 
-	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &basicShader);
-	WorldObject boxobj = CreateModel(box);
+	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &fluidShader);
 
 	EulerianGrid grid(5, 2, box, Vector3f(1, 1, -2));
 	WorldObject eulerGrid = WorldObject();
 	eulerGrid.AddComponent(grid);
 
 	Scene scene;
-	scene.AddWorldObject(boxobj);
 	scene.AddWorldObject(doughnut);
 	scene.AddWorldObject(eulerGrid);
 

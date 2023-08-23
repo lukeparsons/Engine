@@ -151,6 +151,8 @@
     <None Include="src\shaderfiles\BasicVertex.vertex" />
     <None Include="src\shaderfiles\BasicFragment.fragment" />
     <None Include="assimp-vc142-mtd.dll" />
+    <None Include="src\shaderfiles\fluids\FluidFragment.fragment" />
+    <None Include="src\shaderfiles\fluids\FluidVertex.vertex" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\wall.tga" />

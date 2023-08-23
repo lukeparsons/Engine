@@ -22,6 +22,7 @@ private:
 	{
 		return new EulerianGrid(*this, newWorldObject);
 	}
+
 public:
 	std::vector<Cell*> cells;
 
