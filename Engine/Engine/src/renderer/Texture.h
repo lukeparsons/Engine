@@ -1,8 +1,6 @@
 #pragma once
-
 #include <vector>
-#include <iostream>
-#include  "../../util/formats/png/lodepng.h"
+#include "../util/formats/png/lodepng.h"
 
 struct Texture
 {

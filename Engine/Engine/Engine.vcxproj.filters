@@ -57,19 +57,16 @@
     <ClCompile Include="src\math\Vectorf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\objects\components\active\fluids\EulerianGrid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\formats\png\lodepng.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\objects\WorldObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\objects\components\active\RenderComponent.cpp">
+    <ClCompile Include="src\scene\objects\WorldObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\components\EulerianGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,34 +113,46 @@
     <ClInclude Include="src\math\Vectorf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\objects\WorldObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scene\objects\components\active\fluids\EulerianGrid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\util\formats\png\lodepng.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\materials\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\objects\components\active\RenderComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scene\objects\components\active\ActiveComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\objects\components\static\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\objects\components\Component.h">
+    <ClInclude Include="src\scene\objects\components\static\StaticComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\Global.h">
+    <ClInclude Include="src\renderer\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\objects\WorldObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\components\EulerianGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\components\RenderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\components\TransformComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\systems\RenderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\systems\EngineSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\components\Component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\systems\TransformSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\types\EngineTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -153,6 +162,10 @@
     <None Include="assimp-vc142-mtd.dll" />
     <None Include="src\shaderfiles\fluids\FluidFragment.fragment" />
     <None Include="src\shaderfiles\fluids\FluidVertex.vertex" />
+    <None Include="src\renderer\shaders\shaderfiles\BasicFragment.fragment" />
+    <None Include="src\renderer\shaders\shaderfiles\BasicVertex.vertex" />
+    <None Include="src\renderer\shaders\shaderfiles\fluids\FluidFragment.fragment" />
+    <None Include="src\renderer\shaders\shaderfiles\fluids\FluidVertex.vertex" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\wall.tga" />

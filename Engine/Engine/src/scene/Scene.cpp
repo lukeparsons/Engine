@@ -1,42 +1,38 @@
 #include "Scene.h"
-#include <cassert>
-#include <algorithm>
+#include <ranges>
+#include "components/TransformComponent.h"
 
-void Scene::AddWorldObject(const WorldObject& worldObject)
+Scene::Scene()
 {
-	if(worldObject.activeComponents.size() > 0)
-	{
-		numberActiveObjects++;
-
-	}
-	worldObjects.insert(std::make_shared<WorldObject>(worldObject));
+    entities[typeid(RenderComponent)] = std::make_unique<RenderSystem>();
+    renderSystem = static_cast<RenderSystem*>(entities[typeid(RenderComponent)].get());
 }
 
-void Scene::DeleteWorldObject(std::shared_ptr<WorldObject>& worldObject)
-{ 
-	assert(worldObjects.contains(worldObject));
-	worldObjects.erase(worldObject);
-	worldObject.reset();
+EntityID Scene::NewEntity()
+{
+    // TODO: Add rvalue AddComponent!
+    AddComponent<TransformComponent>(numberofentities);
+    return numberofentities++;
 }
 
-/*void Scene::AddWorldObject(WorldObject&& worldObject)
+void Scene::DeleteEntity(EntityID id)
 {
-	if(worldObject.activeComponents.size() > 0)
-	{
-		numberActiveObjects++;
-	}
-	worldObjects.insert(std::move(worldObject));
-} */
+    for(auto& componentSet : entities | std::views::values)
+    {
+        componentSet.get()->Delete(id);
+    }
+}
 
-
-void Scene::FrameUpdateActiveObjects() const
+void Scene::Update(const Matrix4f& cameraMatrix)
 {
-	int i = 0;
-	std::multiset<std::shared_ptr<WorldObject>, ComponentCompare>::iterator it = worldObjects.begin();
-	while(i < numberActiveObjects)
-	{
-		(*it).get()->FrameUpdateActiveComponents();
-		it = std::next(it, 1);
-		i++;
-	}
+    renderSystem->Render(cameraMatrix);
+}
+
+void Scene::PrintStatus()
+{
+    size_t i = 0;
+    for(auto it = entities.begin(); it != entities.end(); it++)
+    {
+        std::cout << "System " << it->first.name() << " initialized" << std::endl;
+    }
 }

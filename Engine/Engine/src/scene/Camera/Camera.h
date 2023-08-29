@@ -1,12 +1,12 @@
 #pragma once
 #include "../../math/Matrix4f.h"
-#include "../objects/WorldObject.h"
 #include <GLFW/glfw3.h>
 
-class Camera : public WorldObject {
+class Camera {
 
 public:
 
+	Vector3f location;
 	Camera(Vector3f location);
 
 	const float moveSpeed = 0.001f;

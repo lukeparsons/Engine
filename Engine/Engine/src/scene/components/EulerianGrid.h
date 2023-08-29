@@ -1,9 +1,6 @@
 #pragma once
-#include "../ActiveComponent.h"
-#include "../../../WorldObject.h"
-#include "../RenderComponent.h"
 
-class Cell
+/*class Cell
 {
 public:
 	WorldObject object;
@@ -17,10 +14,9 @@ class EulerianGrid : public ActiveComponent
 {
 private:
 	size_t row, column;
-
-	virtual ActiveComponent* cloneComponent(WorldObject& newWorldObject) const
+	virtual ActiveComponent* cloneComponent() const
 	{
-		return new EulerianGrid(*this, newWorldObject);
+		return new EulerianGrid(*this);
 	}
 
 public:
@@ -31,5 +27,5 @@ public:
 	EulerianGrid(const EulerianGrid& other, WorldObject& newWorldObject) : row(other.row), column(other.column), cells(other.cells) {};
 
 	void FrameUpdate();
-};
+}; */
 

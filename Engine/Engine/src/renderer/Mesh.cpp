@@ -7,12 +7,13 @@
 #include "shaders/Shader.h"
 #include <filesystem>
 #include <vector>
+#include "Texture.h"
 
 static Assimp::Importer importer;
 
-Mesh::Mesh(const char* fileName, const char* textureFileName, ShaderProgram *const shaderProgram) : shaderProgram(shaderProgram)
+void Mesh::constructmesh(const char* fileName, ShaderProgram* const shaderProgram)
 {
-	const aiScene* scene = importer.ReadFile(fileName, 
+	const aiScene* scene = importer.ReadFile(fileName,
 		aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
 
 	if(!scene)
@@ -20,7 +21,7 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, ShaderProgram *con
 		std::cout << importer.GetErrorString() << std::endl;
 	}
 
-	for(unsigned int i = 0; i < scene->mNumMeshes; i++) 
+	for(unsigned int i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
 		for(unsigned int j = 0; j < mesh->mNumVertices; j++)
@@ -79,8 +80,23 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, ShaderProgram *con
 
 	glBindVertexArray(0);
 
-	Texture tex(textureFileName);
+	transformLoc = glGetUniformLocation(shaderProgram->GetID(), "transform");
+	modelLoc = glGetUniformLocation(shaderProgram->GetID(), "mesh");
+}
 
+Mesh::Mesh(const char* fileName, ShaderProgram *const shaderProgram) : shaderProgram(shaderProgram)
+{
+	constructmesh(fileName, shaderProgram);
+}
+
+Mesh::Mesh(const char* fileName, const Texture& tex, ShaderProgram* const shaderProgram) : shaderProgram(shaderProgram)
+{
+	constructmesh(fileName, shaderProgram);
+	AssignTexture(tex);
+}
+
+void Mesh::AssignTexture(const Texture& tex)
+{
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -91,9 +107,6 @@ Mesh::Mesh(const char* fileName, const char* textureFileName, ShaderProgram *con
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &tex.data[0]);
 
 	glUniform1i(glGetUniformLocation(shaderProgram->GetID(), "textureID"), 0);
-
-	transformLoc = glGetUniformLocation(shaderProgram->GetID(), "transform");
-	modelLoc = glGetUniformLocation(shaderProgram->GetID(), "mesh");
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

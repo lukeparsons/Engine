@@ -6,7 +6,7 @@
 #include "../math/Matrix4f.h"
 #include "../math/Vectorf.h"
 #include <assimp/scene.h>
-#include "materials/Texture.h"
+#include "Texture.h"
 
 struct Vertex
 {
@@ -29,9 +29,13 @@ private:
 	GLuint VAO;
 	unsigned int transformLoc;
 	unsigned int modelLoc;
-public:
-	Mesh(const char* fileName, const char* textureFileName, ShaderProgram *const shaderProgram);
 
+	void constructmesh(const char* fileName, ShaderProgram *const shaderProgram);
+public:
+	Mesh(const char* fileName, ShaderProgram *const shaderProgram);
+	Mesh(const char* fileName, const Texture& tex, ShaderProgram* const shaderProgram);
+
+	void AssignTexture(const Texture& tex);
 	void Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
