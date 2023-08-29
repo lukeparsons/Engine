@@ -16,7 +16,7 @@ void Mesh::constructmesh(const char* fileName, ShaderProgram* const shaderProgra
 	const aiScene* scene = importer.ReadFile(fileName,
 		aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
 
-	if(!scene)
+	if(scene == nullptr)
 	{
 		std::cout << importer.GetErrorString() << std::endl;
 	}

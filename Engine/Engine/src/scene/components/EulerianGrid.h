@@ -10,14 +10,10 @@ public:
 	};
 };
 
-class EulerianGrid : public ActiveComponent
+class EulerianGrid : public Component
 {
 private:
 	size_t row, column;
-	virtual ActiveComponent* cloneComponent() const
-	{
-		return new EulerianGrid(*this);
-	}
 
 public:
 	std::vector<Cell*> cells;

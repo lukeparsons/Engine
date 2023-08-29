@@ -10,7 +10,6 @@ Scene::Scene()
 
 EntityID Scene::NewEntity()
 {
-    // TODO: Add rvalue AddComponent!
     AddComponent<TransformComponent>(numberofentities);
     return numberofentities++;
 }
@@ -27,6 +26,21 @@ void Scene::Update(const Matrix4f& cameraMatrix)
 {
     renderSystem->Render(cameraMatrix);
 }
+
+std::unordered_map<std::type_index, Component*> Scene::GetAllEntityComponents(EntityID id) const
+{
+    std::unordered_map<std::type_index, Component*> entityComponents;
+    for(auto const& [type, system] : entities)
+    {
+        if(system.get()->Contains(id))
+        {
+            entityComponents[type] = system.get()->Get(id);
+        }
+    }
+
+    return entityComponents;
+}
+
 
 void Scene::PrintStatus()
 {

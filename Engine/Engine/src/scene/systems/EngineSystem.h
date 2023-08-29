@@ -10,7 +10,7 @@
 class BaseEngineSystem
 {
 public:
-	virtual Component* Add(EntityID id) = 0;
+	virtual Component* Add(EntityID id, std::unordered_map<std::type_index, Component*>&& entityComponents) = 0;
 
 	virtual void Delete(EntityID id) = 0;
 
@@ -36,14 +36,15 @@ public:
 
 	// TODO: Check dupes and possible accidential sparse to dense mapping
 	// Also deleting then creating new entity in same place can currently cause bugs
-	Component* Add(EntityID id)
+	Component* Add(EntityID id, std::unordered_map<std::type_index, Component*>&& entityComponents)
 	{
 		if(id < 0)
 		{
 			throw std::out_of_range("Trying to insert value out of sparse set range");
 		}
 
-		dense.push_back(ComponentType(id));
+		dense.push_back(ComponentType(id, entityComponents));
+		size_t newPos = dense.size() - 1;
 
 		if(id + 1 < std::numeric_limits<EntityID>::max())
 		{
@@ -56,8 +57,9 @@ public:
 			throw std::overflow_error("Size of sparse set exceeds maximum value supported by set type");
 		}
 
-		sparse[id] = static_cast<EntityID>(dense.size() - 1);
-		return &dense[dense.size() - 1];
+		sparse[id] = static_cast<EntityID>(newPos);
+
+		return &dense[newPos];
 	}
 
 	bool Contains(EntityID id)

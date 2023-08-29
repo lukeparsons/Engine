@@ -119,7 +119,6 @@ int main()
 	RenderComponent* rc = scene.AddComponent<RenderComponent>(e1);
 	rc->mesh = &model;
 	scene.PrintStatus();
-	rc->transform = scene.GetComponent<TransformComponent>(e1);
 
 	//EulerianGrid grid(10, 10, box, Vector3f(-5, -20, 10));
 

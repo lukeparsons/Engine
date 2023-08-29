@@ -1,10 +1,12 @@
 #pragma once
 #include "EngineSystem.h"
 #include "../components/RenderComponent.h"
+#include "../Scene.h"
 
 class RenderSystem : public EngineSystem<RenderComponent>
 {
 public:
+
 	void Render(const Matrix4f& cameraMatrix)
 	{
 		for(RenderComponent& component : this->dense)

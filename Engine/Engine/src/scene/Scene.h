@@ -28,6 +28,7 @@ public:
 	EntityID NewEntity();
 	void DeleteEntity(EntityID id);
 	void Update(const Matrix4f& cameraMatrix);
+	std::unordered_map<std::type_index, Component*> GetAllEntityComponents(EntityID id) const;
 	void PrintStatus();
 
 	template<typename ComponentType>
@@ -37,13 +38,12 @@ public:
 
 		if(!entities.contains(typeid(ComponentType)))
 		{
-			entities[typeid(ComponentType)] = 
+			entities[typeid(ComponentType)] =
 				std::make_unique<EngineSystem<ComponentType>>(EngineSystem<ComponentType>());
 		}
-
-		return static_cast<ComponentType*>(entities[typeid(ComponentType)].get()->Add(id));
+		return static_cast<ComponentType*>(entities[typeid(ComponentType)].get()->Add(id, GetAllEntityComponents(id)));
 	}
-
+	
 	template<typename ComponentType>
 	bool HasComponent(EntityID id)
 	{
