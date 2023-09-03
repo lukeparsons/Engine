@@ -5,43 +5,49 @@
 #include <typeindex>
 #include <stdexcept>
 #include <memory>
-#include "systems/EngineSystem.h"
 #include "components/RenderComponent.h"
 #include "../types/EngineTypes.h"
 #include "systems/RenderSystem.h"
+#include "ComponentStore.h"
 
 class Scene
 {
 private:
 	/* Number of sparse sets in vector = number of components
 	Size of sparse set = number of entities */
-	std::unordered_map<std::type_index, std::unique_ptr<BaseEngineSystem>> entities;
+	std::unordered_map<std::type_index, std::unique_ptr<BaseComponentStore>> entities;
 
 	EntityID numberofentities = 0;
 
-	RenderSystem* renderSystem;
+	std::unique_ptr<RenderSystem> renderSystem;
+
+	template<typename T>
+	ComponentStore<T>* GetStorePointer()
+	{
+		return static_cast<ComponentStore<T>*>(entities[typeid(T)].get());
+	}
+
 
 public:
 
 	Scene();
 
 	EntityID NewEntity();
+	EntityID CreateModel(const Mesh& mesh, Vector3f location = Vector3f(0, 0, 0), Vector3f scale = Vector3f(1, 1, 1));
 	void DeleteEntity(EntityID id);
 	void Update(const Matrix4f& cameraMatrix);
 	std::unordered_map<std::type_index, Component*> GetAllEntityComponents(EntityID id) const;
-	void PrintStatus();
 
 	template<typename ComponentType>
 	ComponentType* AddComponent(EntityID id)
 	{
 		static_assert(std::is_base_of<Component, ComponentType>::value, "Type must derive Component");
-
 		if(!entities.contains(typeid(ComponentType)))
 		{
 			entities[typeid(ComponentType)] =
-				std::make_unique<EngineSystem<ComponentType>>(EngineSystem<ComponentType>());
+				std::make_unique<ComponentStore<ComponentType>>(ComponentStore<ComponentType>());
 		}
-		return static_cast<ComponentType*>(entities[typeid(ComponentType)].get()->Add(id, GetAllEntityComponents(id)));
+		return static_cast<ComponentType*>(entities[typeid(ComponentType)].get()->Add(id));
 	}
 	
 	template<typename ComponentType>

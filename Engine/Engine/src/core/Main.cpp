@@ -14,6 +14,7 @@
 #include "../renderer/Mesh.h"
 #include "../scene/Scene.h"
 #include "../scene/components/RenderComponent.h"
+#include "../scene/components/EulerianGridComponent.h"
 
 /* Task list TODO:
 * Convert std::cout for errors to proper error handling
@@ -112,15 +113,14 @@ int main()
 	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
 	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
 
-	//Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &fluidShader);
+	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &fluidShader);
 
 	Scene scene;
-	EntityID e1 = scene.NewEntity();
-	RenderComponent* rc = scene.AddComponent<RenderComponent>(e1);
-	rc->mesh = &model;
-	scene.PrintStatus();
+	EntityID e1 = scene.CreateModel(model, Vector3f(0, 0, 0));
 
-	//EulerianGrid grid(10, 10, box, Vector3f(-5, -20, 10));
+	EntityID eulerianGridEntity = scene.NewEntity();
+	//EulerianGridComponent* grid = scene.AddComponent<EulerianGridComponent>(eulerianGridEntity);
+	//grid->InitializeGrid(scene, 10, 10, box, Vector3f(-5, -20, 10));
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))

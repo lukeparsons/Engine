@@ -4,14 +4,26 @@
 
 Scene::Scene()
 {
-    entities[typeid(RenderComponent)] = std::make_unique<RenderSystem>();
-    renderSystem = static_cast<RenderSystem*>(entities[typeid(RenderComponent)].get());
+    entities[typeid(TransformComponent)] = std::make_unique<ComponentStore<TransformComponent>>();
+    entities[typeid(RenderComponent)] = std::make_unique<ComponentStore<RenderComponent>>();
+    renderSystem = std::make_unique<RenderSystem>(GetStorePointer<TransformComponent>(), GetStorePointer<RenderComponent>());
 }
 
 EntityID Scene::NewEntity()
 {
     AddComponent<TransformComponent>(numberofentities);
     return numberofentities++;
+}
+
+EntityID Scene::CreateModel(const Mesh& mesh, Vector3f location, Vector3f scale)
+{
+    EntityID newID = NewEntity();
+    TransformComponent* transform = GetComponent<TransformComponent>(newID);
+    transform->location = location;
+    transform->scale = scale;
+    RenderComponent* render = AddComponent<RenderComponent>(newID);
+    render->mesh = &mesh;
+    return newID;
 }
 
 void Scene::DeleteEntity(EntityID id)
@@ -39,14 +51,4 @@ std::unordered_map<std::type_index, Component*> Scene::GetAllEntityComponents(En
     }
 
     return entityComponents;
-}
-
-
-void Scene::PrintStatus()
-{
-    size_t i = 0;
-    for(auto it = entities.begin(); it != entities.end(); it++)
-    {
-        std::cout << "System " << it->first.name() << " initialized" << std::endl;
-    }
 }

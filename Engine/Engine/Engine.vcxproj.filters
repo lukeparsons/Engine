@@ -66,7 +66,7 @@
     <ClCompile Include="src\scene\objects\WorldObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\components\EulerianGrid.cpp">
+    <ClCompile Include="src\scene\components\EulerianGridComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,7 +131,7 @@
     <ClInclude Include="src\scene\objects\WorldObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\components\EulerianGrid.h">
+    <ClInclude Include="src\scene\components\EulerianGridComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\components\RenderComponent.h">
@@ -143,16 +143,16 @@
     <ClInclude Include="src\scene\systems\RenderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\systems\EngineSystem.h">
+    <ClInclude Include="src\scene\ComponentStore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\components\Component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\systems\TransformSystem.h">
+    <ClInclude Include="src\types\EngineTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\types\EngineTypes.h">
+    <ClInclude Include="src\scene\systems\EngineSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
