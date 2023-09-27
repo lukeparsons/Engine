@@ -4,8 +4,6 @@
 
 class WorldObject
 {
-private:
-	TransformComponent transform;
 public:
 
 	unsigned short id;
@@ -13,5 +11,3 @@ public:
 	//WorldObject(const TransformComponent& transform = TransformComponent()) : transform(transform) {};
 
 };
-
-//WorldObject CreateModel(const Mesh& model, const TransformComponent& transform = TransformComponent());

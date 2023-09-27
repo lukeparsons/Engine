@@ -15,6 +15,8 @@
 #include "../scene/Scene.h"
 #include "../scene/components/RenderComponent.h"
 #include "../scene/components/EulerianGridComponent.h"
+#include "../math/Matrix.h"
+#include "2DEngine/Grid2D.h"
 
 /* Task list TODO:
 * Convert std::cout for errors to proper error handling
@@ -65,8 +67,34 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 	pypos = ypos;
 }
 
+static const std::shared_ptr<int> h = std::make_shared<int>(10);
+static const std::shared_ptr<int> m = std::make_shared<int>(20);
+
+struct Test
+{
+	std::shared_ptr<int> t;
+
+	Test() : t(h) {}
+
+	void Change(const std::shared_ptr<int>& f)
+	{
+		t = f;
+	}
+
+	void Print()
+	{
+		std::cout << *t << std::endl;
+	}
+};
+
 int main()
 {
+	Test test = Test();
+	
+	//test.Print();
+	test.Change(m);
+	//test.Print();
+
 	glfwInit();
 	// opengl 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -100,7 +128,6 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
 	// These shader programs have to stay in scope (for now)
 	Shader basicVertexShader("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex");
 	Shader basicFragmentShader("../Engine/src/renderer/shaders/shaderfiles/BasicFragment.fragment");
@@ -111,20 +138,18 @@ int main()
 	ShaderProgram fluidShader(fluidVertexShader, fluidFragmentShader);
 
 	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
-	Mesh model("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
-
-	Mesh box("../Engine/assets/box.obj", "../Engine/assets/window.png", &fluidShader);
+	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
+	std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj", &basicShader);
 
 	Scene scene;
-	EntityID e1 = scene.CreateModel(model, Vector3f(0, 0, 0));
+	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
+	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	EntityID eulerianGridEntity = scene.NewEntity();
-	//EulerianGridComponent* grid = scene.AddComponent<EulerianGridComponent>(eulerianGridEntity);
-	//grid->InitializeGrid(scene, 10, 10, box, Vector3f(-5, -20, 10));
+	Grid2D grid = Grid2D<10, 10>(scene, square, Vector2f(-0.5, -0.5), 1, 0.05f);
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
-	{
+	{ 
 
 		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
@@ -134,10 +159,10 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		processInput(window);
-		
-		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
 
-		scene.Update(cameraMatrix);
+		grid.Update(float(currentFrameTime - previousFrameTime));
+
+		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

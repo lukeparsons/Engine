@@ -5,9 +5,12 @@
 
 class RenderComponent : public Component {
 private:
+	std::shared_ptr<Texture> texture;
 public:
-	
-	const Mesh* mesh;
+	std::shared_ptr<Mesh> mesh;
+	GLuint textureID;
 
-	RenderComponent(EntityID _id) : Component(_id), mesh(nullptr) {};
+	RenderComponent(EntityID _id);
+
+	void ChangeTexture(std::shared_ptr<Texture> _texture);
 };

@@ -18,10 +18,10 @@ public:
 
 	void Render(const Matrix4f& cameraMatrix)
 	{
-		for(RenderComponent& component : renderComponents->GetDenseList())
+		for(std::unique_ptr<RenderComponent>& component : renderComponents->GetDenseList())
 		{
-			TransformComponent& transform = transformComponents->GetComponentFromType(component.entity);
-			component.mesh->Draw(cameraMatrix, transform.location, transform.rotation, transform.scale);
+			TransformComponent& transform = transformComponents->GetComponentFromType(component->entity);
+			component->mesh->Draw(cameraMatrix, component->textureID, transform.location, transform.rotation, transform.scale);
 		}
 	}
 };

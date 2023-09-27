@@ -24,20 +24,21 @@ struct Vertex
 class Mesh
 {
 private:
-	ShaderProgram *const shaderProgram;
-	GLuint textureID;
 	GLuint VAO;
 	unsigned int transformLoc;
 	unsigned int modelLoc;
+	unsigned int textureLoc;
 
-	void constructmesh(const char* fileName, ShaderProgram *const shaderProgram);
+	void readmesh(const char* fileName);
+	void constructmesh(ShaderProgram *const shaderProgram);
 public:
-	Mesh(const char* fileName, ShaderProgram *const shaderProgram);
-	Mesh(const char* fileName, const Texture& tex, ShaderProgram* const shaderProgram);
+	ShaderProgram* shaderProgram;
 
-	void AssignTexture(const Texture& tex);
-	void Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const;
+	Mesh(const char* fileName, ShaderProgram *const shaderProgram);
+
+	Mesh(const Mesh& other);
+
+	void Draw(const Matrix4f& cameraMatrix, GLuint textureID, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 };
-

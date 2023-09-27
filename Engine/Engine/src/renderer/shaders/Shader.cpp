@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "../../util/FileIO.h"
+#include <iostream>
 
 #define VERTEX_EXTENSION "vertex"
 #define FRAGMENT_EXTENSION "fragment"
@@ -41,6 +42,7 @@ Shader::Shader(const char* path)
 	if (!success)
 	{
 		glGetShaderInfoLog(idValue, sizeof(infoLog), NULL, infoLog);
+		std::cout << "Failed to compile shader at path " << path << "\n" << infoLog << std::endl; // TEMP LINE
 		throw std::runtime_error(std::string("Failed to compile shader at path ") + path + "\n" + infoLog);
 	}
 }

@@ -8,10 +8,11 @@
 #include <filesystem>
 #include <vector>
 #include "Texture.h"
+#include <cassert>
 
 static Assimp::Importer importer;
 
-void Mesh::constructmesh(const char* fileName, ShaderProgram* const shaderProgram)
+void Mesh::readmesh(const char* fileName)
 {
 	const aiScene* scene = importer.ReadFile(fileName,
 		aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
@@ -52,7 +53,10 @@ void Mesh::constructmesh(const char* fileName, ShaderProgram* const shaderProgra
 			}
 		}
 	}
+}
 
+void Mesh::constructmesh(ShaderProgram* const shaderProgram)
+{
 	GLuint VBO, EBO;
 	glGenVertexArrays(1, &VAO);
 
@@ -82,52 +86,38 @@ void Mesh::constructmesh(const char* fileName, ShaderProgram* const shaderProgra
 
 	transformLoc = glGetUniformLocation(shaderProgram->GetID(), "transform");
 	modelLoc = glGetUniformLocation(shaderProgram->GetID(), "mesh");
+	textureLoc = glGetUniformLocation(shaderProgram->GetID(), "texture");
 }
 
 Mesh::Mesh(const char* fileName, ShaderProgram *const shaderProgram) : shaderProgram(shaderProgram)
 {
-	constructmesh(fileName, shaderProgram);
+	readmesh(fileName);
+	constructmesh(shaderProgram);
 }
 
-Mesh::Mesh(const char* fileName, const Texture& tex, ShaderProgram* const shaderProgram) : shaderProgram(shaderProgram)
+Mesh::Mesh(const Mesh& other)
 {
-	constructmesh(fileName, shaderProgram);
-	AssignTexture(tex);
+	vertices = other.vertices;
+	indices = other.indices;
+	shaderProgram = other.shaderProgram;
+	constructmesh(shaderProgram);
 }
 
-void Mesh::AssignTexture(const Texture& tex)
-{
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &tex.data[0]);
-
-	glUniform1i(glGetUniformLocation(shaderProgram->GetID(), "textureID"), 0);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Mesh::Draw(const Matrix4f& cameraMatrix, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const
+void Mesh::Draw(const Matrix4f& cameraMatrix, GLuint textureID, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const
 {
 	glUseProgram(shaderProgram->GetID());
 	glUniformMatrix4fv(transformLoc, 1, GL_TRUE, cameraMatrix.matrix[0]);
 
 	// TODO: Include rotation matrix
-	Matrix4f modelMatrix = GetScaleMatrix(scale) * GetTranslationMatrix(location);
+	Matrix4f modelMatrix = GetTranslationMatrix(location) * GetScaleMatrix(scale);
 	glUniformMatrix4fv(modelLoc, 1, GL_TRUE, modelMatrix.matrix[0]);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glBindVertexArray(VAO);
-	//std::cout << "Using shader id " << shaderProgram->GetID() << std::endl;
-	glActiveTexture(GL_TEXTURE0);
+
 	glBindTexture(GL_TEXTURE_2D, textureID);
+	glBindVertexArray(VAO);
 
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
-	glActiveTexture(GL_TEXTURE0);
 }

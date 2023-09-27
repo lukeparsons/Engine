@@ -23,14 +23,14 @@ class ComponentStore : public BaseComponentStore
 {
 private:
 	std::vector<EntityID> sparse;
-	std::vector<ComponentType> dense;
+	std::vector<std::unique_ptr<ComponentType>> dense;
 public:
 
 	ComponentStore()
 	{
 		static_assert(std::is_base_of<Component, ComponentType>::value, "EngineSystem ComponentType must inherit from Component");
 		sparse = std::vector<EntityID>();
-		dense = std::vector<ComponentType>();
+		dense = std::vector<std::unique_ptr<ComponentType>>();
 	}
 
 	// TODO: Check dupes and possible accidential sparse to dense mapping
@@ -42,7 +42,7 @@ public:
 			throw std::out_of_range("Trying to insert value out of sparse set range");
 		}
 
-		dense.push_back(ComponentType(id));
+		dense.push_back(std::make_unique<ComponentType>(ComponentType(id)));
 		size_t newDensePos = dense.size() - 1;
 
 		if(id + 1 < std::numeric_limits<EntityID>::max())
@@ -58,7 +58,7 @@ public:
 
 		sparse[id] = static_cast<EntityID>(newDensePos);
 
-		return &dense[newDensePos];
+		return dense[newDensePos].get();
 	}
 
 	bool Contains(EntityID id)
@@ -66,14 +66,14 @@ public:
 		if(id < sparse.size() && id >= 0)
 		{
 			EntityID denseIndex = sparse[id];
-			return denseIndex >= 0 && denseIndex < dense.size() && dense[denseIndex].entity == id;
+			return denseIndex >= 0 && denseIndex < dense.size() && dense[denseIndex]->entity == id;
 		}
 		return false;
 	}
 
 	virtual Component* Get(EntityID id)
 	{
-		return &dense[id];
+		return dense[sparse[id]].get();
 	}
 
 	void Delete(EntityID id)
@@ -82,9 +82,9 @@ public:
 		{
 			EntityID denseIndex = sparse[id]; // Get index in dense array of id
 
-			EntityID lastAddedSparseIndex = dense.back().entity; // Get the index in the sparse array of the last id added to dense array
+			EntityID lastAddedSparseIndex = dense.back()->entity; // Get the index in the sparse array of the last id added to dense array
 
-			dense[denseIndex].entity = lastAddedSparseIndex; // Replace value in dense array with last id added to dense array
+			dense[denseIndex]->entity = lastAddedSparseIndex; // Replace value in dense array with last id added to dense array
 
 			sparse[lastAddedSparseIndex] = denseIndex; // Update value in sparse index with new position in dense index
 
@@ -93,7 +93,8 @@ public:
 			dense.shrink_to_fit();
 
 			EntityID maxDenseVal = std::max_element(dense.begin(), dense.end(),
-				[](const ComponentType& c1, const ComponentType& c2) { return c1.entity < c2.entity; })->entity;
+				[](const std::unique_ptr<ComponentType>& c1, const std::unique_ptr<ComponentType>& c2) 
+			{ return c1->entity < c2->entity; })->get()->entity;
 
 			if(sparse[maxDenseVal] == denseIndex)
 			{
@@ -103,14 +104,14 @@ public:
 		}
 	}
 
-	inline std::vector<ComponentType>& GetDenseList()
+	inline std::vector<std::unique_ptr<ComponentType>>& GetDenseList()
 	{
 		return dense;
 	}
 
 	inline ComponentType& GetComponentFromType(EntityID id)
 	{
-		return dense[id];
+		return *dense[id].get();
 	}
 
 	void Clear()

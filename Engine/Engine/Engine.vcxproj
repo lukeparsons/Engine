@@ -172,11 +172,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\scene\components\EulerianGridComponent.cpp" />
+    <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
     <ClCompile Include="src\math\Vectorf.cpp" />
     <ClCompile Include="src\renderer\Mesh.cpp" />
     <ClCompile Include="src\math\Matrix4f.cpp" />
+    <ClCompile Include="src\scene\SystemManager.cpp" />
     <ClCompile Include="src\util\formats\old\Model.cpp" />
     <ClCompile Include="src\util\formats\old\Polygon.cpp" />
     <ClCompile Include="src\scene\camera\Camera.cpp" />
@@ -191,6 +193,9 @@
     <ClCompile Include="src\util\formats\png\lodepng.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\2DEngine\GridCell2D.h" />
+    <ClInclude Include="src\core\2DEngine\Grid2D.h" />
+    <ClInclude Include="src\math\Matrix.h" />
     <ClInclude Include="src\renderer\Texture.h" />
     <ClInclude Include="src\scene\components\Component.h" />
     <ClInclude Include="src\scene\components\EulerianGridComponent.h" />
@@ -203,8 +208,10 @@
     <ClInclude Include="src\renderer\Mesh.h" />
     <ClInclude Include="src\math\Matrix4f.h" />
     <ClInclude Include="src\scene\systems\EngineSystem.h" />
+    <ClInclude Include="src\scene\systems\EulerianFluidSystem.h" />
     <ClInclude Include="src\scene\systems\RenderSystem.h" />
     <ClInclude Include="src\scene\ComponentStore.h" />
+    <ClInclude Include="src\scene\SystemManager.h" />
     <ClInclude Include="src\types\EngineTypes.h" />
     <ClInclude Include="src\util\formats\old\Model.h" />
     <ClInclude Include="src\util\formats\old\Polygon.h" />
