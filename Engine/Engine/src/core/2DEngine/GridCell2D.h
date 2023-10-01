@@ -5,8 +5,6 @@
 #include <map>
 #include "../../math/Matrix.h"
 
-using IntPair = std::pair<int, int>;
-
 class Cell2D
 {
 public:

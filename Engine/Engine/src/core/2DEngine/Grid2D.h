@@ -5,6 +5,19 @@ static const std::shared_ptr<Texture> fluidTexture = std::make_shared<Texture>("
 static const std::shared_ptr<Texture> solidTexture = std::make_shared<Texture>("../Engine/assets/block.png");
 static const std::shared_ptr<Texture> emptyTexture = std::make_shared<Texture>("../Engine/assets/wall2.png");
 
+struct CellLocation
+{
+	unsigned int i, j;
+
+	CellLocation(unsigned int _i, unsigned int _j) : i(_i), j(_j) {};
+
+	bool operator<(const CellLocation& rhs) const
+	{
+		return i == rhs.i ? j < rhs.j : i < rhs.i;
+	}
+};
+
+
 template<size_t row, size_t column>
 class Grid2D
 {
@@ -16,12 +29,12 @@ public:
 	float temperature;
 	float concentration;
 
-	std::map<IntPair, Cell2D> centerCells;
-	std::map<IntPair, BorderCell2D> borderCells;
+	std::map<CellLocation, Cell2D> centerCells;
+	std::map<CellLocation, BorderCell2D> borderCells;
 
-	std::map<IntPair, float> uField;
-	std::map<IntPair, float> vField;
-	std::map<IntPair, float> pressure;
+	std::map<CellLocation, float> uField;
+	std::map<CellLocation, float> vField;
+	std::map<CellLocation, float> pressure;
 
 	Matrix<float, row, column> divergCoeff;
 	Matrix<float, row, 1> negativeDiverg;
@@ -30,15 +43,15 @@ public:
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		for(int i = 0; i < row; i++)
+		for(unsigned int i = 0; i < row; i++)
 		{
-			for(int j = 0; j < column; j++)
+			for(unsigned int j = 0; j < column; j++)
 			{
 				EntityID cellID = scene.CreateModel(gridModel, solidTexture,
 					Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
 				RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 
-				IntPair cellGridLoc = { i, j };
+				CellLocation cellGridLoc = { i, j };
 
 				pressure.insert({ {i, j}, 0 });
 
@@ -111,8 +124,10 @@ public:
 					break;
 			} 
 
-			uField[location] -= timeStep * scale * pressure[{location.first + 1, location.second}] - pressure[location];
-			vField[location] -= timeStep * scale * pressure[{location.first, location.second + 1}] - pressure[location];
+			uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
+			vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
+
+			//float negativeDivergence = -(uField[])
 		}
 
 		for(auto& [location, cell] : borderCells)
