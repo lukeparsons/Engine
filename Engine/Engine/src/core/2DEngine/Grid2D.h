@@ -17,7 +17,6 @@ struct CellLocation
 	}
 };
 
-
 template<size_t row, size_t column>
 class Grid2D
 {
@@ -132,7 +131,7 @@ public:
 
 		for(auto& [location, cell] : borderCells)
 		{
-			cell.renderComponent->ChangeTexture(solidTexture);
+			cell.renderComponent->ChangeTexture(fluidTexture);
 		}
 	}
 

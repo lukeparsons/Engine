@@ -70,30 +70,9 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 static const std::shared_ptr<int> h = std::make_shared<int>(10);
 static const std::shared_ptr<int> m = std::make_shared<int>(20);
 
-struct Test
-{
-	std::shared_ptr<int> t;
-
-	Test() : t(h) {}
-
-	void Change(const std::shared_ptr<int>& f)
-	{
-		t = f;
-	}
-
-	void Print()
-	{
-		std::cout << *t << std::endl;
-	}
-};
 
 int main()
 {
-	Test test = Test();
-	
-	//test.Print();
-	test.Change(m);
-	//test.Print();
 
 	glfwInit();
 	// opengl 3.3

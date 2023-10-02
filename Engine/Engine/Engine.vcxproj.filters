@@ -193,6 +193,24 @@
     <Image Include="assets\wall2.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="assets\block.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\grass.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\smoke.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\wall2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\water.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\window.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\test.txt" />

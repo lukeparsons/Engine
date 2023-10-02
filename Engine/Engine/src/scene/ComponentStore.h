@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <assert.h>
+#include <algorithm>
 #include "components/Component.h"
 
 class BaseComponentStore
