@@ -35,8 +35,9 @@ public:
 	std::map<CellLocation, float> vField;
 	std::map<CellLocation, float> pressure;
 
-	Matrix<float, row, column> divergCoeff;
-	Matrix<float, row, 1> negativeDiverg;
+	std::map<CellLocation, float> ADiag;
+	std::map<CellLocation, float> Ax;
+	std::map<CellLocation, float> Ay;
 
 	Grid2D(Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) : density(_density), cellWidth(_cellWidth)
 	{
@@ -126,12 +127,18 @@ public:
 			uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
 			vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
 
-			//float negativeDivergence = -(uField[])
+			float negativeDivergence = -(uField[location.i + 1, location.j] - uField[location.i - 1, location.j] +
+				vField[location.i + 1, location.j] - vField[location.i - 1, location.j]) / cellWidth;
+
+			if(cell.cellState == Cell2D::FLUID)
+			{
+				if()
+			}
 		}
 
 		for(auto& [location, cell] : borderCells)
 		{
-			cell.renderComponent->ChangeTexture(fluidTexture);
+			cell.renderComponent->ChangeTexture(solidTexture);
 		}
 	}
 
