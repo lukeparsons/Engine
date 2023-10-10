@@ -4,12 +4,12 @@
 
 struct Texture
 {
-	std::vector<unsigned char> data;
+	std::vector<unsigned char> pixels;
 	unsigned int width, height;
 
 	Texture(const char* fileName)
 	{
-		unsigned int error = lodepng::decode(data, width, height, fileName);
+		unsigned int error = lodepng::decode(pixels, width, height, fileName);
 
 		if(error)
 		{
