@@ -1,5 +1,6 @@
 #pragma once
 #include "GridCell2D.h"
+#include <map>
 
 static const std::shared_ptr<Texture> fluidTexture = std::make_shared<Texture>("../Engine/assets/smoke.png");
 static const std::shared_ptr<Texture> solidTexture = std::make_shared<Texture>("../Engine/assets/block.png");
@@ -27,19 +28,35 @@ public:
 	
 	GridDataMap(const Value& _defaultValue) : defaultValue(_defaultValue) {};
 
-	Value operator[](const Key& key) const
-	{
-		return map.contains(key) ? map[key] : defaultValue;
-	}
-
 	Value& operator[](const Key& key)
 	{
-		return map.contains(key) ? map[key] : defaultValue;
+		typename std::map<Key, Value>::iterator it = map.find(key);
+		return it != map.end() ? it->second : defaultValue;
+	}
+
+	Value operator[](const Key& key) const
+	{
+		return this[key];
 	}
 
 	void insert(const Key& key, const Value& value)
 	{
 		map[key] = value;
+	}
+
+	void insert(const Key& key, const Value&& value)
+	{
+		map.emplace(key, std::move(value));
+	}
+
+	std::map<Key, Value>::iterator begin()
+	{ 
+		return map.begin();
+	}
+
+	std::map<Key, Value>::iterator end()
+	{
+		return map.end();
 	}
 
 };
@@ -55,15 +72,25 @@ public:
 	float temperature;
 	float concentration;
 
-	std::map<CellLocation, Cell2D> cells;
+	GridDataMap<CellLocation, Cell2D> cells = GridDataMap<CellLocation, Cell2D>(Cell2D());
 
 	GridDataMap<CellLocation, float> uField = GridDataMap<CellLocation, float>(0);
 	GridDataMap<CellLocation, float> vField = GridDataMap<CellLocation, float>(0);
 	GridDataMap<CellLocation, float> pressure = GridDataMap<CellLocation, float>(0);
 
-	GridDataMap<CellLocation, float> ADiag = GridDataMap<CellLocation, float>(0);
-	GridDataMap<CellLocation, float> Ax = GridDataMap<CellLocation, float>(0);
-	GridDataMap<CellLocation, float> Ay = GridDataMap<CellLocation, float>(0);
+	/* These 'A' named variables store the coefficient matrix for the pressure calculations
+	Each row of the matrix corresponds to one fluid cell
+	The entries in that row are the coefficients of all the pressure unknowns in the equation for that cell.
+	These are the pressure values of the cell's neighbours
+	A is symmetric: For example the coefficient of p(i + 1, j, k) in the equation for cell (i, j, k) is stored at
+	A(i, j, k),(i + 1, j, k) and must be equal to A(i + 1, j, k)(i, j, k) 
+	We store three numbers at every grid cell, one for the diagonal entry (i.e, the cell itself), one for the cell to the right and one for the cell directly up 
+	When we need to refer to an entry like A(i, j)(i - 1, j) we use the symmetry property and instead use A(i - 1, j)(i ,j) = Ax(i - 1, j)
+	Thus we only need to store the coefficient for the positive direction in each row */
+
+	GridDataMap<CellLocation, float> ADiag = GridDataMap<CellLocation, float>(0); // ADiag stores the coefficient for A(i, j)(i, j)
+	GridDataMap<CellLocation, float> Ax = GridDataMap<CellLocation, float>(0); // Ax stores the coefficient for A(i, j)(i + 1, j)
+	GridDataMap<CellLocation, float> Ay = GridDataMap<CellLocation, float>(0); // Ax stores the coefficient for A(i, j)(i, j + 1)
 
 	Grid2D(Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) : density(_density), cellWidth(_cellWidth)
 	{
@@ -94,7 +121,7 @@ public:
 					vField.insert({i, j - 1}, 0); // bottom arrows of bottom-most cells
 				}
 
-				cells.insert({ cellGridLoc, Cell2D(render) });
+				cells.insert(cellGridLoc, Cell2D(Cell2D::SOLID, render));
 			}
 		}
 	}
@@ -102,6 +129,7 @@ public:
 	void Update(float timeStep)
 	{
 		float scale = 1 / (density * cellWidth);
+		float Acoefficient = timeStep / (density * cellWidth * cellWidth);
 
 		for(auto& [location, cell] : cells)
 		{
@@ -112,6 +140,12 @@ public:
 					break;
 				case Cell2D::FLUID:
 					cell.renderComponent->ChangeTexture(fluidTexture);
+
+					if(cells[{ location.i - 1, location.j }].cellState == Cell2D::FLUID) // Left neighbour
+					{
+						ADiag[{ location.i, location.j }] += scale;
+					}
+
 					break;
 				case Cell2D::EMPTY:
 					cell.renderComponent->ChangeTexture(emptyTexture);

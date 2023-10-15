@@ -9,11 +9,11 @@ class Cell2D
 {
 public:
 	RenderComponent* renderComponent;
-	enum State { FLUID, SOLID, EMPTY } cellState;
+	enum State { FLUID, SOLID, EMPTY, DEFAULT } cellState;
 	
-	Cell2D() : cellState(SOLID), renderComponent(nullptr) {};
+	Cell2D() : cellState(DEFAULT), renderComponent(nullptr) {};
 
-	Cell2D(RenderComponent* _render) : renderComponent(_render), cellState(SOLID) {};
+	Cell2D(State _cellState, RenderComponent* _render) : renderComponent(_render), cellState(_cellState) {};
 };
 
 
