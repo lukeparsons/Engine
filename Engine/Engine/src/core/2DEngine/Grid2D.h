@@ -126,10 +126,52 @@ public:
 		}
 	}
 
+	double StandardPCG()
+	{
+		// PCG algorithm for solving Ap = b
+		double pressureGuess = 0;
+		Vector2f residualVector = b; // TODO b is negative divergences
+
+		Vector2f auxiliaryVector = applyPreconditoner(r);
+		Vector2f searchVector = z;
+
+		double sigma = dotproduct(z, r);
+
+		for(unsigned int i = 0; i < 200; i++) // 200 here is max iterations
+		{
+			auxiliaryVector = applyA(searchVector);
+			Vector2f alpha = sigma / dotproduct(z, s);
+			pressureGuess = pressureGuess + alpha * sigma;
+			residualVector = residualVector - alpha * auxiliaryVector;
+
+			if(max(residualVector) <= tolerance)
+			{
+				return pressureGuess;
+			}
+
+			auxiliaryVector = applyPreconditoner(r);
+			double sigmaNew = dotproduct(auxiliaryVector, residualVector);
+			double beta = sigmaNew / sigma;
+
+			searchVector = auxiliaryVector + beta * searchVector;
+
+			sigma = sigmaNew;
+		}
+
+		// Iteration limit exceeded
+		return pressureGuess;
+	}
+
 	void Update(float timeStep)
 	{
 		float scale = 1 / (density * cellWidth);
 		float Acoefficient = timeStep / (density * cellWidth * cellWidth);
+		
+		uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
+		vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
+
+		float negativeDivergence = -(uField[{location.i + 1, location.j}] - uField[{location.i - 1, location.j}] +
+			vField[{location.i + 1, location.j}] - vField[{location.i - 1, location.j}]) / cellWidth;
 
 		for(auto& [location, cell] : cells)
 		{
@@ -189,19 +231,8 @@ public:
 					break;
 			}
 
-			uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
-			vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
-
-			float negativeDivergence = -(uField[{location.i + 1, location.j}] - uField[{location.i - 1, location.j}] +
-				vField[{location.i + 1, location.j}] - vField[{location.i - 1, location.j}]) / cellWidth;
-
-			// PCG algorithm for solving Ap = d
-			double p = 0;
-			Vector2f residual = b;
-			if(residual == 0)
-			{
-				return p;
-			}
+			
+			StandardPCG();
 		}
 	}
 
