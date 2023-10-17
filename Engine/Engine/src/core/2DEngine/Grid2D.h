@@ -141,22 +141,67 @@ public:
 				case Cell2D::FLUID:
 					cell.renderComponent->ChangeTexture(fluidTexture);
 
+					// Pressure coefficient update
+
+					float* cellPressureCoefficient = &ADiag[{ location.i, location.j }];
+
 					if(cells[{ location.i - 1, location.j }].cellState == Cell2D::FLUID) // Left neighbour
 					{
-						ADiag[{ location.i, location.j }] += scale;
+						*cellPressureCoefficient += scale;
+					}
+
+					Cell2D::State positiveXCellState = cells[{ location.i + 1, location.j }].cellState;
+					switch(positiveXCellState)
+					{
+						case Cell2D::FLUID:
+							*cellPressureCoefficient += scale;
+							Ax[{ location.i, location.j }] = -scale;
+							break;
+						case Cell2D::EMPTY:
+							*cellPressureCoefficient += scale;
+							break;
+						default:
+							break;
+					}
+
+					if(cells[{ location.i, location.j - 1 }].cellState == Cell2D::FLUID) // Below neighbour
+					{
+						*cellPressureCoefficient += scale;
+					}
+
+					Cell2D::State positiveYCellState = cells[{ location.i, location.j + 1 }].cellState;
+					switch(positiveXCellState)
+					{
+						case Cell2D::FLUID:
+							*cellPressureCoefficient += scale;
+							Ax[{ location.i, location.j + 1 }] = -scale;
+							break;
+						case Cell2D::EMPTY:
+							*cellPressureCoefficient += scale;
+							break;
+						default:
+							break;
 					}
 
 					break;
 				case Cell2D::EMPTY:
 					cell.renderComponent->ChangeTexture(emptyTexture);
 					break;
-			} 
+			}
 
 			uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
 			vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
 
 			float negativeDivergence = -(uField[{location.i + 1, location.j}] - uField[{location.i - 1, location.j}] +
 				vField[{location.i + 1, location.j}] - vField[{location.i - 1, location.j}]) / cellWidth;
+
+			// PCG algorithm for solving Ap = d
+			double p = 0;
+			Vector2f residual = b;
+			if(residual == 0)
+			{
+				return p;
+			}
 		}
 	}
 
