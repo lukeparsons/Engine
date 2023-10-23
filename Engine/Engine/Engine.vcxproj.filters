@@ -176,6 +176,9 @@
     <ClInclude Include="src\core\2DEngine\Grid2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\2DEngine\GridStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaderfiles\BasicVertex.vertex" />

@@ -1,71 +1,23 @@
 #pragma once
 #include "GridCell2D.h"
+#include "GridStructures.h"
 #include <map>
 
 static const std::shared_ptr<Texture> fluidTexture = std::make_shared<Texture>("../Engine/assets/smoke.png");
 static const std::shared_ptr<Texture> solidTexture = std::make_shared<Texture>("../Engine/assets/block.png");
 static const std::shared_ptr<Texture> emptyTexture = std::make_shared<Texture>("../Engine/assets/wall2.png");
 
-struct CellLocation
-{
-	unsigned int i, j;
-
-	CellLocation(unsigned int _i, unsigned int _j) : i(_i), j(_j) {};
-
-	bool operator<(const CellLocation& rhs) const
-	{
-		return i == rhs.i ? j < rhs.j : i < rhs.i;
-	}
-};
-
-template<typename Key, typename Value>
-class GridDataMap
-{
-private:
-	std::map<Key, Value> map;
-	Value defaultValue;
-public:
-	
-	GridDataMap(const Value& _defaultValue) : defaultValue(_defaultValue) {};
-
-	Value& operator[](const Key& key)
-	{
-		typename std::map<Key, Value>::iterator it = map.find(key);
-		return it != map.end() ? it->second : defaultValue;
-	}
-
-	Value operator[](const Key& key) const
-	{
-		return this[key];
-	}
-
-	void insert(const Key& key, const Value& value)
-	{
-		map[key] = value;
-	}
-
-	void insert(const Key& key, const Value&& value)
-	{
-		map.emplace(key, std::move(value));
-	}
-
-	std::map<Key, Value>::iterator begin()
-	{ 
-		return map.begin();
-	}
-
-	std::map<Key, Value>::iterator end()
-	{
-		return map.end();
-	}
-
-};
-
 template<size_t row, size_t column>
 class Grid2D
 {
+	using GridRowVector = RowVector<double, row * column>;
 private:
 	const float cellWidth;
+
+	GridRowVector precon = GridRowVector(0);
+	GridRowVector q = GridRowVector(0);
+	GridRowVector z = GridRowVector(0);
+	GridRowVector negativeDivergences = GridRowVector(0);
 public:
 
 	float density;
@@ -130,30 +82,34 @@ public:
 	{
 		// PCG algorithm for solving Ap = b
 		double pressureGuess = 0;
-		Vector2f residualVector = b; // TODO b is negative divergences
 
-		Vector2f auxiliaryVector = applyPreconditoner(r);
-		Vector2f searchVector = z;
+		GridRowVector residualVector = negativeDivergences; // TODO: Try changing these rowvector types to doubles 
 
-		double sigma = dotproduct(z, r);
+		GridRowVector auxiliaryVector = applyPreconditioner(residualVector);
+		GridRowVector searchVector = auxiliaryVector;
+
+		double sigma = DotProduct(auxiliaryVector, residualVector);
+
+		// TODO: Implement proper scaling
+		double tolerance = 0.00001;
 
 		for(unsigned int i = 0; i < 200; i++) // 200 here is max iterations
 		{
 			auxiliaryVector = applyA(searchVector);
-			Vector2f alpha = sigma / dotproduct(z, s);
+			double alpha = sigma / DotProduct(auxiliaryVector, searchVector);
 			pressureGuess = pressureGuess + alpha * sigma;
-			residualVector = residualVector - alpha * auxiliaryVector;
+			residualVector = residualVector - (alpha * auxiliaryVector);
 
 			if(max(residualVector) <= tolerance)
 			{
 				return pressureGuess;
 			}
 
-			auxiliaryVector = applyPreconditoner(r);
-			double sigmaNew = dotproduct(auxiliaryVector, residualVector);
+			auxiliaryVector = applyPreconditioner(residualVector);
+			double sigmaNew = DotProduct(auxiliaryVector, residualVector);
 			double beta = sigmaNew / sigma;
 
-			searchVector = auxiliaryVector + beta * searchVector;
+			searchVector = auxiliaryVector + (beta * searchVector);
 
 			sigma = sigmaNew;
 		}
@@ -162,26 +118,96 @@ public:
 		return pressureGuess;
 	}
 
+	GridRowVector applyA(const GridRowVector& vector)
+	{
+		return vector;
+	}
+
+	/* Modified Incomplete Choleksy preconditoner to find a matrix M where M is approx A^ {-1}
+	 Simple to implement, fairly efficient and robust in handling irregular domains (e.g liquid splash)
+	 However hard to efficiently parallelize and not optimally scalable
+	 */
+	GridRowVector applyPreconditioner(GridRowVector& residualVector)
+	{
+		double tuningConstant = 0.97;
+		double safetyConstant = 0.25;
+
+		double e = 0;
+		double cellPressureCoefficient = 0;
+		double t = 0;
+		for(auto& [location, cell] : cells)
+		{
+			if(cell.cellState == Cell2D::FLUID)
+			{
+				double Aplusi = Ax[{location.i - 1, location.j}];
+				double Aplusj = Ay[{location.i, location.j - 1}];
+
+				// NOTE: These will be the same as the precon from the last iteration of applyPreconditoner
+
+				double previousXPrecon = precon[location.i - 1 + location.j];
+				double previousYPrecon = precon[location.i + location.j - 1];
+
+				cellPressureCoefficient = ADiag[{location.i, location.j}];
+
+				e = cellPressureCoefficient - pow((Aplusi * previousXPrecon), 2)
+					- pow((Aplusj - 1) * previousYPrecon, 2);
+
+				e -= tuningConstant * (Aplusi * (Aplusj * pow(previousXPrecon, 2))
+					+ Aplusj * (Aplusi * previousYPrecon, 2));
+
+				if(e < safetyConstant * cellPressureCoefficient)
+				{
+					e = cellPressureCoefficient;
+				}
+
+				precon[location.i + location.j] = 1 / sqrt(e);
+
+				// Solve Lq = r
+				t = residualVector[location.i + location.j]
+					- Aplusi * previousXPrecon * q[location.i - 1 + location.j]
+					- Aplusj * previousYPrecon * q[location.i + location.j - 1];
+
+				q[location.i, location.j] = t * precon[location.i + location.j];
+
+			}
+		}
+		for(std::map<CellLocation, Cell2D>::reverse_iterator rit = cells.rbegin(); rit != cells.rend(); ++rit)
+		{
+			CellLocation location = rit->first;
+			if(rit->second.cellState == Cell2D::FLUID)
+			{
+				t = q[location.i, location.j]
+					- Ax[{location.i, location.j}] * precon[location.i + location.j] * z[location.i + 1, location.j]
+					- Ay[{location.i, location.j}] * precon[location.i + location.j] * z[location.i + 1, location.j];
+
+				z[location.i + location.j] = t * precon[location.i, location.j];
+
+			}
+		}
+
+		return precon;
+	}
+
 	void Update(float timeStep)
 	{
 		float scale = 1 / (density * cellWidth);
 		float Acoefficient = timeStep / (density * cellWidth * cellWidth);
-		
-		uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
-		vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
-
-		float negativeDivergence = -(uField[{location.i + 1, location.j}] - uField[{location.i - 1, location.j}] +
-			vField[{location.i + 1, location.j}] - vField[{location.i - 1, location.j}]) / cellWidth;
-
+	
 		for(auto& [location, cell] : cells)
 		{
+			uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
+			vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
+			negativeDivergences[location.i + location.j] = -(uField[{location.i + 1, location.j}] - uField[{location.i - 1, location.j}] +
+				vField[{location.i + 1, location.j}] - vField[{location.i - 1, location.j}]) / cellWidth;
+
 			switch(cell.cellState)
 			{
 				case Cell2D::SOLID:
-					cell.renderComponent->ChangeTexture(solidTexture);
+					//cell.renderComponent->ChangeTexture(solidTexture);
 					break;
 				case Cell2D::FLUID:
-					cell.renderComponent->ChangeTexture(fluidTexture);
+				{
+					//cell.renderComponent->ChangeTexture(fluidTexture);
 
 					// Pressure coefficient update
 
@@ -224,15 +250,15 @@ public:
 						default:
 							break;
 					}
-
+				}
 					break;
 				case Cell2D::EMPTY:
-					cell.renderComponent->ChangeTexture(emptyTexture);
+					//cell.renderComponent->ChangeTexture(emptyTexture);
 					break;
 			}
 
 			
-			StandardPCG();
+			//StandardPCG();
 		}
 	}
 

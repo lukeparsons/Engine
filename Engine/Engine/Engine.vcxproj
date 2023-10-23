@@ -195,6 +195,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\2DEngine\GridCell2D.h" />
     <ClInclude Include="src\core\2DEngine\Grid2D.h" />
+    <ClInclude Include="src\core\2DEngine\GridStructures.h" />
     <ClInclude Include="src\math\Matrix.h" />
     <ClInclude Include="src\renderer\Texture.h" />
     <ClInclude Include="src\scene\components\Component.h" />
