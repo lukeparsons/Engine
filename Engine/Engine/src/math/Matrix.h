@@ -17,7 +17,8 @@ struct Matrix
 		return matrix[rowRequest];
 	}
 
-	Matrix() {
+	Matrix() 
+	{
 		for(size_t i = 0; i < row; i++)
 		{
 			for(size_t j = 0; j < column; j++)

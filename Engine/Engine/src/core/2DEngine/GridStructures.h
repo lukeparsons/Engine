@@ -1,158 +1,178 @@
 #pragma once
 #include <algorithm>
+#include <array>
 
-struct CellLocation
+class GridDataPoint
 {
-	unsigned int i, j;
+public:
+	Cell2D cell;
 
-	CellLocation(unsigned int _i, unsigned int _j) : i(_i), j(_j) {};
+	enum CellState { FLUID, SOLID, EMPTY, DEFAULT } cellState;
 
-	bool operator<(const CellLocation& rhs) const
+	float uVelocity; // right arrow of cell
+	float vVelocity; // top arrow of cell
+	float pressure;
+
+	/* These 'A' named variables store the coefficient matrix for the pressure calculations
+	Each row of the matrix corresponds to one fluid cell
+	The entries in that row are the coefficients of all the pressure unknowns in the equation for that cell.
+	These are the pressure values of the cell's neighbours
+	A is symmetric: For example the coefficient of p(i + 1, j, k) in the equation for cell (i, j, k) is stored at
+	A(i, j, k),(i + 1, j, k) and must be equal to A(i + 1, j, k)(i, j, k)
+	We store three numbers at every grid cell, one for the diagonal entry (i.e, the cell itself), one for the cell to the right and one for the cell directly up
+	When we need to refer to an entry like A(i, j)(i - 1, j) we use the symmetry property and instead use A(i - 1, j)(i ,j) = Ax(i - 1, j)
+	Thus we only need to store the coefficient for the positive direction in each row */
+	float Adiag;  // ADiag stores the coefficient for A(i, j)(i, j)
+	float Ax; // Ax stores the coefficient for A(i, j)(i + 1, j)
+	float Ay; // Ax stores the coefficient for A(i, j)(i, j + 1)
+
+	double q;
+	double z;
+
+	GridDataPoint(Cell2D& _cell, CellState _state) : cell(_cell), cellState(_state),
+		uVelocity(0), vVelocity(0), pressure(0), Adiag(0), Ax(0), Ay(0), q(0), z(0) {};
+
+	GridDataPoint(Cell2D&& _cell, CellState _state) : cell(_cell), cellState(_state),
+		uVelocity(0), vVelocity(0), pressure(0), Adiag(0), Ax(0), Ay(0), q(0), z(0) {};
+
+	GridDataPoint() : cell(Cell2D()), cellState(EMPTY),
+		uVelocity(0), vVelocity(0), pressure(0), Adiag(0), Ax(0), Ay(0), q(0), z(0) {};
+};
+
+/* This data structure relies on an ordered insertion
+* for(0 -> row) { for(0 -> column) { insert() } } is the required order
+*/
+template<typename T, size_t row, size_t column>
+struct GridStructure
+{
+protected:
+	T defaultObject;
+	std::array<T, row * column> grid;
+	size_t nextAvailable = 0;
+
+public:
+
+	GridStructure(const T& _defaultObject) : defaultObject(_defaultObject) {};
+
+	void push_back(T& dataPoint)
 	{
-		if(i == rhs.i)
+		grid[nextAvailable] = dataPoint;
+		nextAvailable++;
+	}
+
+	void emplace(T&& dataPoint)
+	{
+		grid[nextAvailable] = dataPoint;
+		nextAvailable++;
+	}
+
+	inline T& operator()(size_t i, size_t j)
+	{
+		return grid[i * column + j];
+	}
+
+	const inline T& operator()(size_t i, size_t j) const
+	{
+		return grid[i * column + j];
+	}
+
+	inline T& at(size_t i, size_t j)
+	{
+		if(i >= 0 && i < row && j >= 0 && j < row)
 		{
-			return j < rhs.j;
-		} if(j == rhs.j)
-		{
-			return i < rhs.i;
+			return grid[i * column + j];
 		} else
 		{
-			return i < rhs.i;
+			return defaultObject;
+		}
+	}
+
+	const inline T& at(size_t i, size_t j) const
+	{
+		if(i >= 0 && i < row && j >= 0 && j < row)
+		{
+			return grid[i * column + j];
+		} else
+		{
+			return defaultObject;
 		}
 	}
 };
 
-template<typename T, size_t n>
-class RowVector
+template<size_t row, size_t column>
+class RowVector : public GridStructure<double, row, column>
 {
-private:
-	Matrix<T, n, 1> vector;
-
-	T defaultValue;
 public:
 
-	RowVector(T _defaultValue) : defaultValue(_defaultValue) {};
+	RowVector() : GridStructure<double, row, column>(0) {};
 
-	RowVector(const Matrix<T, n, 1>&& matrix, T _defaultValue) : vector(matrix), defaultValue(_defaultValue) {};
-	
-	RowVector(const RowVector& copyVector) : vector(copyVector.vector), defaultValue(copyVector.defaultValue) {};
-
-	RowVector(RowVector&& moveVector) : vector(moveVector.vector), defaultValue(moveVector.defaultValue) {};
-
-	RowVector& operator=(const RowVector& other)
+	constexpr inline RowVector<row, column> operator*(double scalar) const
 	{
-		vector = other.vector;
-		defaultValue = other.defaultValue;
-		return *this;
+		RowVector<row, column> result;
+		for(size_t i = 0; i < row; i++)
+		{
+			for(size_t j = 0; j < column; j++)
+			{
+				result(i, j) = (*this)(i, j) * scalar;
+			}
+		}
+		return result;
 	}
 
-	Matrix<T, n, 1>& GetMatrix()
+	constexpr inline RowVector<row, column> operator*(const RowVector<row, column>& rhs) const
 	{
-		return vector;
+		// TODO: implement
+		return rhs;
 	}
 
-	const Matrix<T, n, 1>& GetMatrix() const
+	constexpr inline RowVector<row, column> operator+(const RowVector<row, column>& rhs) const
 	{
-		return vector;
+		RowVector<row, column> result;
+		for(size_t i = 0; i < row; i++)
+		{
+			for(size_t j = 0; j < column; j++)
+			{
+				result(i, j) = (*this)(i, j) + rhs(i, j);
+			}
+		}
+		return result;
 	}
 
-	T GetDefaultValue() const
+	constexpr inline RowVector<row, column> operator-(const RowVector<row, column>& rhs) const
 	{
-		return defaultValue;
+		RowVector<row, column> result;
+		for(size_t i = 0; i < row; i++)
+		{
+			for(size_t j = 0; j < column; j++)
+			{
+				result(i, j) = (*this)(i, j) - rhs(i, j);
+			}
+		}
+		return result;
 	}
 
-	T& operator[](const size_t row)
+	constexpr inline double max()
 	{
-		return row >= 0 && row <= n ? vector[row][0] : defaultValue;
+		return *std::max_element(this->grid.begin(), this->grid.end());
 	}
-
 };
 
-template<typename T, size_t n>
-T DotProduct(const RowVector<T, n>& lhs, const RowVector<T, n>& rhs)
+template<size_t row, size_t column>
+constexpr inline RowVector<row, column> operator*(double scalar, const RowVector<row, column>& vector)
 {
-	return DotProduct(lhs.GetMatrix(), rhs.GetMatrix());
+	return vector * scalar;
 }
 
-template<typename T, size_t n>
-RowVector<T, n> operator*(T scalar, RowVector<T, n>& lhs)
+template<size_t row, size_t column>
+inline double DotProduct(const RowVector<row, column>& lhs, const RowVector<row, column>& rhs)
 {
-	return RowVector(scalar * lhs.GetMatrix(), lhs.GetDefaultValue());
+	double result = 0;
+	for(size_t i = 0; i < row; i++)
+	{
+		for(size_t j = 0; j < column; j++)
+		{
+			result += lhs(i, j) * rhs(i, j);
+		}
+	}
+	return result;
 }
-
-template<typename T, size_t n>
-RowVector<T, n> operator*(const RowVector<T, n>& lhs, const RowVector<T, n>& rhs)
-{
-	return RowVector(lhs.GetMatrix() * rhs.GetMatrix(), lhs.GetDefaultValue());
-}
-
-template<typename T, size_t n>
-RowVector<T, n> operator-(const RowVector<T, n>& lhs, const RowVector<T, n>& rhs)
-{
-	return RowVector(lhs.GetMatrix() - rhs.GetMatrix(), lhs.GetDefaultValue());
-}
-
-template<typename T, size_t n>
-RowVector<T, n> operator+(const RowVector<T, n>& lhs, const RowVector<T, n>& rhs)
-{
-	return RowVector(lhs.GetMatrix() + rhs.GetMatrix(), lhs.GetDefaultValue());
-}
-
-template<typename T, size_t n>
-T max(const RowVector<T, n>& vector)
-{
-	return *std::max_element(vector.GetMatrix()[0], vector.GetMatrix()[0] + n);
-}
-
-template<typename Key, typename Value>
-class GridDataMap
-{
-private:
-	std::map<Key, Value> map;
-	Value defaultValue;
-public:
-
-	GridDataMap(const Value& _defaultValue) : defaultValue(_defaultValue) {};
-
-	Value& operator[](const Key& key)
-	{
-		typename std::map<Key, Value>::iterator it = map.find(key);
-		return it != map.end() ? it->second : defaultValue;
-	}
-
-	Value operator[](const Key& key) const
-	{
-		return this[key];
-	}
-
-	void insert(const Key& key, const Value& value)
-	{
-		map[key] = value;
-	}
-
-	void insert(const Key& key, const Value&& value)
-	{
-		map.emplace(key, std::move(value));
-	}
-
-	std::map<Key, Value>::iterator begin()
-	{
-		return map.begin();
-	}
-
-	std::map<Key, Value>::iterator end()
-	{
-		return map.end();
-	}
-
-	std::map<Key, Value>::reverse_iterator rbegin()
-	{
-		return map.rbegin();
-	}
-
-	std::map<Key, Value>::reverse_iterator rend()
-	{
-		return map.rend();
-	}
-
-};

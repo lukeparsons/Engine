@@ -10,39 +10,18 @@ static const std::shared_ptr<Texture> emptyTexture = std::make_shared<Texture>("
 template<size_t row, size_t column>
 class Grid2D
 {
-	using GridRowVector = RowVector<double, row * column>;
 private:
 	const float cellWidth;
 
-	GridRowVector precon = GridRowVector(0);
-	GridRowVector q = GridRowVector(0);
-	GridRowVector z = GridRowVector(0);
-	GridRowVector negativeDivergences = GridRowVector(0);
 public:
 
 	float density;
 	float temperature;
 	float concentration;
 
-	GridDataMap<CellLocation, Cell2D> cells = GridDataMap<CellLocation, Cell2D>(Cell2D());
-
-	GridDataMap<CellLocation, float> uField = GridDataMap<CellLocation, float>(0);
-	GridDataMap<CellLocation, float> vField = GridDataMap<CellLocation, float>(0);
-	GridDataMap<CellLocation, float> pressure = GridDataMap<CellLocation, float>(0);
-
-	/* These 'A' named variables store the coefficient matrix for the pressure calculations
-	Each row of the matrix corresponds to one fluid cell
-	The entries in that row are the coefficients of all the pressure unknowns in the equation for that cell.
-	These are the pressure values of the cell's neighbours
-	A is symmetric: For example the coefficient of p(i + 1, j, k) in the equation for cell (i, j, k) is stored at
-	A(i, j, k),(i + 1, j, k) and must be equal to A(i + 1, j, k)(i, j, k) 
-	We store three numbers at every grid cell, one for the diagonal entry (i.e, the cell itself), one for the cell to the right and one for the cell directly up 
-	When we need to refer to an entry like A(i, j)(i - 1, j) we use the symmetry property and instead use A(i - 1, j)(i ,j) = Ax(i - 1, j)
-	Thus we only need to store the coefficient for the positive direction in each row */
-
-	GridDataMap<CellLocation, float> ADiag = GridDataMap<CellLocation, float>(0); // ADiag stores the coefficient for A(i, j)(i, j)
-	GridDataMap<CellLocation, float> Ax = GridDataMap<CellLocation, float>(0); // Ax stores the coefficient for A(i, j)(i + 1, j)
-	GridDataMap<CellLocation, float> Ay = GridDataMap<CellLocation, float>(0); // Ax stores the coefficient for A(i, j)(i, j + 1)
+	GridStructure<GridDataPoint, row, column> gridData = GridStructure<GridDataPoint, row, column>(GridDataPoint(Cell2D(nullptr), GridDataPoint::EMPTY));
+	RowVector<row, column> negativeDivergences = RowVector<row, column>();
+	RowVector<row, column> precon = RowVector<row, column>();
 
 	Grid2D(Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) : density(_density), cellWidth(_cellWidth)
 	{
@@ -56,24 +35,7 @@ public:
 					Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
 				RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 
-				CellLocation cellGridLoc = { i, j };
-
-				pressure.insert({i, j}, 0);
-
-				uField.insert({i, j}, 0); // right arrow of cell
-				vField.insert({i, j}, 0); // top arrow of cell
-
-				if(i == 0)
-				{
-					uField.insert({i - 1, j}, 0); // left arrow of left-most cells
-				}
-
-				if(j == 0)
-				{
-					vField.insert({i, j - 1}, 0); // bottom arrows of bottom-most cells
-				}
-
-				cells.insert(cellGridLoc, Cell2D(Cell2D::SOLID, render));
+				gridData.emplace(GridDataPoint(Cell2D(render), GridDataPoint::FLUID));
 			}
 		}
 	}
@@ -83,10 +45,11 @@ public:
 		// PCG algorithm for solving Ap = b
 		double pressureGuess = 0;
 
-		GridRowVector residualVector = negativeDivergences; // TODO: Try changing these rowvector types to doubles 
+		RowVector<row, column> residualVector = negativeDivergences;
+		RowVector<row, column> auxiliaryVector;
 
-		GridRowVector auxiliaryVector = applyPreconditioner(residualVector);
-		GridRowVector searchVector = auxiliaryVector;
+		applyPreconditioner(residualVector, auxiliaryVector);
+		RowVector<row, column> searchVector = auxiliaryVector;
 
 		double sigma = DotProduct(auxiliaryVector, residualVector);
 
@@ -95,17 +58,17 @@ public:
 
 		for(unsigned int i = 0; i < 200; i++) // 200 here is max iterations
 		{
-			auxiliaryVector = applyA(searchVector);
+			applyA(searchVector, auxiliaryVector);
 			double alpha = sigma / DotProduct(auxiliaryVector, searchVector);
 			pressureGuess = pressureGuess + alpha * sigma;
 			residualVector = residualVector - (alpha * auxiliaryVector);
 
-			if(max(residualVector) <= tolerance)
+			if(residualVector.max() <= tolerance)
 			{
 				return pressureGuess;
 			}
 
-			auxiliaryVector = applyPreconditioner(residualVector);
+			applyPreconditioner(residualVector, auxiliaryVector);
 			double sigmaNew = DotProduct(auxiliaryVector, residualVector);
 			double beta = sigmaNew / sigma;
 
@@ -118,16 +81,24 @@ public:
 		return pressureGuess;
 	}
 
-	GridRowVector applyA(const GridRowVector& vector)
+	void applyA(const RowVector<row, column>& vector, RowVector<row, column>& result)
 	{
-		return vector;
+		for(size_t i = 0; i < row; i++)
+		{
+			for(size_t j = 0; j < column; j++)
+			{
+				// This might be wrong
+				result(i, j) = vector(i, j) * gridData(i, j).Adiag
+					+ vector.at(i + 1, j) * gridData(i, j).Ax + vector.at(i, j + 1) * gridData(i, j).Ay;
+			}
+		}
 	}
 
 	/* Modified Incomplete Choleksy preconditoner to find a matrix M where M is approx A^ {-1}
 	 Simple to implement, fairly efficient and robust in handling irregular domains (e.g liquid splash)
 	 However hard to efficiently parallelize and not optimally scalable
 	 */
-	GridRowVector applyPreconditioner(GridRowVector& residualVector)
+	void applyPreconditioner(RowVector<row, column>& residualVector, RowVector<row, column>& result)
 	{
 		double tuningConstant = 0.97;
 		double safetyConstant = 0.25;
@@ -135,131 +106,177 @@ public:
 		double e = 0;
 		double cellPressureCoefficient = 0;
 		double t = 0;
-		for(auto& [location, cell] : cells)
+		for(size_t i = 0; i < row; i++)
 		{
-			if(cell.cellState == Cell2D::FLUID)
+			for(size_t j = 0; j < column; j++)
 			{
-				double Aplusi = Ax[{location.i - 1, location.j}];
-				double Aplusj = Ay[{location.i, location.j - 1}];
-
-				// NOTE: These will be the same as the precon from the last iteration of applyPreconditoner
-
-				double previousXPrecon = precon[location.i - 1 + location.j];
-				double previousYPrecon = precon[location.i + location.j - 1];
-
-				cellPressureCoefficient = ADiag[{location.i, location.j}];
-
-				e = cellPressureCoefficient - pow((Aplusi * previousXPrecon), 2)
-					- pow((Aplusj - 1) * previousYPrecon, 2);
-
-				e -= tuningConstant * (Aplusi * (Aplusj * pow(previousXPrecon, 2))
-					+ Aplusj * (Aplusi * previousYPrecon, 2));
-
-				if(e < safetyConstant * cellPressureCoefficient)
+				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					e = cellPressureCoefficient;
+					double Aplusi = gridData.at(i - 1, j).Ax;
+					double Aplusj = gridData.at(i, j - 1).Ay;
+
+					// NOTE: These will be the same as the precon from the last iteration of applyPreconditoner
+					double previousXPrecon = precon.at(i - 1, j);
+					double previousYPrecon = precon.at(i, j - 1);
+
+					double cellPressureCoefficient = gridData(i, j).Adiag;
+
+					e = cellPressureCoefficient - pow((Aplusi * previousXPrecon), 2)
+						- pow((Aplusj - 1) * previousYPrecon, 2);
+
+					e -= tuningConstant * (Aplusi * (Aplusj * pow(previousXPrecon, 2))
+						+ Aplusj * (Aplusi * previousYPrecon, 2));
+
+					if(e < safetyConstant * cellPressureCoefficient)
+					{
+						e = cellPressureCoefficient;
+					}
+
+					precon(i, j) = 1 / sqrt(e);
+
+					// Solve Lq = r
+					t = residualVector(i, j)
+						- Aplusi * previousXPrecon * gridData.at(i - 1, j).q
+						- Aplusj * previousYPrecon * gridData.at(i - 1, j - 1).q;
+
+					gridData(i, j).q = t * precon(i, j);
+
+				}
+			}
+		}
+
+		for(size_t i = row - 1; i + 1 >= 1; i--)
+		{
+			for(size_t j = column - 1; j + 1 >= 1; j--)
+			{
+				if(gridData(i, j).cellState == GridDataPoint::FLUID)
+				{
+					t = gridData(i, j).q
+						- gridData(i, j).Ax * precon(i, j) * gridData.at(i + 1, j).z
+						- gridData(i, j).Ay * precon(i, j) * gridData.at(i, j + 1).z;
 				}
 
-				precon[location.i + location.j] = 1 / sqrt(e);
-
-				// Solve Lq = r
-				t = residualVector[location.i + location.j]
-					- Aplusi * previousXPrecon * q[location.i - 1 + location.j]
-					- Aplusj * previousYPrecon * q[location.i + location.j - 1];
-
-				q[location.i, location.j] = t * precon[location.i + location.j];
-
+				gridData(i, j).z = t * precon(i, j);
 			}
 		}
-		for(std::map<CellLocation, Cell2D>::reverse_iterator rit = cells.rbegin(); rit != cells.rend(); ++rit)
-		{
-			CellLocation location = rit->first;
-			if(rit->second.cellState == Cell2D::FLUID)
-			{
-				t = q[location.i, location.j]
-					- Ax[{location.i, location.j}] * precon[location.i + location.j] * z[location.i + 1, location.j]
-					- Ay[{location.i, location.j}] * precon[location.i + location.j] * z[location.i + 1, location.j];
-
-				z[location.i + location.j] = t * precon[location.i, location.j];
-
-			}
-		}
-
-		return precon;
+		result = precon;
 	}
 
+	inline void UpdatePressure(float Acoefficient, GridDataPoint& cellData, GridDataPoint::CellState leftState, GridDataPoint::CellState rightState, GridDataPoint::CellState belowState, GridDataPoint::CellState aboveState)
+	{
+		if(leftState == GridDataPoint::FLUID) // Left neighbour
+		{
+			cellData.Adiag += Acoefficient;
+		}
+
+		if(rightState == GridDataPoint::FLUID) // Right neighbour
+		{
+			cellData.Adiag += Acoefficient;
+			cellData.Ax = -Acoefficient;
+		} else if(rightState == GridDataPoint::EMPTY)
+		{
+			cellData.Adiag += Acoefficient;
+		}
+
+		if(belowState == GridDataPoint::FLUID) // Below neighbour
+		{
+			cellData.Adiag += Acoefficient;
+		}
+
+		if(aboveState == GridDataPoint::FLUID) // Above neighbour
+		{
+			cellData.Adiag += Acoefficient;
+			cellData.Ay = -Acoefficient;
+		} else if(aboveState == GridDataPoint::EMPTY)
+		{
+			cellData.Adiag += Acoefficient;
+		}
+	}
+
+	// TODO: A 1xn or nx1 grid is currently broken
 	void Update(float timeStep)
 	{
 		float scale = 1 / (density * cellWidth);
 		float Acoefficient = timeStep / (density * cellWidth * cellWidth);
-	
-		for(auto& [location, cell] : cells)
+
+		size_t i = 0;
+		size_t j = 0;
+
+		/* uVelocity in the GridDataPoint refers to the right u velocity arrow for that cell in the MAC Grid
+		* Likewise vVelocity refers to the up v velocity arrow for that cell
+		* Hence to get the arrow to the left or bottom we lookup the cell to the left or below the current cell respectively
+		* These cells do not exist for the leftmost and bottommost cells so we have a special cases (the missing velocitys are set to 0)
+		* Bottom left is an extra special case because it has neither a left arrow or bottom arrow
+		*/
+
+		// Bottom left
+		negativeDivergences(0, 0) = -(gridData(0, 0).uVelocity + gridData(0, 0).vVelocity) / cellWidth;
+		UpdatePressure(Acoefficient, gridData(0, 0), GridDataPoint::EMPTY, gridData(1, 0).cellState, GridDataPoint::EMPTY, gridData(0, 1).cellState);
+
+		// Leftmost cells (except bottom left)
+		for(j = 1; j < column; j++)
 		{
-			uField[location] -= timeStep * scale * pressure[{location.i + 1, location.j}] - pressure[location];
-			vField[location] -= timeStep * scale * pressure[{location.i, location.j + 1}] - pressure[location];
-			negativeDivergences[location.i + location.j] = -(uField[{location.i + 1, location.j}] - uField[{location.i - 1, location.j}] +
-				vField[{location.i + 1, location.j}] - vField[{location.i - 1, location.j}]) / cellWidth;
+			// i = 0
+			negativeDivergences(0, j) = -(gridData(0, j).uVelocity + gridData(0, j).vVelocity - gridData(0, j - 1).vVelocity) / cellWidth;
 
-			switch(cell.cellState)
+			if(j == column - 1)
 			{
-				case Cell2D::SOLID:
-					//cell.renderComponent->ChangeTexture(solidTexture);
-					break;
-				case Cell2D::FLUID:
-				{
-					//cell.renderComponent->ChangeTexture(fluidTexture);
-
-					// Pressure coefficient update
-
-					float* cellPressureCoefficient = &ADiag[{ location.i, location.j }];
-
-					if(cells[{ location.i - 1, location.j }].cellState == Cell2D::FLUID) // Left neighbour
-					{
-						*cellPressureCoefficient += scale;
-					}
-
-					Cell2D::State positiveXCellState = cells[{ location.i + 1, location.j }].cellState;
-					switch(positiveXCellState)
-					{
-						case Cell2D::FLUID:
-							*cellPressureCoefficient += scale;
-							Ax[{ location.i, location.j }] = -scale;
-							break;
-						case Cell2D::EMPTY:
-							*cellPressureCoefficient += scale;
-							break;
-						default:
-							break;
-					}
-
-					if(cells[{ location.i, location.j - 1 }].cellState == Cell2D::FLUID) // Below neighbour
-					{
-						*cellPressureCoefficient += scale;
-					}
-
-					Cell2D::State positiveYCellState = cells[{ location.i, location.j + 1 }].cellState;
-					switch(positiveXCellState)
-					{
-						case Cell2D::FLUID:
-							*cellPressureCoefficient += scale;
-							Ax[{ location.i, location.j + 1 }] = -scale;
-							break;
-						case Cell2D::EMPTY:
-							*cellPressureCoefficient += scale;
-							break;
-						default:
-							break;
-					}
-				}
-					break;
-				case Cell2D::EMPTY:
-					//cell.renderComponent->ChangeTexture(emptyTexture);
-					break;
+				// Top left
+				UpdatePressure(Acoefficient, gridData(0, j), GridDataPoint::EMPTY, gridData(1, j).cellState, gridData(0, j - 1).cellState, GridDataPoint::EMPTY);
+			} else
+			{
+				UpdatePressure(Acoefficient, gridData(0, j), GridDataPoint::EMPTY, gridData(1, j).cellState, gridData(0, j - 1).cellState, gridData(0, j + 1).cellState);
 			}
-
-			
-			//StandardPCG();
 		}
-	}
 
+		// Bottommost cells (except bottom left)
+		for(i = 1; i < row; i++)
+		{
+			// j = 0
+			negativeDivergences(i, 0) = -(gridData(i, 0).uVelocity + gridData(i - 1, 0).uVelocity + gridData(i, 0).vVelocity) / cellWidth;
+
+			if(i == row - 1)
+			{
+				// Bottom right
+				UpdatePressure(Acoefficient, gridData(i, 0), gridData(i - 1, 0).cellState, GridDataPoint::EMPTY, GridDataPoint::EMPTY, gridData(i, 1).cellState);
+			} else
+			{
+				UpdatePressure(Acoefficient, gridData(i, 0), gridData(i - 1, 0).cellState, gridData(i + 1, 0).cellState, GridDataPoint::EMPTY, gridData(i, 1).cellState);
+			}
+		}
+
+
+		// All other cells
+		for(size_t i = 1; i < row; i++)
+		{
+			for(size_t j = 1; j < column; j++)
+			{
+				gridData(i, j).uVelocity -= timeStep * scale * gridData.at(i + 1, j).pressure - gridData(i, j).pressure;
+				gridData(i, j).vVelocity -= timeStep * scale * gridData.at(i, j + 1).pressure - gridData(i, j).pressure;
+
+				// TODO: remove division
+				negativeDivergences(i, j) = -(gridData(i, j).uVelocity - gridData(i - 1, j).uVelocity +
+					gridData(i, j).vVelocity - gridData(i, j - 1).vVelocity) / cellWidth;
+
+				switch(gridData(i, j).cellState)
+				{
+					case GridDataPoint::SOLID:
+						break;
+					case GridDataPoint::FLUID:
+
+						// Pressure coefficient update
+
+						// We use 'at' for the positive i and j cells which will not exist for the topmost and rightmost cells
+						UpdatePressure(Acoefficient, gridData(i, j), gridData(i - 1, j).cellState, gridData.at(i + 1, j).cellState,
+							gridData(i, j - 1).cellState, gridData.at(i, j + 1).cellState);
+
+						break;
+					case GridDataPoint::EMPTY:
+						break;
+				}
+			}
+		}
+		StandardPCG();
+		GridDataPoint t = gridData(5, 5);
+	}
 };
