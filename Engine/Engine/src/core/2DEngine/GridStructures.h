@@ -40,7 +40,7 @@ public:
 };
 
 /* This data structure relies on an ordered insertion
-* for(1 -> row) { for(1 -> column) { insert() } } is the required order
+* for(1 -> column) { for(1 -> row) { insert() } } is the required order
 * The grid is made up of cells from (1, 1) to (column, row) with a halo (one cell thick wall) around it
 */
 template<typename T, size_t row, size_t column>
@@ -88,6 +88,11 @@ public:
 	}
 };
 
+/* A row vector is a (row * size) x 1 vector
+One row of the vector stores information about one cell in the grid (i, j)
+We do not store information about the halo grid so therefore we store information from cells (1, 1) to (row, column)
+However the information is stored from index 0 to row * column in the grid therefore when we index by (i, j) we subtract both i and j by 1
+*/
 template<size_t row, size_t column>
 class RowVector
 {

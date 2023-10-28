@@ -26,9 +26,9 @@ public:
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		for(unsigned int i = 1; i <= row; i++)
+		for(unsigned int i = 1; i <= column; i++)
 		{
-			for(unsigned int j = 1; j <= column; j++)
+			for(unsigned int j = 1; j <= row; j++)
 			{
 				EntityID cellID = scene.CreateModel(gridModel, solidTexture,
 					Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
@@ -132,9 +132,9 @@ public:
 		}
 
 		// Internal cells
-		for(size_t i = 2; i < row - 1; i++)
+		for(size_t i = 2; i < column - 1; i++)
 		{
-			for(size_t j = 2; j <= column - 1; j++)
+			for(size_t j = 2; j <= row - 1; j++)
 			{
 				result(i, j) = gridData(i, j).Adiag * vector(i, j)
 					+ gridData(i - 1, j).Ax * vector(i - 1, j)
@@ -160,9 +160,9 @@ public:
 
 		double previousXPrecon = 0;
 		double previousYPrecon = 0;
-		for(size_t i = 1; i <= row; i++)
+		for(size_t i = 1; i <= column; i++)
 		{
-			for(size_t j = 1; j <= column; j++)
+			for(size_t j = 1; j <= row; j++)
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
@@ -196,9 +196,9 @@ public:
 			}
 		}
 
-		for(size_t i = row; i >= 1; i--)
+		for(size_t i = column; i >= 1; i--)
 		{
-			for(size_t j = column; j >= 1; j--)
+			for(size_t j = row; j >= 1; j--)
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
@@ -259,13 +259,10 @@ public:
 		* Likewise vVelocity refers to the up v velocity arrow for that cell
 		*/
 
-		for(size_t i = 1; i <= row; i++)
+		for(size_t i = 1; i <= column; i++)
 		{
-			for(size_t j = 1; j <= column; j++)
+			for(size_t j = 1; j <= row; j++)
 			{
-
-				gridData(i, j).uVelocity -= timeStep * scale * gridData(i + 1, j).pressure - gridData(i, j).pressure;
-				gridData(i, j).vVelocity -= timeStep * scale * gridData(i, j + 1).pressure - gridData(i, j).pressure;
 
 				// TODO: remove division
 				negativeDivergences(i, j) = -(gridData(i, j).uVelocity - gridData(i - 1, j).uVelocity +
@@ -289,5 +286,14 @@ public:
 			}
 		}
 		StandardPCG();
+
+		for(size_t i = 1; i <= column; i++)
+		{
+			for(size_t j = 1; j <= row; j++)
+			{
+				gridData(i, j).uVelocity -= timeStep * scale * gridData(i + 1, j).pressure - gridData(i, j).pressure;
+				gridData(i, j).vVelocity -= timeStep * scale * gridData(i, j + 1).pressure - gridData(i, j).pressure;
+			}
+		}
 	}
 };
