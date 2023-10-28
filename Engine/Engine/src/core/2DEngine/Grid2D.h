@@ -12,30 +12,29 @@ class Grid2D
 {
 private:
 	const float cellWidth;
-
 public:
 
 	float density;
 	float temperature;
 	float concentration;
 
-	GridStructure<GridDataPoint, row, column> gridData = GridStructure<GridDataPoint, row, column>(GridDataPoint(Cell2D(nullptr), GridDataPoint::EMPTY));
-	RowVector<row, column> negativeDivergences = RowVector<row, column>();
-	RowVector<row, column> precon = RowVector<row, column>();
+	GridStructure<GridDataPoint, row, column> gridData;
+	RowVector<row, column> negativeDivergences;
+	RowVector<row, column> precon;
 
 	Grid2D(Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) : density(_density), cellWidth(_cellWidth)
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		for(unsigned int i = 0; i < row; i++)
+		for(unsigned int i = 1; i <= row; i++)
 		{
-			for(unsigned int j = 0; j < column; j++)
+			for(unsigned int j = 1; j <= column; j++)
 			{
 				EntityID cellID = scene.CreateModel(gridModel, solidTexture,
 					Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
 				RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 
-				gridData.emplace(GridDataPoint(Cell2D(render), GridDataPoint::FLUID));
+				gridData.emplace(GridDataPoint(Cell2D(render), GridDataPoint::FLUID), i, j);
 			}
 		}
 	}
@@ -83,13 +82,65 @@ public:
 
 	void applyA(const RowVector<row, column>& vector, RowVector<row, column>& result)
 	{
-		for(size_t i = 0; i < row; i++)
+
+		// Bottom left corner
+		result(1, 1) = gridData(1, 1).Adiag * vector(1, 1)
+			+ gridData(1, 1).Ax * vector(2, 1);
+			+ gridData(1, 1).Ay * vector(1, 2);
+		
+		// Bottom right corner
+		result(column, 1) = gridData(column, 1).Adiag * vector(column, 1)
+			+ gridData(column - 1, 1).Ax * vector(column - 1, 1)
+			+ gridData(column, 1).Ay * vector(column, 2);
+
+		// Top left corner
+		result(1, row) = gridData(1, row).Adiag * vector(1, row)
+			+ gridData(1, row).Ax * vector(2, row)
+			+ gridData(1, row - 1).Ay * vector(1, row - 1);
+
+		// Top right corner
+		result(column, row) = gridData(column, row).Adiag * vector(column, row)
+			+ gridData(column - 1, row).Ax * vector(column - 1, row)
+			+ gridData(column, row - 1).Ay * vector(column, row - 1);
+
+		// Top and bottom cells
+		for(size_t i = 2; i < column; i++)
 		{
-			for(size_t j = 0; j < column; j++)
+			result(i, 1) = gridData(i, 1).Adiag * vector(i, 1)
+				+ gridData(i - 1, 1).Ax * vector(i - 1, 1)
+				+ gridData(i, 1).Ax * vector(i + 1, 1)
+				+ gridData(i, 1).Ay * vector(i, 2);
+
+			result(i, row) = gridData(i, row).Adiag * vector(i, row)
+				+ gridData(i - 1, row).Ax * vector(i - 1, row)
+				+ gridData(i, row).Ax * vector(i + 1, row)
+				+ gridData(i, row - 1).Ay * vector(i, row - 1);
+		}
+
+		// Left and right cells
+		for(size_t j = 2; j < row; j++)
+		{
+			result(1, j) = gridData(1, j).Adiag * vector(1, j)
+				+ gridData(1, j).Ax * vector(2, j)
+				+ gridData(1, j).Ay * vector(1, j + 1)
+				+ gridData(1, j - 1).Ay * vector(1, j - 1);
+
+			result(column, j) = gridData(column, j).Adiag * vector(column, j)
+				+ gridData(column - 1, j).Ax * vector(column - 1, j)
+				+ gridData(column, j).Ay * vector(column, j + 1)
+				+ gridData(column, j - 1).Ay * vector(column, j - 1);
+		}
+
+		// Internal cells
+		for(size_t i = 2; i < row - 1; i++)
+		{
+			for(size_t j = 2; j <= column - 1; j++)
 			{
-				// This might be wrong
-				result(i, j) = vector(i, j) * gridData(i, j).Adiag
-					+ vector.at(i + 1, j) * gridData(i, j).Ax + vector.at(i, j + 1) * gridData(i, j).Ay;
+				result(i, j) = gridData(i, j).Adiag * vector(i, j)
+					+ gridData(i - 1, j).Ax * vector(i - 1, j)
+					+ gridData(i, j).Ax * vector(i + 1, j)
+					+ gridData(i, j).Ay * vector(i, j + 1)
+					+ gridData(i, j - 1).Ay * vector(i, j - 1);
 			}
 		}
 	}
@@ -106,18 +157,17 @@ public:
 		double e = 0;
 		double cellPressureCoefficient = 0;
 		double t = 0;
-		for(size_t i = 0; i < row; i++)
+
+		double previousXPrecon = 0;
+		double previousYPrecon = 0;
+		for(size_t i = 1; i <= row; i++)
 		{
-			for(size_t j = 0; j < column; j++)
+			for(size_t j = 1; j <= column; j++)
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					double Aplusi = gridData.at(i - 1, j).Ax;
-					double Aplusj = gridData.at(i, j - 1).Ay;
-
-					// NOTE: These will be the same as the precon from the last iteration of applyPreconditoner
-					double previousXPrecon = precon.at(i - 1, j);
-					double previousYPrecon = precon.at(i, j - 1);
+					double Aplusi = gridData(i - 1, j).Ax;
+					double Aplusj = gridData(i, j - 1).Ay;
 
 					double cellPressureCoefficient = gridData(i, j).Adiag;
 
@@ -131,29 +181,30 @@ public:
 					{
 						e = cellPressureCoefficient;
 					}
-
 					precon(i, j) = 1 / sqrt(e);
-
 					// Solve Lq = r
 					t = residualVector(i, j)
-						- Aplusi * previousXPrecon * gridData.at(i - 1, j).q
-						- Aplusj * previousYPrecon * gridData.at(i - 1, j - 1).q;
+						- Aplusi * previousXPrecon * gridData(i - 1, j).q
+						- Aplusj * previousYPrecon * gridData(i - 1, j - 1).q;
 
 					gridData(i, j).q = t * precon(i, j);
 
+					// NOTE: These will be the same as the precon from the last iteration of applyPreconditoner
+					double previousXPrecon = precon(i, j);
+					double previousYPrecon = precon(i, j);
 				}
 			}
 		}
 
-		for(size_t i = row - 1; i + 1 >= 1; i--)
+		for(size_t i = row; i >= 1; i--)
 		{
-			for(size_t j = column - 1; j + 1 >= 1; j--)
+			for(size_t j = column; j >= 1; j--)
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
 					t = gridData(i, j).q
-						- gridData(i, j).Ax * precon(i, j) * gridData.at(i + 1, j).z
-						- gridData(i, j).Ay * precon(i, j) * gridData.at(i, j + 1).z;
+						- gridData(i, j).Ax * precon(i, j) * gridData(i + 1, j).z
+						- gridData(i, j).Ay * precon(i, j) * gridData(i, j + 1).z;
 				}
 
 				gridData(i, j).z = t * precon(i, j);
@@ -162,13 +213,14 @@ public:
 		result = precon;
 	}
 
-	inline void UpdatePressure(float Acoefficient, GridDataPoint& cellData, GridDataPoint::CellState leftState, GridDataPoint::CellState rightState, GridDataPoint::CellState belowState, GridDataPoint::CellState aboveState)
+	inline void UpdatePressure(float Acoefficient, GridDataPoint& cellData, size_t i, size_t j)
 	{
-		if(leftState == GridDataPoint::FLUID) // Left neighbour
+		if(gridData(i - 1, j).cellState == GridDataPoint::FLUID) // Left neighbour
 		{
 			cellData.Adiag += Acoefficient;
 		}
 
+		GridDataPoint::CellState rightState = gridData(i + 1, j).cellState;
 		if(rightState == GridDataPoint::FLUID) // Right neighbour
 		{
 			cellData.Adiag += Acoefficient;
@@ -178,11 +230,12 @@ public:
 			cellData.Adiag += Acoefficient;
 		}
 
-		if(belowState == GridDataPoint::FLUID) // Below neighbour
+		if(gridData(i, j - 1).cellState == GridDataPoint::FLUID) // Below neighbour
 		{
 			cellData.Adiag += Acoefficient;
 		}
 
+		GridDataPoint::CellState aboveState = gridData(i, j + 1).cellState;
 		if(aboveState == GridDataPoint::FLUID) // Above neighbour
 		{
 			cellData.Adiag += Acoefficient;
@@ -204,55 +257,15 @@ public:
 
 		/* uVelocity in the GridDataPoint refers to the right u velocity arrow for that cell in the MAC Grid
 		* Likewise vVelocity refers to the up v velocity arrow for that cell
-		* Hence to get the arrow to the left or bottom we lookup the cell to the left or below the current cell respectively
-		* These cells do not exist for the leftmost and bottommost cells so we have a special cases (the missing velocitys are set to 0)
-		* Bottom left is an extra special case because it has neither a left arrow or bottom arrow
 		*/
 
-		// Bottom left
-		negativeDivergences(0, 0) = -(gridData(0, 0).uVelocity + gridData(0, 0).vVelocity) / cellWidth;
-		UpdatePressure(Acoefficient, gridData(0, 0), GridDataPoint::EMPTY, gridData(1, 0).cellState, GridDataPoint::EMPTY, gridData(0, 1).cellState);
-
-		// Leftmost cells (except bottom left)
-		for(j = 1; j < column; j++)
+		for(size_t i = 1; i <= row; i++)
 		{
-			// i = 0
-			negativeDivergences(0, j) = -(gridData(0, j).uVelocity + gridData(0, j).vVelocity - gridData(0, j - 1).vVelocity) / cellWidth;
-
-			if(j == column - 1)
+			for(size_t j = 1; j <= column; j++)
 			{
-				// Top left
-				UpdatePressure(Acoefficient, gridData(0, j), GridDataPoint::EMPTY, gridData(1, j).cellState, gridData(0, j - 1).cellState, GridDataPoint::EMPTY);
-			} else
-			{
-				UpdatePressure(Acoefficient, gridData(0, j), GridDataPoint::EMPTY, gridData(1, j).cellState, gridData(0, j - 1).cellState, gridData(0, j + 1).cellState);
-			}
-		}
 
-		// Bottommost cells (except bottom left)
-		for(i = 1; i < row; i++)
-		{
-			// j = 0
-			negativeDivergences(i, 0) = -(gridData(i, 0).uVelocity + gridData(i - 1, 0).uVelocity + gridData(i, 0).vVelocity) / cellWidth;
-
-			if(i == row - 1)
-			{
-				// Bottom right
-				UpdatePressure(Acoefficient, gridData(i, 0), gridData(i - 1, 0).cellState, GridDataPoint::EMPTY, GridDataPoint::EMPTY, gridData(i, 1).cellState);
-			} else
-			{
-				UpdatePressure(Acoefficient, gridData(i, 0), gridData(i - 1, 0).cellState, gridData(i + 1, 0).cellState, GridDataPoint::EMPTY, gridData(i, 1).cellState);
-			}
-		}
-
-
-		// All other cells
-		for(size_t i = 1; i < row; i++)
-		{
-			for(size_t j = 1; j < column; j++)
-			{
-				gridData(i, j).uVelocity -= timeStep * scale * gridData.at(i + 1, j).pressure - gridData(i, j).pressure;
-				gridData(i, j).vVelocity -= timeStep * scale * gridData.at(i, j + 1).pressure - gridData(i, j).pressure;
+				gridData(i, j).uVelocity -= timeStep * scale * gridData(i + 1, j).pressure - gridData(i, j).pressure;
+				gridData(i, j).vVelocity -= timeStep * scale * gridData(i, j + 1).pressure - gridData(i, j).pressure;
 
 				// TODO: remove division
 				negativeDivergences(i, j) = -(gridData(i, j).uVelocity - gridData(i - 1, j).uVelocity +
@@ -261,14 +274,13 @@ public:
 				switch(gridData(i, j).cellState)
 				{
 					case GridDataPoint::SOLID:
+						// TODO: Remember to update Adiag, Ax etc in a ChangeState function
 						break;
 					case GridDataPoint::FLUID:
 
 						// Pressure coefficient update
 
-						// We use 'at' for the positive i and j cells which will not exist for the topmost and rightmost cells
-						UpdatePressure(Acoefficient, gridData(i, j), gridData(i - 1, j).cellState, gridData.at(i + 1, j).cellState,
-							gridData(i, j - 1).cellState, gridData.at(i, j + 1).cellState);
+						UpdatePressure(Acoefficient, gridData(i, j), i, j);
 
 						break;
 					case GridDataPoint::EMPTY:
@@ -277,6 +289,5 @@ public:
 			}
 		}
 		StandardPCG();
-		GridDataPoint t = gridData(5, 5);
 	}
 };
