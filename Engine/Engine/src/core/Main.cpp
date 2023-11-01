@@ -131,7 +131,7 @@ int main()
 	{ 
 
 		double currentFrameTime = glfwGetTime();
-		std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
+		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
 		previousFrameTime = currentFrameTime;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -139,7 +139,9 @@ int main()
 
 		processInput(window);
 
-		grid.Update(float(currentFrameTime - previousFrameTime));
+		float timeStep = static_cast<float>(currentFrameTime - previousFrameTime);
+		grid.advect(timeStep, &GridDataPoint::uVelocity);
+		grid.Update(timeStep);
 
 		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
 

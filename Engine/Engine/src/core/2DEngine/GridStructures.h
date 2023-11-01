@@ -41,134 +41,85 @@ public:
 
 /* This data structure relies on an ordered insertion
 * for(1 -> column) { for(1 -> row) { insert() } } is the required order
-* The grid is made up of cells from (1, 1) to (column, row) with a halo (one cell thick wall) around it
+* The grid is made up of cells from (2, 2) to (column, row) with a halo (two cell thick wall) around it
 */
 template<typename T, size_t row, size_t column>
 struct GridStructure
 {
 protected:
-	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 2) * j
-	std::array < T, row * column + (2 * (row + 2)) + (2 * column)> grid;
+	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
+	std::array < T, row * column + (4 * (row + 2)) + (4 * column)> grid;
 
 public:
 
 	GridStructure()
 	{
-		for(size_t i = 0; i <= column + 1; i++) // Bottom and top halo
+		for(size_t i = 0; i <= column + 2; i++) // Bottom and top halo
 		{
-			grid[i] = GridDataPoint();
-			grid[i + (column + 2) * (row + 1)] = GridDataPoint();
+			// Outer halo
+			grid[i] = GridDataPoint(); // (0, 0) to (column + 2, 0)
+			grid[i + (column + 4) * (row + 2)] = GridDataPoint(); // (0, row + 2) to (column + 2, row + 2)
+
+			// Inner halo
+			grid[i + (column + 4) * 1] = GridDataPoint(); // (0, 1) to (column + 2, 1)
+			grid[i + (column + 4) * (row + 1)] = GridDataPoint(); // (0, row + 1) to (column + 2, row + 1)
 		}
 
-		for(size_t j = 1; j <= row; j++)// Bottom and top halo
+		for(size_t j = 2; j <= row; j++) // Left and right halo
 		{
-			grid[(column + 2) * j] = GridDataPoint();
-			grid[(column + 1) + (column + 2) * j] = GridDataPoint();
+			// Outer halo
+			grid[(column + 4) * j] = GridDataPoint(); // (0, 2) to (0, row)
+			grid[(column + 2) + (column + 4) * j] = GridDataPoint(); // (column + 2, 2) to (column + 2, row)
+
+			// Inner halo
+			grid[1 + (column + 4) * j] = GridDataPoint(); // (1, 2) to (1, row)
+			grid[(column + 1) + (column + 4) * j] = GridDataPoint(); // (column + 1, 2) to (column + 1, row)
 		}
 	};
 
 	void push_back(T& dataPoint, size_t i, size_t j)
 	{
-		grid[i + (column + 2) * j] = dataPoint;
+		grid[i + (column + 4) * j] = dataPoint;
 	}
 
 	void emplace(T&& dataPoint, size_t i, size_t j)
 	{
-		grid[i + (column + 2) * j] = dataPoint;
+		grid[i + (column + 4) * j] = dataPoint;
 	}
 
 	inline T& operator()(size_t i, size_t j)
 	{
-		return grid[i + (column + 2) * j];
+		return grid[i + (column + 4) * j];
 	}
 
 	const inline T& operator()(size_t i, size_t j) const
 	{
-		return grid[i + (column + 2) * j];
+		return grid[i + (column + 4) * j];
+	}
+
+	bool snap_to_grid(int& i, int& j)
+	{
+		bool snapped = false;
+		if(i < 2) // Outside grid on left
+		{
+			i = 2;
+			snapped = true;
+		} else if(i > column) // Outside grid on right
+		{
+			i = column;
+			snapped = true;
+		}
+
+		if(j < 2) // Outside grid below
+		{
+			j = 2;
+			return true;
+		} else if(j > row) // Outside grid above
+		{
+			j = row;
+			return true;
+		}
+		return snapped;
 	}
 };
 
-/* A row vector is a (row * size) x 1 vector
-One row of the vector stores information about one cell in the grid (i, j)
-We do not store information about the halo grid so therefore we store information from cells (1, 1) to (row, column)
-However the information is stored from index 0 to row * column in the grid therefore when we index by (i, j) we subtract both i and j by 1
-*/
-template<size_t row, size_t column>
-class RowVector
-{
-private:
-	std::array<double, row * column> vector;
-public:
-
-	inline double operator[](size_t idx) const
-	{
-		return vector[idx];
-	}
-
-	inline double& operator[](size_t idx)
-	{
-		return vector[idx];
-	}
-
-	inline double operator()(size_t i, size_t j) const
-	{
-		return vector[(i - 1) + column * (j - 1)];
-	}
-
-	inline double& operator()(size_t i, size_t j)
-	{
-		return vector[(i - 1) + column * (j - 1)];
-	}
-
-	constexpr inline RowVector<row, column> operator*(double scalar) const
-	{
-		RowVector<row, column> result;
-		for(size_t i = 0; i < row * column; i++)
-		{
-			result[i] = vector[i] * scalar;
-		}
-		return result;
-	}
-
-	constexpr inline RowVector<row, column> operator+(const RowVector<row, column>& rhs) const
-	{
-		RowVector<row, column> result;
-		for(size_t i = 0; i < row * column; i++)
-		{
-			result[i] = vector[i] + rhs[i];
-		}
-		return result;
-	}
-
-	constexpr inline RowVector<row, column> operator-(const RowVector<row, column>& rhs) const
-	{
-		RowVector<row, column> result;
-		for(size_t i = 0; i < row * column; i++)
-		{
-			result[i] = vector[i] - rhs[i];
-		}
-		return result;
-	}
-
-	constexpr inline double max()
-	{
-		return *std::max_element(vector.begin(), vector.end());
-	}
-};
-
-template<size_t row, size_t column>
-constexpr inline RowVector<row, column> operator*(double scalar, const RowVector<row, column>& vector)
-{
-	return vector * scalar;
-}
-
-template<size_t row, size_t column>
-inline double DotProduct(const RowVector<row, column>& lhs, const RowVector<row, column>& rhs)
-{
-	double result = 0;
-	for(size_t i = 0; i < row * column; i++)
-	{
-		result += lhs[i]* rhs[i];
-	}
-	return result;
-}
