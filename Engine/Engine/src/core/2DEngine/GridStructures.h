@@ -41,60 +41,63 @@ public:
 
 /* This data structure relies on an ordered insertion
 * for(1 -> column) { for(1 -> row) { insert() } } is the required order
-* The grid is made up of cells from (2, 2) to (column, row) with a halo (two cell thick wall) around it
+* The grid is made up of cells from (2, 2) to (column + 2 , row + 2) with a halo (two cell thick wall) around it
+* The outer halo bottom left corner is at (0, 0) and the top right is at (column + 3, row + 3)
+* The inner halo bottom left corner is at (1, 1) and the top right is at (column + 2, row + 2)
+* But we can index from (0, 0) to (column, row) by adding 2 to (i, j)
 */
 template<typename T, size_t row, size_t column>
 struct GridStructure
 {
 protected:
 	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
-	std::array < T, row * column + (4 * (row + 2)) + (4 * column)> grid;
+	std::array < T, (row + 4) * (column + 4)> grid;
 
 public:
 
 	GridStructure()
 	{
-		for(size_t i = 0; i <= column + 2; i++) // Bottom and top halo
+		for(size_t i = 0; i <= column + 3; i++) // Bottom and top halo
 		{
 			// Outer halo
-			grid[i] = GridDataPoint(); // (0, 0) to (column + 2, 0)
-			grid[i + (column + 4) * (row + 2)] = GridDataPoint(); // (0, row + 2) to (column + 2, row + 2)
+			grid[i] = GridDataPoint(); // (0, 0) to (column + 4, 0)
+			grid[i + (column + 4) * (row + 3)] = GridDataPoint(); // (0, row + 3) to (column + 3, row + 3)
 
 			// Inner halo
-			grid[i + (column + 4) * 1] = GridDataPoint(); // (0, 1) to (column + 2, 1)
-			grid[i + (column + 4) * (row + 1)] = GridDataPoint(); // (0, row + 1) to (column + 2, row + 1)
+			grid[i + (column + 4) * 1] = GridDataPoint(); // (0, 1) to (column + 3, 1)
+			grid[i + (column + 4) * (row + 2)] = GridDataPoint(); // (0, row + 2) to (column + 3, row + 2)
 		}
 
 		for(size_t j = 2; j <= row; j++) // Left and right halo
 		{
 			// Outer halo
 			grid[(column + 4) * j] = GridDataPoint(); // (0, 2) to (0, row)
-			grid[(column + 2) + (column + 4) * j] = GridDataPoint(); // (column + 2, 2) to (column + 2, row)
+			grid[(column + 3) + (column + 4) * j] = GridDataPoint(); // (column + 3, 2) to (column + 3, row)
 
 			// Inner halo
 			grid[1 + (column + 4) * j] = GridDataPoint(); // (1, 2) to (1, row)
-			grid[(column + 1) + (column + 4) * j] = GridDataPoint(); // (column + 1, 2) to (column + 1, row)
+			grid[(column + 2) + (column + 4) * j] = GridDataPoint(); // (column + 2, 2) to (column + 2, row)
 		}
 	};
 
-	void push_back(T& dataPoint, size_t i, size_t j)
+	void insert(T& dataPoint, size_t i, size_t j)
 	{
-		grid[i + (column + 4) * j] = dataPoint;
+		grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
 	}
 
-	void emplace(T&& dataPoint, size_t i, size_t j)
+	void insert(T&& dataPoint, size_t i, size_t j)
 	{
-		grid[i + (column + 4) * j] = dataPoint;
+		grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
 	}
 
 	inline T& operator()(size_t i, size_t j)
 	{
-		return grid[i + (column + 4) * j];
+		return grid[(i + 2) + (column + 4) * (j + 2)];
 	}
 
 	const inline T& operator()(size_t i, size_t j) const
 	{
-		return grid[i + (column + 4) * j];
+		return grid[(i + 2) + (column + 4) * (j + 2)];
 	}
 
 	bool snap_to_grid(int& i, int& j)
@@ -104,9 +107,9 @@ public:
 		{
 			i = 2;
 			snapped = true;
-		} else if(i > column) // Outside grid on right
+		} else if(i > column + 1) // Outside grid on right
 		{
-			i = column;
+			i = column + 1;
 			snapped = true;
 		}
 
@@ -114,9 +117,9 @@ public:
 		{
 			j = 2;
 			return true;
-		} else if(j > row) // Outside grid above
+		} else if(j > row + 1) // Outside grid above
 		{
-			j = row;
+			j = row + 1;
 			return true;
 		}
 		return snapped;

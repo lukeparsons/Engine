@@ -124,7 +124,7 @@ int main()
 	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
 	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	Grid2D grid = Grid2D<10, 10>(scene, square, Vector2f(-0.5, -0.5), 1, 0.05f);
+	Grid2D<10, 10>* grid = new Grid2D<10, 10>(scene, square, Vector2f(-0.5, -0.5), 1, 0.05f);
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
@@ -132,6 +132,7 @@ int main()
 
 		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
+		float timeStep = static_cast<float>(currentFrameTime - previousFrameTime);
 		previousFrameTime = currentFrameTime;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -139,16 +140,20 @@ int main()
 
 		processInput(window);
 
-		float timeStep = static_cast<float>(currentFrameTime - previousFrameTime);
-		grid.advect(timeStep, &GridDataPoint::uVelocity);
-		grid.Update(timeStep);
+		std::cout << "Time step " << timeStep << std::endl;
+		grid->advect(timeStep, &GridDataPoint::uVelocity);
+		grid->advect(timeStep, &GridDataPoint::pressure);
+		grid->addforce(timeStep, 1200, 5, 5, &GridDataPoint::uVelocity);;
+		grid->addforce(timeStep, 1200, 5, 5, &GridDataPoint::pressure);
+		grid->Update(timeStep);
 
 		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
+	delete grid;
 	glfwTerminate();
 	return 0;
 }

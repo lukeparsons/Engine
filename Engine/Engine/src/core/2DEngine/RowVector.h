@@ -3,7 +3,6 @@
 /* A row vector is a (row * size) x 1 vector
 One row of the vector stores information about one cell in the grid (i, j)
 We store a one cell thick halo grid
-Therefore (useful) information is stored from index 1 to row * column
 */
 template<size_t row, size_t column>
 class RowVector
@@ -39,18 +38,18 @@ public:
 
 	inline double operator()(size_t i, size_t j) const
 	{
-		return vector[i + column * j];
+		return vector[(i + 1) + column * (j + 1)];
 	}
 
 	inline double& operator()(size_t i, size_t j)
 	{
-		return vector[i + column * j];
+		return vector[(i + 1) + column * (j + 1)];
 	}
 
 	constexpr inline RowVector<row, column> operator*(double scalar) const
 	{
 		RowVector<row, column> result;
-		for(size_t i = 1; i <= row * column; i++)
+		for(size_t i = 0; i < row * column; i++)
 		{
 			result[i] = vector[i] * scalar;
 		}
@@ -60,7 +59,7 @@ public:
 	constexpr inline RowVector<row, column> operator+(const RowVector<row, column>& rhs) const
 	{
 		RowVector<row, column> result;
-		for(size_t i = 1; i <= row * column; i++)
+		for(size_t i = 0; i < row * column; i++)
 		{
 			result[i] = vector[i] + rhs[i];
 		}
@@ -70,7 +69,7 @@ public:
 	constexpr inline RowVector<row, column> operator-(const RowVector<row, column>& rhs) const
 	{
 		RowVector<row, column> result;
-		for(size_t i = 1; i <= row * column; i++)
+		for(size_t i = 0; i < row * column; i++)
 		{
 			result[i] = vector[i] - rhs[i];
 		}
@@ -93,7 +92,7 @@ template<size_t row, size_t column>
 inline double DotProduct(const RowVector<row, column>& lhs, const RowVector<row, column>& rhs)
 {
 	double result = 0;
-	for(size_t i = 1; i <= row * column; i++)
+	for(size_t i = 0; i < row * column; i++)
 	{
 		result += lhs[i] * rhs[i];
 	}

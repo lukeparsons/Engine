@@ -56,15 +56,15 @@ public:
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		for(unsigned int i = 1; i <= column; i++)
+		for(unsigned int i = 0; i < column; i++)
 		{
-			for(unsigned int j = 1; j <= row; j++)
+			for(unsigned int j = 0; j < row; j++)
 			{
-				EntityID cellID = scene.CreateModel(gridModel, solidTexture,
-					Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
-				RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
+				//EntityID cellID = scene.CreateModel(gridModel, solidTexture,
+					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
+				//RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 
-				gridData.emplace(GridDataPoint(Cell2D(render), GridDataPoint::FLUID), i, j);
+				gridData.insert(GridDataPoint(Cell2D(), GridDataPoint::FLUID), i, j);
 			}
 		}
 	}
@@ -74,13 +74,20 @@ public:
 	{
 		float scale = 1 / cellWidth;
 
-		for(size_t i = 2; i <= column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			for(size_t j = 2; j <= row; j++)
+			for(size_t j = 0; j < row; j++)
 			{
 				// Runge-Kutta 2
 				int midPointi = static_cast<int>(std::floorf(i - 0.5 * timeStep * gridData(i, j).uVelocity));
 				int midPointj = static_cast<int>(std::floorf(j - 0.5 * timeStep * gridData(i, j).vVelocity));
+
+				if(gridData.snap_to_grid(midPointi, midPointj))
+				{
+					gridData(i, j).*quantity = gridData(midPointi, midPointj).*quantity;
+					continue;
+				}
+
 				float originalExactPointi = i - 0.5 * timeStep * gridData(midPointi, midPointj).uVelocity;
 				float originalExactPointj = j - 0.5 * timeStep * gridData(midPointi, midPointj).vVelocity;
 
@@ -99,7 +106,6 @@ public:
 					gridData(i, j).*quantity = gridData(originali, originalj).*quantity;
 					continue;
 				}
-
 				
 				//Cubic interpolation
 
@@ -119,12 +125,19 @@ public:
 
 				float finalQj = weightsi[0] * negativeQj + weightsi[1] * Qj + weightsi[2] * positiveQj + weightsi[3] * doublePositiveQj;
 
-				gridData(i, j).*quantity = (finalQi + finalQj) / 2;
+				float averageQ = (finalQi + finalQj) / 2;
+				gridData(i, j).*quantity = averageQ >= 0 ? averageQ : 0;
 
 				// TODO: clamp negative results to 0 */
 
 			}
 		}
+	}
+
+	template<typename QuantityType>
+	void addforce(float timeStep, float force, size_t i, size_t j, QuantityType GridDataPoint::*quantity)
+	{
+		gridData(i, j).*quantity += timeStep * force;
 	}
 
 	double StandardPCG()
@@ -170,10 +183,9 @@ public:
 
 	void applyA(const RowVector<row, column>& vector, RowVector<row, column>& result)
 	{
-
-		for(size_t i = 2; i <= column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			for(size_t j = 2; j <= row; j++)
+			for(size_t j = 0; j < row; j++)
 			{
 				result(i, j) = gridData(i, j).Adiag * vector(i, j)
 					+ gridData(i - 1, j).Ax * vector(i - 1, j)
@@ -199,9 +211,9 @@ public:
 
 		double previousXPrecon = 0;
 		double previousYPrecon = 0;
-		for(size_t i = 2; i <= column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			for(size_t j = 2; j <= row; j++)
+			for(size_t j = 0; j < row; j++)
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
@@ -237,9 +249,9 @@ public:
 			}
 		}
 
-		for(size_t i = column; i >= 2; i--)
+		for(size_t i = column - 1; i-- > 0;)
 		{
-			for(size_t j = row; j >= 2; j--)
+			for(size_t j = row - 1; j-- > 0;)
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
@@ -300,9 +312,9 @@ public:
 		* Likewise vVelocity refers to the up v velocity arrow for that cell
 		*/
 
-		for(size_t i = 2; i <= column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			for(size_t j = 2; j <= row; j++)
+			for(size_t j = 0; j < row; j++)
 			{
 
 				// TODO: remove division
@@ -329,13 +341,15 @@ public:
 
 		StandardPCG();
 
-		for(size_t i = 2; i <= column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			for(size_t j = 2; j <= row; j++)
+			for(size_t j = 0; j < row; j++)
 			{
 				gridData(i, j).uVelocity -= timeStep * scale * gridData(i + 1, j).pressure - gridData(i, j).pressure;
 				gridData(i, j).vVelocity -= timeStep * scale * gridData(i, j + 1).pressure - gridData(i, j).pressure;
 			}
 		}
+
+		std::cout << gridData(5, 5).uVelocity << std::endl;
 	}
 };
