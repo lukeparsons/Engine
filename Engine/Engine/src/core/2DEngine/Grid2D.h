@@ -8,12 +8,23 @@ static const std::shared_ptr<Texture> fluidTexture = std::make_shared<Texture>("
 static const std::shared_ptr<Texture> solidTexture = std::make_shared<Texture>("../Engine/assets/block.png");
 static const std::shared_ptr<Texture> emptyTexture = std::make_shared<Texture>("../Engine/assets/wall2.png");
 
-
 template<size_t row, size_t column>
 class Grid2D
 {
 private:
 	const float cellWidth;
+	//EntityID fluidID;
+	//RenderComponent* fluidRenderComponent;
+
+	inline float uvelocity_centre(size_t i, size_t j)
+	{
+		return (gridData(i - 1, j).uVelocity + gridData(i, j).uVelocity) / 2;
+	}
+
+	inline float vvelocity_centre(size_t i, size_t j)
+	{
+		return (gridData(i, j - 1).vVelocity + gridData(i, j).vVelocity) / 2;
+	}
 
 	std::array<float, 4> get_interp_weights(float s) const
 	{
@@ -56,16 +67,36 @@ public:
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
+		//fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(location.x, location.y, 0), Vector3f(cellWidth * column * 0.3, cellWidth * row * 0.3, cellWidth));
+		//fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);
+
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				//EntityID cellID = scene.CreateModel(gridModel, solidTexture,
-					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
-				//RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
+				EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
+					Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
+				RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 
-				gridData.insert(GridDataPoint(Cell2D(), GridDataPoint::FLUID), i, j);
+				gridData.insert(GridDataPoint(Cell2D(render), GridDataPoint::FLUID), i, j);
 			}
+		}
+
+		// Make the boundary solid
+		for(unsigned int i = 0; i < column; i++)
+		{
+			gridData(i, 0).cellState = GridDataPoint::SOLID;
+			gridData(i, 0).cell.renderComponent->ChangeTexture(solidTexture);
+			gridData(i, row - 1).cellState = GridDataPoint::SOLID;
+			gridData(i, row - 1).cell.renderComponent->ChangeTexture(solidTexture);
+		}
+
+		for(unsigned int j = 0; j < row; j++)
+		{
+			gridData(0, j).cellState = GridDataPoint::SOLID;
+			gridData(0, j).cell.renderComponent->ChangeTexture(solidTexture);
+			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
+			gridData(column - 1, j).cell.renderComponent->ChangeTexture(solidTexture);
 		}
 	}
 
@@ -78,57 +109,62 @@ public:
 		{
 			for(size_t j = 0; j < row; j++)
 			{
-				// Runge-Kutta 2
-				int midPointi = static_cast<int>(std::floorf(i - 0.5 * timeStep * gridData(i, j).uVelocity));
-				int midPointj = static_cast<int>(std::floorf(j - 0.5 * timeStep * gridData(i, j).vVelocity));
-
-				if(gridData.snap_to_grid(midPointi, midPointj))
+				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					gridData(i, j).*quantity = gridData(midPointi, midPointj).*quantity;
-					continue;
+					// Runge-Kutta 2
+					int midPointi = static_cast<int>(std::floorf(i - 0.5 * timeStep * gridData(i, j).uVelocity));
+					int midPointj = static_cast<int>(std::floorf(j - 0.5 * timeStep * gridData(i, j).vVelocity));
+					//std::cout << "midpoint (" << midPointi << ", " << midPointj << ")" << std::endl;
+					if(gridData.snap_to_grid(midPointi, midPointj))
+					{
+						gridData(i, j).*quantity = gridData(midPointi, midPointj).*quantity;
+						continue;
+					}
+
+					float originalExactPointi = i - 0.5 * timeStep * uvelocity_centre(midPointi, midPointj);
+					float originalExactPointj = j - 0.5 * timeStep * vvelocity_centre(midPointi, midPointj);
+					//std::cout << "exact(" << originalExactPointi << ", " << originalExactPointj << ")" << std::endl;
+
+					// Interpolate
+					float alphai = (originalExactPointi - i) * scale;
+					float alphaj = (originalExactPointj - j) * scale;
+
+					std::array<float, 4> weightsi = get_interp_weights(alphai);
+					std::array<float, 4> weightsj = get_interp_weights(alphaj);
+
+					int originali = static_cast<int>(std::floorf(originalExactPointi));
+					int originalj = static_cast<int>(std::floorf(originalExactPointj));
+
+					std::cout << "From (" << i << ", " << j << ") to (" << originali << ", " << originalj << ")" << std::endl;
+
+					if(gridData.snap_to_grid(originali, originalj))
+					{
+						gridData(i, j).*quantity = gridData(originali, originalj).*quantity;
+						continue;
+					}
+
+					//Cubic interpolation
+
+					// x-axis
+					float negativeQi = calculate_interp_quantity_i(originali - 1, originalj, weightsi, quantity);
+					float Qi = calculate_interp_quantity_i(originali, originalj, weightsi, quantity);
+					float positiveQi = calculate_interp_quantity_i(originali + 1, originalj, weightsi, quantity);
+					float doublePositiveQi = calculate_interp_quantity_i(originali + 2, originalj, weightsi, quantity);
+
+					float finalQi = weightsi[0] * negativeQi + weightsi[1] * Qi + weightsi[2] * positiveQi + weightsi[3] * doublePositiveQi;
+
+					// y-axis
+					float negativeQj = calculate_interp_quantity_j(originali, originalj - 1, weightsj, quantity);
+					float Qj = calculate_interp_quantity_j(originali, originalj, weightsj, quantity);
+					float positiveQj = calculate_interp_quantity_j(originali, originalj + 1, weightsj, quantity);
+					float doublePositiveQj = calculate_interp_quantity_j(originali, originalj + 2, weightsj, quantity);
+
+					float finalQj = weightsi[0] * negativeQj + weightsi[1] * Qj + weightsi[2] * positiveQj + weightsi[3] * doublePositiveQj;
+
+					float averageQ = (finalQi + finalQj) / 2;
+					gridData(i, j).*quantity = averageQ >= 0 ? averageQ : 0;
+
 				}
-
-				float originalExactPointi = i - 0.5 * timeStep * gridData(midPointi, midPointj).uVelocity;
-				float originalExactPointj = j - 0.5 * timeStep * gridData(midPointi, midPointj).vVelocity;
-
-				// Interpolate
-				float alphai = (originalExactPointi - i) * scale;
-				float alphaj = (originalExactPointj - j) * scale;
-
-				std::array<float, 4> weightsi = get_interp_weights(alphai);
-				std::array<float, 4> weightsj = get_interp_weights(alphaj);
-
-				int originali = static_cast<int>(std::floorf(originalExactPointi));
-				int originalj = static_cast<int>(std::floorf(originalExactPointj));
-
-				if(gridData.snap_to_grid(originali, originalj))
-				{
-					gridData(i, j).*quantity = gridData(originali, originalj).*quantity;
-					continue;
-				}
-				
-				//Cubic interpolation
-
-				// x-axis
-				float negativeQi = calculate_interp_quantity_i(originali - 1, originalj, weightsi, quantity);
-				float Qi = calculate_interp_quantity_i(originali, originalj, weightsi, quantity);
-				float positiveQi = calculate_interp_quantity_i(originali + 1, originalj, weightsi, quantity);
-				float doublePositiveQi = calculate_interp_quantity_i(originali + 2, originalj, weightsi, quantity);
-
-				float finalQi = weightsi[0] * negativeQi + weightsi[1] * Qi + weightsi[2] * positiveQi + weightsi[3] * doublePositiveQi;
-
-				// y-axis
-				float negativeQj = calculate_interp_quantity_j(originali, originalj - 1, weightsj, quantity);
-				float Qj = calculate_interp_quantity_j(originali, originalj, weightsj, quantity);
-				float positiveQj = calculate_interp_quantity_j(originali, originalj + 1, weightsj, quantity);
-				float doublePositiveQj = calculate_interp_quantity_j(originali, originalj + 2, weightsj, quantity);
-
-				float finalQj = weightsi[0] * negativeQj + weightsi[1] * Qj + weightsi[2] * positiveQj + weightsi[3] * doublePositiveQj;
-
-				float averageQ = (finalQi + finalQj) / 2;
-				gridData(i, j).*quantity = averageQ >= 0 ? averageQ : 0;
-
-				// TODO: clamp negative results to 0 */
 
 			}
 		}
@@ -137,7 +173,10 @@ public:
 	template<typename QuantityType>
 	void addforce(float timeStep, float force, size_t i, size_t j, QuantityType GridDataPoint::*quantity)
 	{
-		gridData(i, j).*quantity += timeStep * force;
+		if(gridData(i, j).cellState == GridDataPoint::FLUID)
+		{
+			gridData(i, j).*quantity += timeStep * force;
+		}
 	}
 
 	double StandardPCG()
@@ -266,8 +305,9 @@ public:
 		result = precon;
 	}
 
-	inline void UpdatePressure(float Acoefficient, GridDataPoint& cellData, size_t i, size_t j)
+	void UpdatePressure(float Acoefficient, GridDataPoint& cellData, size_t i, size_t j)
 	{
+
 		if(gridData(i - 1, j).cellState == GridDataPoint::FLUID) // Left neighbour
 		{
 			cellData.Adiag += Acoefficient;
@@ -302,7 +342,7 @@ public:
 	// TODO: A 1xn or nx1 grid is currently broken
 	void Update(float timeStep)
 	{
-		float scale = 1 / (density * cellWidth);
+		float scale = timeStep / (density * cellWidth);
 		float Acoefficient = timeStep / (density * cellWidth * cellWidth);
 
 		size_t i = 0;
@@ -317,23 +357,52 @@ public:
 			for(size_t j = 0; j < row; j++)
 			{
 
-				// TODO: remove division
-				negativeDivergences(i, j) = -(gridData(i, j).uVelocity - gridData(i - 1, j).uVelocity +
-					gridData(i, j).vVelocity - gridData(i, j - 1).vVelocity) / cellWidth;
-
 				switch(gridData(i, j).cellState)
 				{
 					case GridDataPoint::SOLID:
 						// TODO: Remember to update Adiag, Ax etc in a ChangeState function
+						/*if(gridData(i - 1, j).cellState == FLUID)
+						{
+							// pg 71
+						} */
+
 						break;
 					case GridDataPoint::FLUID:
 
 						// Pressure coefficient update
 
+						if(gridData(i - 1, j).cellState == GridDataPoint::SOLID)
+						{
+							// gridData(i, j) = usolid(i, j)
+						} else
+						{
+							gridData(i, j).uVelocity -= scale * (gridData(i, j).pressure - gridData(i - 1, j).pressure);
+						}
+
+						if(gridData(i, j - 1).cellState == GridDataPoint::SOLID)
+						{
+							// gridData(i, j) = vsolid(i, j)
+						} else
+						{
+							gridData(i, j).vVelocity -= scale * (gridData(i, j).pressure - gridData(i, j - 1).pressure);
+						}
+
+						// TODO: remove division and account for solid velocities
+						negativeDivergences(i, j) = -scale * (gridData(i, j).uVelocity - gridData(i - 1, j).uVelocity +
+							gridData(i, j).vVelocity - gridData(i, j - 1).vVelocity);
+
 						UpdatePressure(Acoefficient, gridData(i, j), i, j);
 
 						break;
 					case GridDataPoint::EMPTY:
+						// Assuming empty fluid cell pressure = 0
+						if(gridData(i - 1, j).cellState == GridDataPoint::FLUID)
+						{
+							gridData(i, j).uVelocity -= scale * -gridData(i - 1, j).pressure;
+						} else
+						{
+							gridData(i, j).vVelocity -= scale * -gridData(i, j - 1).pressure;
+						}
 						break;
 				}
 			}
@@ -341,15 +410,36 @@ public:
 
 		StandardPCG();
 
+		//std::cout << gridData(5, 5).uVelocity << std::endl;
+		//fluidRenderComponent->ChangeTexture(GenerateTexture());
+	}
+
+	Texture GenerateTexture()
+	{
+		unsigned int width = column;
+		unsigned int height = row;
+		std::vector<float> pixels;
 		for(size_t i = 0; i < column; i++)
 		{
 			for(size_t j = 0; j < row; j++)
 			{
-				gridData(i, j).uVelocity -= timeStep * scale * gridData(i + 1, j).pressure - gridData(i, j).pressure;
-				gridData(i, j).vVelocity -= timeStep * scale * gridData(i, j + 1).pressure - gridData(i, j).pressure;
+				//std::cout << gridData(i, j).uVelocity << std::endl;
+				//std::cout << gridData(i, j).vVelocity << std::endl;
+				//std::cout << gridData(i, j).pressure << std::endl;
+				pixels.push_back(gridData(i, j).uVelocity);
+				pixels.push_back(gridData(i, j).vVelocity);
+				pixels.push_back(gridData(i, j).pressure);
 			}
 		}
+		return Texture(width, height, pixels, GL_RGB, GL_FLOAT);
+	}
 
-		std::cout << gridData(5, 5).uVelocity << std::endl;
+	void PrintCell(size_t i, size_t j)
+	{
+		std::cout << i << ", " << j << std::endl;
+		std::cout << "uVelocity " << gridData(i, j).uVelocity << std::endl;
+		std::cout << "vVelocity " << gridData(i, j).vVelocity << std::endl;
+		std::cout << "Pressure " << gridData(i, j).pressure << std::endl;
+		std::cout << std::endl;
 	}
 };

@@ -41,4 +41,6 @@ public:
 	void Draw(const Matrix4f& cameraMatrix, GLuint textureID, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+
+	//void temp_changecolour(GLfloat colour[4]);
 };

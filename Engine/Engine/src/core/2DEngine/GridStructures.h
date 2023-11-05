@@ -103,23 +103,23 @@ public:
 	bool snap_to_grid(int& i, int& j)
 	{
 		bool snapped = false;
-		if(i < 2) // Outside grid on left
+		if(i < 0) // Outside grid on left
 		{
-			i = 2;
+			i = 0;
 			snapped = true;
-		} else if(i > column + 1) // Outside grid on right
+		} else if(i >= column) // Outside grid on right
 		{
-			i = column + 1;
+			i = column - 1;
 			snapped = true;
 		}
 
-		if(j < 2) // Outside grid below
+		if(j < 0) // Outside grid below
 		{
-			j = 2;
+			j = 0;
 			return true;
-		} else if(j > row + 1) // Outside grid above
+		} else if(j >= row) // Outside grid above
 		{
-			j = row + 1;
+			j = row - 1;
 			return true;
 		}
 		return snapped;

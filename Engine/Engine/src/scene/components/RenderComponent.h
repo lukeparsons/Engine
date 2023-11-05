@@ -12,5 +12,6 @@ public:
 
 	RenderComponent(EntityID _id);
 
+	void ChangeTexture(const Texture& _texture);
 	void ChangeTexture(std::shared_ptr<Texture> _texture);
 };

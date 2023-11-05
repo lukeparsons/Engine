@@ -124,7 +124,7 @@ int main()
 	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
 	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	Grid2D<10, 10>* grid = new Grid2D<10, 10>(scene, square, Vector2f(-0.5, -0.5), 1, 0.05f);
+	Grid2D<6, 6>* grid = new Grid2D<6, 6>(scene, square, Vector2f(-0.5, -0.5), 1, 0.05f);
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
@@ -142,13 +142,28 @@ int main()
 
 		std::cout << "Time step " << timeStep << std::endl;
 		grid->advect(timeStep, &GridDataPoint::uVelocity);
+		grid->advect(timeStep, &GridDataPoint::vVelocity);
 		grid->advect(timeStep, &GridDataPoint::pressure);
-		grid->addforce(timeStep, 1200, 5, 5, &GridDataPoint::uVelocity);;
-		grid->addforce(timeStep, 1200, 5, 5, &GridDataPoint::pressure);
+		for(size_t i = 0; i < 4; i++)
+		{
+			for(size_t j = 0; j < 4; j++)
+			{
+				grid->addforce(timeStep, 9.8, i, j, &GridDataPoint::uVelocity);
+				grid->addforce(timeStep, 9.8, i, j, &GridDataPoint::vVelocity);
+				grid->addforce(timeStep, 9.8, i, j, &GridDataPoint::pressure);
+			}
+		}
 		grid->Update(timeStep);
 
 		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
 
+		for(size_t i = 0; i < 4; i++)
+		{
+			for(size_t j = 0; j < 4; j++)
+			{
+				grid->PrintCell(i, j);
+			}
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

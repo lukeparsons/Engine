@@ -103,10 +103,16 @@ Mesh::Mesh(const Mesh& other)
 	constructmesh(shaderProgram);
 }
 
+/*void Mesh::temp_changecolour(GLfloat colour[4])
+{
+	glUniform4fv(glGetUniformLocation(shaderProgram->GetID(), "FluidColour"), 1, colour);
+}*/
+
 void Mesh::Draw(const Matrix4f& cameraMatrix, GLuint textureID, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const
 {
 	glUseProgram(shaderProgram->GetID());
 	glUniformMatrix4fv(transformLoc, 1, GL_TRUE, cameraMatrix.matrix[0]);
+
 
 	// TODO: Include rotation matrix
 	Matrix4f modelMatrix = GetTranslationMatrix(location) * GetScaleMatrix(scale);
