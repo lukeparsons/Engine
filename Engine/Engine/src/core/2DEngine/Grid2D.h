@@ -13,8 +13,10 @@ class Grid2D
 {
 private:
 	const float cellWidth;
-	//EntityID fluidID;
-	//RenderComponent* fluidRenderComponent;
+	EntityID fluidID;
+	RenderComponent* fluidRenderComponent;
+
+	Texture texture;
 
 	inline float uvelocity_centre(size_t i, size_t j)
 	{
@@ -63,22 +65,25 @@ public:
 	RowVector<row, column> negativeDivergences;
 	RowVector<row, column> precon;
 
-	Grid2D(Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) : density(_density), cellWidth(_cellWidth)
+	Grid2D(Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) : density(_density), cellWidth(_cellWidth), texture(Texture(column, row, std::vector<float>(), GL_RGB, GL_FLOAT))
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		//fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(location.x, location.y, 0), Vector3f(cellWidth * column * 0.3, cellWidth * row * 0.3, cellWidth));
-		//fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);
+		fluidID = scene.CreateModel(gridModel, std::make_shared<Texture>(texture), Vector3f(location.x, location.y, 0), Vector3f(cellWidth * column * 0.08, cellWidth * row * 0.08, cellWidth));
+		fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);
 
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
-					Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
-				RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
+				//EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
+					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
+				//RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 
-				gridData.insert(GridDataPoint(Cell2D(render), GridDataPoint::FLUID), i, j);
+				gridData.insert(GridDataPoint(Cell2D(), GridDataPoint::FLUID), i, j);
+				texture.pixels.push_back(gridData(i, j).uVelocity);
+				texture.pixels.push_back(gridData(i, j).vVelocity);
+				texture.pixels.push_back(gridData(i, j).pressure);
 			}
 		}
 
@@ -86,17 +91,17 @@ public:
 		for(unsigned int i = 0; i < column; i++)
 		{
 			gridData(i, 0).cellState = GridDataPoint::SOLID;
-			gridData(i, 0).cell.renderComponent->ChangeTexture(solidTexture);
+			//gridData(i, 0).cell.renderComponent->ChangeTexture(solidTexture);
 			gridData(i, row - 1).cellState = GridDataPoint::SOLID;
-			gridData(i, row - 1).cell.renderComponent->ChangeTexture(solidTexture);
+			//gridData(i, row - 1).cell.renderComponent->ChangeTexture(solidTexture);
 		}
 
 		for(unsigned int j = 0; j < row; j++)
 		{
 			gridData(0, j).cellState = GridDataPoint::SOLID;
-			gridData(0, j).cell.renderComponent->ChangeTexture(solidTexture);
+			//gridData(0, j).cell.renderComponent->ChangeTexture(solidTexture);
 			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
-			gridData(column - 1, j).cell.renderComponent->ChangeTexture(solidTexture);
+			//gridData(column - 1, j).cell.renderComponent->ChangeTexture(solidTexture);
 		}
 	}
 
@@ -135,7 +140,7 @@ public:
 					int originali = static_cast<int>(std::floorf(originalExactPointi));
 					int originalj = static_cast<int>(std::floorf(originalExactPointj));
 
-					std::cout << "From (" << i << ", " << j << ") to (" << originali << ", " << originalj << ")" << std::endl;
+					//std::cout << "From (" << i << ", " << j << ") to (" << originali << ", " << originalj << ")" << std::endl;
 
 					if(gridData.snap_to_grid(originali, originalj))
 					{
@@ -159,10 +164,11 @@ public:
 					float positiveQj = calculate_interp_quantity_j(originali, originalj + 1, weightsj, quantity);
 					float doublePositiveQj = calculate_interp_quantity_j(originali, originalj + 2, weightsj, quantity);
 
-					float finalQj = weightsi[0] * negativeQj + weightsi[1] * Qj + weightsi[2] * positiveQj + weightsi[3] * doublePositiveQj;
+					float finalQj = weightsj[0] * negativeQj + weightsj[1] * Qj + weightsj[2] * positiveQj + weightsj[3] * doublePositiveQj;
 
 					float averageQ = (finalQi + finalQj) / 2;
-					gridData(i, j).*quantity = averageQ >= 0 ? averageQ : 0;
+					gridData(i, j).*quantity = averageQ;
+					//gridData(i, j).*quantity = averageQ >= 0 ? averageQ : 0;
 
 				}
 
@@ -343,6 +349,7 @@ public:
 	void Update(float timeStep)
 	{
 		float scale = timeStep / (density * cellWidth);
+		float divergenceScale = 1 / cellWidth;
 		float Acoefficient = timeStep / (density * cellWidth * cellWidth);
 
 		size_t i = 0;
@@ -387,9 +394,9 @@ public:
 							gridData(i, j).vVelocity -= scale * (gridData(i, j).pressure - gridData(i, j - 1).pressure);
 						}
 
-						// TODO: remove division and account for solid velocities
-						negativeDivergences(i, j) = -scale * (gridData(i, j).uVelocity - gridData(i - 1, j).uVelocity +
-							gridData(i, j).vVelocity - gridData(i, j - 1).vVelocity);
+						// TODO: for solid velocities
+						negativeDivergences(i, j) = -divergenceScale * (gridData(i + 1, j).uVelocity - gridData(i, j).uVelocity +
+							gridData(i, j + 1).vVelocity - gridData(i, j).vVelocity);
 
 						UpdatePressure(Acoefficient, gridData(i, j), i, j);
 
@@ -410,15 +417,22 @@ public:
 
 		StandardPCG();
 
+		/*for(size_t i = 0; i < column; i++)
+		{
+			for(size_t j = 0; j < row; j++)
+			{
+				GLuint shaderID = gridData(i, j).cell.GetShaderID();
+				glUseProgram(shaderID);
+				GLfloat colour[4] = { 0.5f, 0.5f, 0.5f, 1.0f};
+				glUniform4fv(glGetUniformLocation(shaderID, "FluidColour"), 1, colour);
+			}
+		} */
+
 		//std::cout << gridData(5, 5).uVelocity << std::endl;
-		//fluidRenderComponent->ChangeTexture(GenerateTexture());
 	}
 
-	Texture GenerateTexture()
+	void UpdateTexture()
 	{
-		unsigned int width = column;
-		unsigned int height = row;
-		std::vector<float> pixels;
 		for(size_t i = 0; i < column; i++)
 		{
 			for(size_t j = 0; j < row; j++)
@@ -426,12 +440,12 @@ public:
 				//std::cout << gridData(i, j).uVelocity << std::endl;
 				//std::cout << gridData(i, j).vVelocity << std::endl;
 				//std::cout << gridData(i, j).pressure << std::endl;
-				pixels.push_back(gridData(i, j).uVelocity);
-				pixels.push_back(gridData(i, j).vVelocity);
-				pixels.push_back(gridData(i, j).pressure);
+				texture.pixels[i * column + j] = 10;
+				texture.pixels[i * column + j] = 10;
+				texture.pixels[i * column + j] = 10;
 			}
 		}
-		return Texture(width, height, pixels, GL_RGB, GL_FLOAT);
+		fluidRenderComponent->ChangeTextureData(texture.pixels);
 	}
 
 	void PrintCell(size_t i, size_t j)

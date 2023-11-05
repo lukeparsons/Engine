@@ -18,6 +18,9 @@
 #include "../math/Matrix.h"
 #include "2DEngine/Grid2D.h"
 
+#define row 100
+#define column 100 
+
 /* Task list TODO:
 * Convert std::cout for errors to proper error handling
 
@@ -124,7 +127,7 @@ int main()
 	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
 	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	Grid2D<6, 6>* grid = new Grid2D<6, 6>(scene, square, Vector2f(-0.5, -0.5), 1, 0.05f);
+	Grid2D<row, column>* grid = new Grid2D<row, column>(scene, square, Vector2f(0, 0), 1, 0.1f);
 
 	double previousFrameTime = 0;
 	while(!glfwWindowShouldClose(window))
@@ -140,30 +143,33 @@ int main()
 
 		processInput(window);
 
-		std::cout << "Time step " << timeStep << std::endl;
-		grid->advect(timeStep, &GridDataPoint::uVelocity);
-		grid->advect(timeStep, &GridDataPoint::vVelocity);
-		grid->advect(timeStep, &GridDataPoint::pressure);
-		for(size_t i = 0; i < 4; i++)
+		//std::cout << "Time step " << timeStep << std::endl;
+		for(size_t i = 0; i < row; i++)
 		{
-			for(size_t j = 0; j < 4; j++)
+			for(size_t j = 0; j < column; j++)
 			{
-				grid->addforce(timeStep, 9.8, i, j, &GridDataPoint::uVelocity);
-				grid->addforce(timeStep, 9.8, i, j, &GridDataPoint::vVelocity);
-				grid->addforce(timeStep, 9.8, i, j, &GridDataPoint::pressure);
+				grid->addforce(timeStep, 9.81, i, j, &GridDataPoint::uVelocity);
+				grid->addforce(timeStep, 9.81, i, j, &GridDataPoint::vVelocity);
+				//grid->addforce(timeStep, 9.81, i, j, &GridDataPoint::pressure);
 			}
 		}
 		grid->Update(timeStep);
 
+		grid->advect(timeStep, &GridDataPoint::uVelocity);
+		grid->advect(timeStep, &GridDataPoint::vVelocity);
+		grid->advect(timeStep, &GridDataPoint::pressure);
+
+		//grid->UpdateTexture();
+
 		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
 
-		for(size_t i = 0; i < 4; i++)
+		/*for(size_t i = 0; i < row; i++)
 		{
-			for(size_t j = 0; j < 4; j++)
+			for(size_t j = 0; j < column; j++)
 			{
 				grid->PrintCell(i, j);
 			}
-		}
+		} */
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

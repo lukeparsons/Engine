@@ -19,12 +19,18 @@ RenderComponent::RenderComponent(EntityID _id) : Component(_id), texture(default
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void RenderComponent::ChangeTextureData(const std::vector<float>& pixels)
+{
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->width, texture->height, texture->format, texture->type, pixels.data());
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 void RenderComponent::ChangeTexture(const Texture& _texture)
 {
 	texture = nullptr;
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _texture.width, _texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _texture.pixels.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, texture->format, _texture.width, _texture.height, 0, texture->format, texture->type, _texture.pixels.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -38,6 +44,6 @@ void RenderComponent::ChangeTexture(std::shared_ptr<Texture> _texture)
 
 	texture = _texture;
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _texture->width, _texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _texture->pixels.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, texture->format, _texture->width, _texture->height, 0, texture->format, texture->type, _texture->pixels.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

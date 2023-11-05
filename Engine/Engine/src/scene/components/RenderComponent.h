@@ -12,6 +12,7 @@ public:
 
 	RenderComponent(EntityID _id);
 
+	void ChangeTextureData(const std::vector<float>& pixels);
 	void ChangeTexture(const Texture& _texture);
 	void ChangeTexture(std::shared_ptr<Texture> _texture);
 };
