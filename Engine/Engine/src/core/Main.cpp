@@ -19,7 +19,7 @@
 #include "2DEngine/Grid2D.h"
 
 #define row 100
-#define column 100 
+#define column 100
 
 /* Task list TODO:
 * Convert std::cout for errors to proper error handling
@@ -127,15 +127,16 @@ int main()
 	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
 	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	Grid2D<row, column>* grid = new Grid2D<row, column>(scene, square, Vector2f(0, 0), 1, 0.1f);
+	Grid2D<row, column>* grid = new Grid2D<row, column>(scene, square, Vector2f(0, 0), 1, 0.005f);
 
 	double previousFrameTime = 0;
+	float timeStep = 1 / 30.0f;
 	while(!glfwWindowShouldClose(window))
 	{ 
 
 		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
-		float timeStep = static_cast<float>(currentFrameTime - previousFrameTime);
+		//float timeStep = static_cast<float>(currentFrameTime - previousFrameTime);
 		previousFrameTime = currentFrameTime;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -144,32 +145,25 @@ int main()
 		processInput(window);
 
 		//std::cout << "Time step " << timeStep << std::endl;
+		
+		grid->addforces(timeStep, 9.81f);
+
+		grid->Solve(timeStep);
+
+		//grid->advect(timeStep, grid->uVelocity);
+		//grid->advect(timeStep, grid->vVelocity);
+
 		for(size_t i = 0; i < row; i++)
 		{
 			for(size_t j = 0; j < column; j++)
 			{
-				grid->addforce(timeStep, 9.81, i, j, &GridDataPoint::uVelocity);
-				grid->addforce(timeStep, 9.81, i, j, &GridDataPoint::vVelocity);
-				//grid->addforce(timeStep, 9.81, i, j, &GridDataPoint::pressure);
+				//grid->PrintCell(i, j);
 			}
 		}
-		grid->Update(timeStep);
 
-		grid->advect(timeStep, &GridDataPoint::uVelocity);
-		grid->advect(timeStep, &GridDataPoint::vVelocity);
-		grid->advect(timeStep, &GridDataPoint::pressure);
-
-		//grid->UpdateTexture();
+		grid->UpdateTexture();
 
 		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
-
-		/*for(size_t i = 0; i < row; i++)
-		{
-			for(size_t j = 0; j < column; j++)
-			{
-				grid->PrintCell(i, j);
-			}
-		} */
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

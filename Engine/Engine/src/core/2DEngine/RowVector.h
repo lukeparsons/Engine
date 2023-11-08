@@ -4,27 +4,23 @@
 One row of the vector stores information about one cell in the grid (i, j)
 We store a one cell thick halo grid
 */
+// TODO: This don't work (templates)
 template<size_t row, size_t column>
 class RowVector
 {
 private:
-	std::array<double, row * column + (2 * (row + 2)) + (2 * column)> vector;
+	std::array<double, (row + 2) * (column + 2)> vector;
 public:
 
 	RowVector()
 	{
-		for(size_t i = 0; i <= column + 1; i++) // Bottom and top halo
-		{
-			vector[i] = 0;
-			vector[i + (column + 2) * (row + 1)] = 0;
-		}
+		vector.fill(0);
+	}
 
-		for(size_t j = 1; j <= row; j++) // Left and right halo
-		{
-			vector[(column + 2) * j] = 0;
-			vector[(column + 1) + (column + 2) * j] = 0;
-		}
-	};
+	void fill(double val)
+	{
+		vector.fill(val);
+	}
 
 	inline double operator[](size_t idx) const
 	{
@@ -36,22 +32,25 @@ public:
 		return vector[idx];
 	}
 
-	inline double operator()(size_t i, size_t j) const
+	inline const double& operator()(size_t i, size_t j) const
 	{
-		return vector[(i + 1) + column * (j + 1)];
+		return vector[(i + 1) + (column + 2) * (j + 1)];
 	}
 
 	inline double& operator()(size_t i, size_t j)
 	{
-		return vector[(i + 1) + column * (j + 1)];
+		return vector[(i + 1) + (column + 2) * (j + 1)];
 	}
 
 	constexpr inline RowVector<row, column> operator*(double scalar) const
 	{
 		RowVector<row, column> result;
-		for(size_t i = 0; i < row * column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			result[i] = vector[i] * scalar;
+			for(size_t j = 0; j < row; j++)
+			{
+				result[i] = (i, j) * scalar;
+			}
 		}
 		return result;
 	}
@@ -59,9 +58,12 @@ public:
 	constexpr inline RowVector<row, column> operator+(const RowVector<row, column>& rhs) const
 	{
 		RowVector<row, column> result;
-		for(size_t i = 0; i < row * column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			result[i] = vector[i] + rhs[i];
+			for(size_t j = 0; j < row; j++)
+			{
+				result[i] = (i, j) + rhs(i, j);
+			}
 		}
 		return result;
 	}
@@ -69,9 +71,12 @@ public:
 	constexpr inline RowVector<row, column> operator-(const RowVector<row, column>& rhs) const
 	{
 		RowVector<row, column> result;
-		for(size_t i = 0; i < row * column; i++)
+		for(size_t i = 0; i < column; i++)
 		{
-			result[i] = vector[i] - rhs[i];
+			for(size_t j = 0; j < row; j++)
+			{
+				result[i] = (i, j) - rhs(i, j);
+			}
 		}
 		return result;
 	}
@@ -80,6 +85,17 @@ public:
 	{
 		return *std::max_element(vector.begin(), vector.end());
 	}
+
+	std::array<double, (row + 2) * (column + 2) >::iterator begin()
+	{
+		return vector.begin();
+	}
+
+	std::array<double, (row + 2) * (column + 2)>::iterator end()
+	{
+		return vector.end();
+	}
+
 };
 
 template<size_t row, size_t column>
@@ -92,9 +108,12 @@ template<size_t row, size_t column>
 inline double DotProduct(const RowVector<row, column>& lhs, const RowVector<row, column>& rhs)
 {
 	double result = 0;
-	for(size_t i = 0; i < row * column; i++)
+	for(size_t i = 0; i < column; i++)
 	{
-		result += lhs[i] * rhs[i];
+		for(size_t j = 0; j < row; j++)
+		{
+			result += lhs(i, j) * rhs(i, j);
+		}
 	}
 	return result;
 }

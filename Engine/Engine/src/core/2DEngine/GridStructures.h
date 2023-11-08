@@ -2,16 +2,10 @@
 #include <algorithm>
 #include <array>
 
-class GridDataPoint
+struct GridDataPoint
 {
-public:
-	Cell2D cell;
 
 	enum CellState { FLUID, SOLID, EMPTY, DEFAULT } cellState;
-
-	float uVelocity; // right arrow of cell
-	float vVelocity; // top arrow of cell
-	float pressure;
 
 	/* These 'A' named variables store the coefficient matrix for the pressure calculations
 	Each row of the matrix corresponds to one fluid cell
@@ -26,103 +20,109 @@ public:
 	float Ax; // Ax stores the coefficient for A(i, j)(i + 1, j)
 	float Ay; // Ax stores the coefficient for A(i, j)(i, j + 1)
 
-	double q;
-	double z;
-
-	GridDataPoint(Cell2D& _cell, CellState _state) : cell(_cell), cellState(_state),
-		uVelocity(0), vVelocity(0), pressure(0), Adiag(0), Ax(0), Ay(0), q(0), z(0) {};
-
-	GridDataPoint(Cell2D&& _cell, CellState _state) : cell(_cell), cellState(_state),
-		uVelocity(0), vVelocity(0), pressure(0), Adiag(0), Ax(0), Ay(0), q(0), z(0) {};
-
-	GridDataPoint() : cell(Cell2D()), cellState(EMPTY),
-		uVelocity(0), vVelocity(0), pressure(0), Adiag(0), Ax(0), Ay(0), q(0), z(0) {};
+	GridDataPoint() : cellState(GridDataPoint::EMPTY), Adiag(0), Ax(0), Ay(0) {};
+	GridDataPoint(CellState state) : cellState(state), Adiag(0), Ax(0), Ay(0) {};
 };
 
 /* This data structure relies on an ordered insertion
 * for(1 -> column) { for(1 -> row) { insert() } } is the required order
-* The grid is made up of cells from (2, 2) to (column + 2 , row + 2) with a halo (two cell thick wall) around it
-* The outer halo bottom left corner is at (0, 0) and the top right is at (column + 3, row + 3)
-* The inner halo bottom left corner is at (1, 1) and the top right is at (column + 2, row + 2)
-* But we can index from (0, 0) to (column, row) by adding 2 to (i, j)
 */
 template<typename T, size_t row, size_t column>
 struct GridStructure
 {
 protected:
-	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
-	std::array < T, (row + 4) * (column + 4)> grid;
+
+
 
 public:
+	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
+	std::array<T, row* column> grid;
 
-	GridStructure()
+	GridStructure() = default;
+
+	GridStructure(T initValue)
 	{
+		grid.fill(initValue);
+	}
+
+	void fill(T value)
+	{
+		grid.fill(value);
+	}
+
+	virtual void insert(T& dataPoint, size_t i, size_t j)
+	{
+		grid[i + column * j] = dataPoint;
+	}
+
+	virtual void insert(T&& dataPoint, size_t i, size_t j)
+	{
+		grid[i + column * j ] = dataPoint;
+	}
+
+	virtual inline T& operator()(size_t i, size_t j)
+	{
+		return grid[i + column * j];
+	}
+
+	virtual const inline T& operator()(size_t i, size_t j) const
+	{
+		return grid[i + column * j];
+	}
+};
+
+/*The grid is made up of cells from(2, 2) to(column + 2, row + 2) with a halo(two cell thick wall) around it
+* The outer halo bottom left corner is at(0, 0) and the top right is at(column + 3, row + 3)
+* The inner halo bottom left corner is at(1, 1) and the top right is at(column + 2, row + 2)
+* But we can index from(0, 0) to(column, row) by adding 2 to(i, j) */
+template<typename T, size_t row, size_t column>
+struct GridStructureHalo : public GridStructure<T, row + 4, column + 4>
+{
+	// TODO: Possibly redundant
+	GridStructureHalo() : GridStructure<T, row + 4, column + 4>() {
 		for(size_t i = 0; i <= column + 3; i++) // Bottom and top halo
 		{
 			// Outer halo
-			grid[i] = GridDataPoint(); // (0, 0) to (column + 4, 0)
-			grid[i + (column + 4) * (row + 3)] = GridDataPoint(); // (0, row + 3) to (column + 3, row + 3)
+			this->grid[i] = T(); // (0, 0) to (column + 4, 0)
+			this->grid[i + (column + 4) * (row + 3)] = T(); // (0, row + 3) to (column + 3, row + 3)
 
 			// Inner halo
-			grid[i + (column + 4) * 1] = GridDataPoint(); // (0, 1) to (column + 3, 1)
-			grid[i + (column + 4) * (row + 2)] = GridDataPoint(); // (0, row + 2) to (column + 3, row + 2)
+			this->grid[i + (column + 4) * 1] = T(); // (0, 1) to (column + 3, 1)
+			this->grid[i + (column + 4) * (row + 2)] = T(); // (0, row + 2) to (column + 3, row + 2)
 		}
 
 		for(size_t j = 2; j <= row; j++) // Left and right halo
 		{
 			// Outer halo
-			grid[(column + 4) * j] = GridDataPoint(); // (0, 2) to (0, row)
-			grid[(column + 3) + (column + 4) * j] = GridDataPoint(); // (column + 3, 2) to (column + 3, row)
+			this->grid[(column + 4) * j] = T(); // (0, 2) to (0, row)
+			this->grid[(column + 3) + (column + 4) * j] = T(); // (column + 3, 2) to (column + 3, row)
 
 			// Inner halo
-			grid[1 + (column + 4) * j] = GridDataPoint(); // (1, 2) to (1, row)
-			grid[(column + 2) + (column + 4) * j] = GridDataPoint(); // (column + 2, 2) to (column + 2, row)
+			this->grid[1 + (column + 4) * j] = T(); // (1, 2) to (1, row)
+			this->grid[(column + 2) + (column + 4) * j] = T(); // (column + 2, 2) to (column + 2, row)
 		}
-	};
-
-	void insert(T& dataPoint, size_t i, size_t j)
-	{
-		grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
 	}
 
-	void insert(T&& dataPoint, size_t i, size_t j)
+	GridStructureHalo(T initValue) : GridStructure<T, row + 4, column + 4>(initValue) {};
+
+	virtual void insert(T& dataPoint, size_t i, size_t j) override
 	{
-		grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
+		this->grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
 	}
 
-	inline T& operator()(size_t i, size_t j)
+	virtual void insert(T&& dataPoint, size_t i, size_t j) override
 	{
-		return grid[(i + 2) + (column + 4) * (j + 2)];
+		this->grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
 	}
 
-	const inline T& operator()(size_t i, size_t j) const
+	virtual inline T& operator()(size_t i, size_t j) override
 	{
-		return grid[(i + 2) + (column + 4) * (j + 2)];
+		return this->grid[(i + 2) + (column + 4) * (j + 2)];
 	}
 
-	bool snap_to_grid(int& i, int& j)
+	virtual const inline T& operator()(size_t i, size_t j) const override
 	{
-		bool snapped = false;
-		if(i < 0) // Outside grid on left
-		{
-			i = 0;
-			snapped = true;
-		} else if(i >= column) // Outside grid on right
-		{
-			i = column - 1;
-			snapped = true;
-		}
-
-		if(j < 0) // Outside grid below
-		{
-			j = 0;
-			return true;
-		} else if(j >= row) // Outside grid above
-		{
-			j = row - 1;
-			return true;
-		}
-		return snapped;
+		return this->grid[(i + 2) + (column + 4) * (j + 2)];
 	}
 };
 
