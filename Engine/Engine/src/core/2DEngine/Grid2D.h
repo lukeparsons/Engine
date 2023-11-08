@@ -100,7 +100,7 @@ public:
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(location.x, location.y, 0), Vector3f(cellWidth * column * 0.4, cellWidth * row * 0.4, cellWidth));
+		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(location.x, location.y, 0), Vector3f(cellWidth * column * 0.8, cellWidth * row * 0.8, cellWidth));
 		fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);
 
 		for(unsigned int i = 0; i < column; i++)
@@ -120,24 +120,24 @@ public:
 		// Make the boundary solid
 		for(unsigned int i = 0; i < column; i++)
 		{
-			//gridData(i, 0).cellState = GridDataPoint::SOLID;
+			gridData(i, 0).cellState = GridDataPoint::SOLID;
 			//gridData(i, 0).cell.renderComponent->ChangeTexture(solidTexture);
-			//gridData(i, row - 1).cellState = GridDataPoint::SOLID;
+			gridData(i, row - 1).cellState = GridDataPoint::SOLID;
 			//gridData(i, row - 1).cell.renderComponent->ChangeTexture(solidTexture);
 		}
 
 		for(unsigned int j = 0; j < row; j++)
 		{
-			//gridData(0, j).cellState = GridDataPoint::SOLID;
+			gridData(0, j).cellState = GridDataPoint::SOLID;
 			//gridData(0, j).cell.renderComponent->ChangeTexture(solidTexture);
-			//gridData(column - 1, j).cellState = GridDataPoint::SOLID;
+			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
 			//gridData(column - 1, j).cell.renderComponent->ChangeTexture(solidTexture);
 		}
 
 		// Temp
 		for(unsigned int j = 1; j < row - 1; j++)
 		{
-			//uVelocity(1, j) = 2.0f;
+			uVelocity(1, j) = 2.0f;
 		}
 	}
 
@@ -152,8 +152,8 @@ public:
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
 					// Runge-Kutta 2
-					int midPointi = static_cast<int>(std::floorf(i - 0.5 * timeStep * uVelocity(i, j)));
-					int midPointj = static_cast<int>(std::floorf(j - 0.5 * timeStep * vVelocity(i, j)));
+					int midPointi = static_cast<int>(std::floorf(i - 0.5 * timeStep * uvelocity_centre(i, j)));
+					int midPointj = static_cast<int>(std::floorf(j - 0.5 * timeStep * vvelocity_centre(i, j)));
 					//std::cout << "midpoint (" << midPointi << ", " << midPointj << ")" << std::endl;
 					if(snap_to_grid(midPointi, midPointj))
 					{
@@ -202,8 +202,8 @@ public:
 					float finalQj = weightsj[0] * negativeQj + weightsj[1] * Qj + weightsj[2] * positiveQj + weightsj[3] * doublePositiveQj;
 
 					float averageQ = (finalQi + finalQj) / 2;
-					data(i, j) = averageQ;
-					//gridData(i, j).*quantity = averageQ >= 0 ? averageQ : 0;
+					//data(i, j) = averageQ;
+					data(i, j) = averageQ >= 0 ? averageQ : 0;
 
 				}
 
@@ -219,8 +219,8 @@ public:
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					uVelocity(i, j) += timeStep * force + i; // TODO: remove + i and + j
-					vVelocity(i, j) += timeStep * force + j;
+					uVelocity(i, j) += timeStep * force;
+					vVelocity(i, j) += timeStep * force;
 				}
 
 			}
@@ -249,7 +249,7 @@ public:
 		double sigma = DotProduct(auxiliaryVector, residualVector);
 
 		// TODO: Implement proper scaling
-		double tolerance = 0.0001;
+		double tolerance = 0.000001f;
 
 		for(unsigned int iter = 0; iter < 200; iter++) // 200 here is max iterations
 		{
@@ -549,9 +549,6 @@ public:
 		{
 			for(size_t j = 0; j < row; j++)
 			{
-				//std::cout << uVelocity(i, j) << std::endl;
-				//std::cout << vVelocity(i, j) << std::endl;
-				//std::cout << pressure(i, j) << std::endl;
 				gridTexture.pixels[i * column + j] = uVelocity(i, j);
 				gridTexture.pixels[i * column + j] = vVelocity(i, j);
 				gridTexture.pixels[i * column + j] = pressure(i, j);

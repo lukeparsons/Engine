@@ -152,6 +152,7 @@ int main()
 
 		//grid->advect(timeStep, grid->uVelocity);
 		//grid->advect(timeStep, grid->vVelocity);
+		//grid->advect(timeStep, grid->pressure);
 
 		for(size_t i = 0; i < row; i++)
 		{
