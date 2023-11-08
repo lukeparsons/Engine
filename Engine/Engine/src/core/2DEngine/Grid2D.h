@@ -13,7 +13,6 @@ template<size_t row, size_t column>
 class Grid2D
 {
 private:
-	const float cellWidth;
 	EntityID fluidID;
 	RenderComponent* fluidRenderComponent;
 
@@ -46,18 +45,18 @@ private:
 
 	inline float uvelocity_centre(size_t i, size_t j) const
 	{
-		return (uVelocity(i - 1, j) + uVelocity(i, j)) / 2;
+		return (uVelocity(i - 1, j) + uVelocity(i, j)) / 2.0f;
 	}
 
 	inline float vvelocity_centre(size_t i, size_t j) const
 	{
-		return (vVelocity(i, j - 1) + vVelocity(i, j)) / 2;
+		return (vVelocity(i, j - 1) + vVelocity(i, j)) / 2.0f;
 	}
 
 	std::array<float, 4> get_interp_weights(float s) const
 	{
-		float sSquared = pow(s, 2);
-		float sCubed = pow(s, 3);
+		float sSquared = powf(s, 2);
+		float sCubed = powf(s, 3);
 
 		float negativeWeight = (-1/3.0f) * s + (1/2.0f) * sSquared - (1/6.0f) * sCubed;
 		float weight = 1 - sSquared + (1/2.0f) * (sCubed - s);
@@ -67,20 +66,19 @@ private:
 		return { negativeWeight, weight, positiveWeight, doublePositiveWeight };
 	}
 
-	template<typename T>
-	inline float calculate_interp_quantity_i(int i, int j, std::array<float, 4> weights, const GridStructureHalo<T, row, column>& data) const
+	inline float calculate_interp_quantity_i(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float, row, column>& data) const
 	{
 		return weights[0] * data(i, j - 1) + weights[1] * data(i, j) + weights[2] * data(i, j + 1) + weights[3] * data(i, j + 2);
 	}
 
-	template<typename T>
-	inline float calculate_interp_quantity_j(int i, int j, std::array<float, 4> weights, const GridStructureHalo<T, row, column>& data) const
+	inline float calculate_interp_quantity_j(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float, row, column>& data) const
 	{
 		return weights[0] * data(i - 1, j) + weights[1] * data(i, j) + weights[2] * data(i + 1, j) + weights[3] * data(i + 2, j);
 	}
 
 public:
-
+	// TODO: make private
+	const float cellWidth;
 	float density;
 	float temperature;
 	float concentration;
@@ -152,36 +150,46 @@ public:
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
 					// Runge-Kutta 2
-					int midPointi = static_cast<int>(std::floorf(i - 0.5 * timeStep * uvelocity_centre(i, j)));
-					int midPointj = static_cast<int>(std::floorf(j - 0.5 * timeStep * vvelocity_centre(i, j)));
+					int midPointi = static_cast<int>(std::roundf(i - 0.5f * timeStep * uvelocity_centre(i, j)));
+					int midPointj = static_cast<int>(std::roundf(j - 0.5f * timeStep * vvelocity_centre(i, j)));
+					//std::cout << uvelocity_centre(i, j) << std::endl;
 					//std::cout << "midpoint (" << midPointi << ", " << midPointj << ")" << std::endl;
 					if(snap_to_grid(midPointi, midPointj))
 					{
+						//std::cout << "snapped" << std::endl;
 						data(i, j) = data(midPointi, midPointj);
 						continue;
 					}
 
-					float originalExactPointi = i - 0.5 * timeStep * uvelocity_centre(midPointi, midPointj);
-					float originalExactPointj = j - 0.5 * timeStep * vvelocity_centre(midPointi, midPointj);
+					float originalExactPointi = i - timeStep * uvelocity_centre(midPointi, midPointj);
+					float originalExactPointj = j - timeStep * vvelocity_centre(midPointi, midPointj);
 					//std::cout << "exact(" << originalExactPointi << ", " << originalExactPointj << ")" << std::endl;
 
-					// Interpolate
-					float alphai = (originalExactPointi - i) * scale;
-					float alphaj = (originalExactPointj - j) * scale;
-
-					std::array<float, 4> weightsi = get_interp_weights(alphai);
-					std::array<float, 4> weightsj = get_interp_weights(alphaj);
-
-					int originali = static_cast<int>(std::floorf(originalExactPointi));
-					int originalj = static_cast<int>(std::floorf(originalExactPointj));
+					int originali = static_cast<int>(std::roundf(originalExactPointi));
+					int originalj = static_cast<int>(std::roundf(originalExactPointj));
 
 					//std::cout << "From (" << i << ", " << j << ") to (" << originali << ", " << originalj << ")" << std::endl;
 
 					if(snap_to_grid(originali, originalj))
 					{
-						data(i, j) = data(midPointi, midPointj);
+						//std::cout << "snapped" << std::endl;
+						data(i, j) = data(originali, originalj);
 						continue;
 					}
+
+					// Interpolate
+					float alphai = (originalExactPointi - i) * scale;
+					float alphaj = (originalExactPointj - j) * scale;
+
+					float qI = (1 - alphai) * data(originali, originalj) + alphai * data(originali + 1, originalj);
+					float qJ = (1 - alphaj) * data(originali, originalj) + alphaj * data(originali, originalj + 1);
+
+					data(i, j) = (qI + qJ) / 2;
+					continue;
+
+					/*std::array<float, 4> weightsi = get_interp_weights(alphai);
+					std::array<float, 4> weightsj = get_interp_weights(alphaj);
+
 
 					//Cubic interpolation
 
@@ -202,9 +210,8 @@ public:
 					float finalQj = weightsj[0] * negativeQj + weightsj[1] * Qj + weightsj[2] * positiveQj + weightsj[3] * doublePositiveQj;
 
 					float averageQ = (finalQi + finalQj) / 2;
-					//data(i, j) = averageQ;
-					data(i, j) = averageQ >= 0 ? averageQ : 0;
-
+					data(i, j) = averageQ;
+					//data(i, j) = averageQ >= 0 ? averageQ : 0; */
 				}
 
 			}

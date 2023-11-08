@@ -130,7 +130,6 @@ int main()
 	Grid2D<row, column>* grid = new Grid2D<row, column>(scene, square, Vector2f(0, 0), 1, 0.005f);
 
 	double previousFrameTime = 0;
-	float timeStep = 1 / 30.0f;
 	while(!glfwWindowShouldClose(window))
 	{ 
 
@@ -144,20 +143,23 @@ int main()
 
 		processInput(window);
 
+		float timeStep = 5 * grid->cellWidth / (grid->uVelocity.max());
+
 		//std::cout << "Time step " << timeStep << std::endl;
 		
 		grid->addforces(timeStep, 9.81f);
 
 		grid->Solve(timeStep);
 
-		//grid->advect(timeStep, grid->uVelocity);
-		//grid->advect(timeStep, grid->vVelocity);
+		grid->advect(timeStep, grid->uVelocity);
+		grid->advect(timeStep, grid->vVelocity);
 		//grid->advect(timeStep, grid->pressure);
 
 		for(size_t i = 0; i < row; i++)
 		{
 			for(size_t j = 0; j < column; j++)
 			{
+				//std::cout << "pressure " << grid->pressure(i, j) << std::endl;
 				//grid->PrintCell(i, j);
 			}
 		}
