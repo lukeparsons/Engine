@@ -105,6 +105,11 @@ public:
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
+				if(i == 1)
+				{
+					uVelocity(1, j) = 2.0f;
+					vVelocity(1, j) = 2.0f;
+				}
 				//EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
 					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
 				//RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
@@ -119,24 +124,16 @@ public:
 		for(unsigned int i = 0; i < column; i++)
 		{
 			gridData(i, 0).cellState = GridDataPoint::SOLID;
-			//gridData(i, 0).cell.renderComponent->ChangeTexture(solidTexture);
 			gridData(i, row - 1).cellState = GridDataPoint::SOLID;
-			//gridData(i, row - 1).cell.renderComponent->ChangeTexture(solidTexture);
+
 		}
 
-		for(unsigned int j = 0; j < row; j++)
-		{
-			gridData(0, j).cellState = GridDataPoint::SOLID;
-			//gridData(0, j).cell.renderComponent->ChangeTexture(solidTexture);
-			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
-			//gridData(column - 1, j).cell.renderComponent->ChangeTexture(solidTexture);
-		}
-
-		// Temp
 		for(unsigned int j = 1; j < row - 1; j++)
 		{
-			uVelocity(1, j) = 2.0f;
+			gridData(0, j).cellState = GridDataPoint::EMPTY;
+			gridData(column - 1, j).cellState = GridDataPoint::EMPTY;
 		}
+
 	}
 
 	void advect(float timeStep, GridStructureHalo<float, row, column>& data)
@@ -218,7 +215,7 @@ public:
 		}
 	}
 
-	inline void addforces(float timeStep, float force)
+	inline void addforces(float timeStep, float force, float variableTimeStep)
 	{
 		for(size_t i = 0; i < row; i++)
 		{
@@ -233,13 +230,23 @@ public:
 			}
 		}
 
+		// Temp
+		for(unsigned int j = 1; j < row - 1; j++)
+		{
+			if(gridData(column - 2, j).cellState == GridDataPoint::FLUID)
+			{
+				uVelocity(column - 2, j) += 700.0f * variableTimeStep;
+				vVelocity(column - 2, j) += 700.0f * variableTimeStep;
+			}
+
+		}
+
 	}
 
 	void StandardPCG()
 	{
 		// PCG algorithm for solving Ap = b
 		pressure.fill(0); // Pressure guess
-		precon.fill(0);
 		constructPreconditioner();
 
 		if(std::all_of(negativeDivergences.begin(), negativeDivergences.end(), [](float val) { return val == 0; }))
@@ -364,6 +371,8 @@ public:
 		double safetyConstant = 0.25;
 
 		double e = 0;
+
+		precon.fill(0);
 		for(size_t i = 0; i < column; i++)
 		{
 			for(size_t j = 0; j < row; j++)

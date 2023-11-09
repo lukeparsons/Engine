@@ -130,6 +130,8 @@ int main()
 	Grid2D<row, column>* grid = new Grid2D<row, column>(scene, square, Vector2f(0, 0), 1, 0.005f);
 
 	double previousFrameTime = 0;
+	//float timeStep = (1 / 30.0f);
+	int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
 	{ 
 
@@ -147,7 +149,7 @@ int main()
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
-		grid->addforces(timeStep, 9.81f);
+		grid->addforces(timeStep, -9.81f, abs(sinf(frameCount) * timeStep));
 
 		grid->Solve(timeStep);
 
@@ -167,6 +169,8 @@ int main()
 		grid->UpdateTexture();
 
 		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
+
+		frameCount++;
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
