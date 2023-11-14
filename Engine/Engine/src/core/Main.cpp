@@ -127,7 +127,7 @@ int main()
 	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
 	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	Grid2D<row, column>* grid = new Grid2D<row, column>(scene, square, Vector2f(0, 0), 1, 0.005f);
+	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.05f);
 
 	double previousFrameTime = 0;
 	//float timeStep = (1 / 30.0f);
@@ -149,12 +149,11 @@ int main()
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
-		grid->addforces(timeStep, -9.81f, abs(sinf(frameCount) * timeStep));
+		grid->addforces(timeStep, -9.81f);
 
 		grid->Solve(timeStep);
 
-		grid->advect(timeStep, grid->uVelocity);
-		grid->advect(timeStep, grid->vVelocity);
+		grid->advect(timeStep, grid->uVelocity, grid->vVelocity);
 		//grid->advect(timeStep, grid->pressure);
 
 		for(size_t i = 0; i < row; i++)

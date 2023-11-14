@@ -9,12 +9,13 @@ static const std::shared_ptr<Texture> fluidTexture = std::make_shared<TextureDat
 static const std::shared_ptr<Texture> solidTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/block.png"));
 static const std::shared_ptr<Texture> emptyTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
-template<size_t row, size_t column>
 class Grid2D
 {
 private:
 	EntityID fluidID;
 	RenderComponent* fluidRenderComponent;
+
+	size_t column, row;
 
 	TextureData<float> gridTexture;
 
@@ -66,12 +67,12 @@ private:
 		return { negativeWeight, weight, positiveWeight, doublePositiveWeight };
 	}
 
-	inline float calculate_interp_quantity_i(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float, row, column>& data) const
+	inline float calculate_interp_quantity_i(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float>& data) const
 	{
 		return weights[0] * data(i, j - 1) + weights[1] * data(i, j) + weights[2] * data(i, j + 1) + weights[3] * data(i, j + 2);
 	}
 
-	inline float calculate_interp_quantity_j(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float, row, column>& data) const
+	inline float calculate_interp_quantity_j(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float>& data) const
 	{
 		return weights[0] * data(i - 1, j) + weights[1] * data(i, j) + weights[2] * data(i + 1, j) + weights[3] * data(i + 2, j);
 	}
@@ -83,32 +84,32 @@ public:
 	float temperature;
 	float concentration;
 
-	GridStructureHalo<float, row, column> uVelocity = GridStructureHalo<float, row, column>(0);
-	GridStructureHalo<float, row, column> vVelocity = GridStructureHalo<float, row, column>(0);
-	GridStructureHalo<float, row, column> pressure = GridStructureHalo<float, row, column>(0);
+	GridStructureHalo<float> uVelocity = GridStructureHalo<float>(0, column, row);
+	GridStructureHalo<float> vVelocity = GridStructureHalo<float>(0, column, row);
+	GridStructureHalo<float> pressure = GridStructureHalo<float>(0, column, row);
 
 	// TODO: Make this a one thick halo
-	GridStructureHalo<GridDataPoint, row, column> gridData = GridStructureHalo<GridDataPoint, row, column>(GridDataPoint(GridDataPoint::FLUID));
+	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::FLUID), column, row);
 
-	RowVector<row, column> negativeDivergences;
-	RowVector<row, column> precon;
+	RowVector negativeDivergences = RowVector(column, row);
+	RowVector precon = RowVector(column, row);
 
-	Grid2D(Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) : density(_density), cellWidth(_cellWidth),
-		gridTexture(TextureData<float>(row, column, GL_RGB, GL_FLOAT, std::vector<float>()))
+	Grid2D(size_t _row, size_t _column, Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) 
+		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), gridTexture(TextureData<float>(column, row, GL_RGB, GL_FLOAT, std::vector<float>()))
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(location.x, location.y, 0), Vector3f(cellWidth * column * 0.8, cellWidth * row * 0.8, cellWidth));
+		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(location.x, location.y, 0), Vector3f(column * cellWidth * 0.1, row * cellWidth * 0.1, cellWidth));
 		fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);
 
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				if(i == 1)
+				if(i == column - 2)
 				{
-					uVelocity(1, j) = 2.0f;
-					vVelocity(1, j) = 2.0f;
+					uVelocity(column - 2, j) = 2.0f;
+					//vVelocity(1, j) = 2.0f;
 				}
 				//EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
 					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
@@ -130,92 +131,61 @@ public:
 
 		for(unsigned int j = 1; j < row - 1; j++)
 		{
-			gridData(0, j).cellState = GridDataPoint::EMPTY;
-			gridData(column - 1, j).cellState = GridDataPoint::EMPTY;
+			gridData(0, j).cellState = GridDataPoint::SOLID;
+			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
 		}
 
 	}
 
-	void advect(float timeStep, GridStructureHalo<float, row, column>& data)
+	// data1 and data2 are temp
+	void advect(float timeStep, GridStructureHalo<float>& data1, GridStructureHalo<float>& data2)
 	{
 		float scale = 1 / cellWidth;
-
+		int count = 0;
 		for(size_t i = 0; i < column; i++)
 		{
 			for(size_t j = 0; j < row; j++)
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					// Runge-Kutta 2
-					int midPointi = static_cast<int>(std::roundf(i - 0.5f * timeStep * uvelocity_centre(i, j)));
-					int midPointj = static_cast<int>(std::roundf(j - 0.5f * timeStep * vvelocity_centre(i, j)));
-					//std::cout << uvelocity_centre(i, j) << std::endl;
-					//std::cout << "midpoint (" << midPointi << ", " << midPointj << ")" << std::endl;
-					if(snap_to_grid(midPointi, midPointj))
-					{
-						//std::cout << "snapped" << std::endl;
-						data(i, j) = data(midPointi, midPointj);
-						continue;
-					}
 
-					float originalExactPointi = i - timeStep * uvelocity_centre(midPointi, midPointj);
-					float originalExactPointj = j - timeStep * vvelocity_centre(midPointi, midPointj);
-					//std::cout << "exact(" << originalExactPointi << ", " << originalExactPointj << ")" << std::endl;
-
-					int originali = static_cast<int>(std::roundf(originalExactPointi));
-					int originalj = static_cast<int>(std::roundf(originalExactPointj));
+					float x = i - timeStep * uVelocity(i, j) * scale;
+					float y = j - timeStep * vVelocity(i, j) * scale;
+					int originali = static_cast<int>(std::roundf(x));
+					int originalj = static_cast<int>(std::roundf(y));
 
 					//std::cout << "From (" << i << ", " << j << ") to (" << originali << ", " << originalj << ")" << std::endl;
-
 					if(snap_to_grid(originali, originalj))
 					{
 						//std::cout << "snapped" << std::endl;
-						data(i, j) = data(originali, originalj);
+						data1(i, j) = data1(originali, originalj);
+						data2(i, j) = data2(originali, originalj);
+						//smoke(i, j) = smoke(originali, originalj);
 						continue;
 					}
-
 					// Interpolate
-					float alphai = (originalExactPointi - i) * scale;
-					float alphaj = (originalExactPointj - j) * scale;
 
-					float qI = (1 - alphai) * data(originali, originalj) + alphai * data(originali + 1, originalj);
-					float qJ = (1 - alphaj) * data(originali, originalj) + alphaj * data(originali, originalj + 1);
+					float w01 = abs(x - originali) * cellWidth;
+					float w11 = abs(y - originalj) * cellWidth;
+					float w00 = 1 - w01;
+					float w10 = 1 - w11;
 
-					data(i, j) = (qI + qJ) / 2;
-					continue;
+					data1(i, j) = w00 * w10 * data1(originali, originalj)
+						+ w01 * w10 * data1(originali + 1, originalj)
+						+ w01 * w11 * data1(originali, originalj + 1)
+						+ w00 * w11 * data1(originali + 1, originalj + 1);
 
-					/*std::array<float, 4> weightsi = get_interp_weights(alphai);
-					std::array<float, 4> weightsj = get_interp_weights(alphaj);
-
-
-					//Cubic interpolation
-
-					// x-axis
-					float negativeQi = calculate_interp_quantity_i(originali - 1, originalj, weightsi, data);
-					float Qi = calculate_interp_quantity_i(originali, originalj, weightsi, data);
-					float positiveQi = calculate_interp_quantity_i(originali + 1, originalj, weightsi, data);
-					float doublePositiveQi = calculate_interp_quantity_i(originali + 2, originalj, weightsi, data);
-
-					float finalQi = weightsi[0] * negativeQi + weightsi[1] * Qi + weightsi[2] * positiveQi + weightsi[3] * doublePositiveQi;
-
-					// y-axis
-					float negativeQj = calculate_interp_quantity_j(originali, originalj - 1, weightsj, data);
-					float Qj = calculate_interp_quantity_j(originali, originalj, weightsj, data);
-					float positiveQj = calculate_interp_quantity_j(originali, originalj + 1, weightsj, data);
-					float doublePositiveQj = calculate_interp_quantity_j(originali, originalj + 2, weightsj, data);
-
-					float finalQj = weightsj[0] * negativeQj + weightsj[1] * Qj + weightsj[2] * positiveQj + weightsj[3] * doublePositiveQj;
-
-					float averageQ = (finalQi + finalQj) / 2;
-					data(i, j) = averageQ;
-					//data(i, j) = averageQ >= 0 ? averageQ : 0; */
+					data2(i, j) = w00 * w10 * data2(originali, originalj)
+						+ w01 * w10 * data2(originali + 1, originalj)
+						+ w01 * w11 * data2(originali, originalj + 1)
+						+ w00 * w11 * data2(originali + 1, originalj + 1);
 				}
-
 			}
 		}
+		//std::cout << "Number of same: " << count << std::endl;
 	}
 
-	inline void addforces(float timeStep, float force, float variableTimeStep)
+	inline void addforces(float timeStep, float force)
 	{
 		for(size_t i = 0; i < row; i++)
 		{
@@ -223,7 +193,7 @@ public:
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					uVelocity(i, j) += timeStep * force;
+					//uVelocity(i, j) += timeStep * force;
 					vVelocity(i, j) += timeStep * force;
 				}
 
@@ -235,12 +205,10 @@ public:
 		{
 			if(gridData(column - 2, j).cellState == GridDataPoint::FLUID)
 			{
-				uVelocity(column - 2, j) += 700.0f * variableTimeStep;
-				vVelocity(column - 2, j) += 700.0f * variableTimeStep;
+				uVelocity(column - 2, j) += 11.0f * timeStep;
+				vVelocity(column - 2, j) += 11.0f * timeStep;
 			}
-
 		}
-
 	}
 
 	void StandardPCG()
@@ -254,11 +222,11 @@ public:
 			return;
 		}
 
-		RowVector<row, column> residualVector = negativeDivergences;
-		RowVector<row, column> auxiliaryVector;
+		RowVector residualVector = negativeDivergences;
+		RowVector auxiliaryVector = RowVector(column, row);
 
 		applyPreconditioner(residualVector, auxiliaryVector);
-		RowVector<row, column> searchVector = auxiliaryVector;
+		RowVector searchVector = auxiliaryVector;
 
 		double sigma = DotProduct(auxiliaryVector, residualVector);
 
@@ -305,7 +273,7 @@ public:
 		std::cout << "exceeded iterations" << std::endl;
 	}
 
-	void applyA(const RowVector<row, column>& vector, RowVector<row, column>& result)
+	void applyA(const RowVector& vector, RowVector& result)
 	{
 		for(size_t i = 0; i < column; i++)
 		{
@@ -322,12 +290,11 @@ public:
 	 Simple to implement, fairly efficient and robust in handling irregular domains (e.g liquid splash)
 	 However hard to efficiently parallelize and not optimally scalable
 	*/
-	void applyPreconditioner(RowVector<row, column>& residualVector, RowVector<row, column>& auxiliaryVector)
+	void applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector)
 	{
-
 		double t = 0;
 
-		RowVector<row, column> q;
+		RowVector q = RowVector(column, row);
 
 		for(size_t i = 0; i < column; i++)
 		{
@@ -346,7 +313,6 @@ public:
 
 					q(i, j) = t * precon(i, j);
 				}
-
 			}
 		}
 

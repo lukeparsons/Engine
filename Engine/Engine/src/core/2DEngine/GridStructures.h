@@ -27,27 +27,24 @@ struct GridDataPoint
 /* This data structure relies on an ordered insertion
 * for(1 -> column) { for(1 -> row) { insert() } } is the required order
 */
-template<typename T, size_t row, size_t column>
+template<typename T>
 struct GridStructure
 {
-protected:
-
-
-
+private:
+	size_t column, row;
 public:
 	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
-	std::array<T, row* column> grid;
+	std::vector<T> grid;
 
-	GridStructure() = default;
-
-	GridStructure(T initValue)
+	GridStructure(T initValue, size_t _column, size_t _row) : column(_column), row(_row)
 	{
-		grid.fill(initValue);
+		grid = std::vector<T>(row * column);
+		std::fill(grid.begin(), grid.end(), initValue);
 	}
 
 	void fill(T value)
 	{
-		grid.fill(value);
+		std::fill(grid.begin(), grid.end(), value);
 	}
 
 	const T& max()
@@ -80,35 +77,17 @@ public:
 * The outer halo bottom left corner is at(0, 0) and the top right is at(column + 3, row + 3)
 * The inner halo bottom left corner is at(1, 1) and the top right is at(column + 2, row + 2)
 * But we can index from(0, 0) to(column, row) by adding 2 to(i, j) */
-template<typename T, size_t row, size_t column>
-struct GridStructureHalo : public GridStructure<T, row + 4, column + 4>
+template<typename T>
+struct GridStructureHalo : public GridStructure<T>
 {
-	// TODO: Possibly redundant
-	GridStructureHalo() : GridStructure<T, row + 4, column + 4>() {
-		for(size_t i = 0; i <= column + 3; i++) // Bottom and top halo
-		{
-			// Outer halo
-			this->grid[i] = T(); // (0, 0) to (column + 4, 0)
-			this->grid[i + (column + 4) * (row + 3)] = T(); // (0, row + 3) to (column + 3, row + 3)
+private:
+	// These are the column/row of the usable grid space. The row/column stored in the parent GridStructure class is for the usable space and the halo
+	size_t column;
+	size_t row;
 
-			// Inner halo
-			this->grid[i + (column + 4) * 1] = T(); // (0, 1) to (column + 3, 1)
-			this->grid[i + (column + 4) * (row + 2)] = T(); // (0, row + 2) to (column + 3, row + 2)
-		}
+public:
 
-		for(size_t j = 2; j <= row; j++) // Left and right halo
-		{
-			// Outer halo
-			this->grid[(column + 4) * j] = T(); // (0, 2) to (0, row)
-			this->grid[(column + 3) + (column + 4) * j] = T(); // (column + 3, 2) to (column + 3, row)
-
-			// Inner halo
-			this->grid[1 + (column + 4) * j] = T(); // (1, 2) to (1, row)
-			this->grid[(column + 2) + (column + 4) * j] = T(); // (column + 2, 2) to (column + 2, row)
-		}
-	}
-
-	GridStructureHalo(T initValue) : GridStructure<T, row + 4, column + 4>(initValue) {};
+	GridStructureHalo(T initValue, size_t _column, size_t _row) : GridStructure<T>(initValue, _column + 4, _row + 4), column(_column), row(_row) {};
 
 	virtual void insert(T& dataPoint, size_t i, size_t j) override
 	{
@@ -122,6 +101,7 @@ struct GridStructureHalo : public GridStructure<T, row + 4, column + 4>
 
 	virtual inline T& operator()(size_t i, size_t j) override
 	{
+		size_t t = (i + 2) + (column + 4) * (j + 2);
 		return this->grid[(i + 2) + (column + 4) * (j + 2)];
 	}
 
