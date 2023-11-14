@@ -171,6 +171,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\2DEngine\Grid2D.cpp" />
+    <ClCompile Include="src\core\2DEngine\PCG.cpp" />
     <ClCompile Include="src\scene\components\EulerianGridComponent.cpp" />
     <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
