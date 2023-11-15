@@ -132,12 +132,15 @@ int main()
 
 	double previousFrameTime = 0;
 	float timeStep = (1 / 120.0f);
+	float frameTime = 0;
+	unsigned int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
 	{ 
 
 		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
-		//float timeStep = static_cast<float>(currentFrameTime - previousFrameTime);
+		//float timeStep = static_cast<float>(currentFrameTime - previousFrameTime) / grid->uVelocity.max();
+		frameTime += currentFrameTime - previousFrameTime;
 		previousFrameTime = currentFrameTime;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -170,7 +173,9 @@ int main()
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		frameCount++;
 	}
+	std::cout << "Average FPS " << 60 / (frameTime / frameCount);
 	delete grid;
 	glfwTerminate();
 	return 0;
