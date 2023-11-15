@@ -52,6 +52,11 @@ public:
 		return *std::max_element(grid.begin(), grid.end());
 	}
 
+	const T& min()
+	{
+		return *std::min_element(grid.begin(), grid.end());
+	}
+
 	virtual void insert(T& dataPoint, size_t i, size_t j)
 	{
 		grid[i + column * j] = dataPoint;

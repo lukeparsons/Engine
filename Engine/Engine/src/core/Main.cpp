@@ -17,6 +17,7 @@
 #include "../scene/components/EulerianGridComponent.h"
 #include "../math/Matrix.h"
 #include "2DEngine/Grid2D.h"
+#include "../renderer/Texture.h"
 
 #define row 100
 #define column 100
@@ -131,7 +132,6 @@ int main()
 
 	double previousFrameTime = 0;
 	//float timeStep = (1 / 30.0f);
-	int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
 	{ 
 
@@ -168,8 +168,6 @@ int main()
 		grid->UpdateTexture();
 
 		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
-
-		frameCount++;
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

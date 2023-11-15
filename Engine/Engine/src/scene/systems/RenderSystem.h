@@ -20,7 +20,7 @@ public:
 	{
 		for(std::unique_ptr<RenderComponent>& component : renderComponents->GetDenseList())
 		{
-			
+
 			TransformComponent& transform = transformComponents->GetComponentFromType(component->entity);
 			component->mesh->Draw(cameraMatrix, component->textureID, transform.location, transform.rotation, transform.scale);
 		}

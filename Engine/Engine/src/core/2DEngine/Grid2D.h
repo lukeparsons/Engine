@@ -17,7 +17,7 @@ private:
 
 	size_t column, row;
 
-	TextureData<float> gridTexture;
+	TextureData<unsigned char> gridTexture;
 
 	bool snap_to_grid(int& i, int& j)
 	{
@@ -87,6 +87,7 @@ public:
 	GridStructureHalo<float> uVelocity = GridStructureHalo<float>(0, column, row);
 	GridStructureHalo<float> vVelocity = GridStructureHalo<float>(0, column, row);
 	GridStructureHalo<float> pressure = GridStructureHalo<float>(0, column, row);
+	GridStructureHalo<float> smoke = GridStructureHalo<float>(0, column, row);
 
 	// TODO: Make this a one thick halo
 	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::FLUID), column, row);
@@ -95,29 +96,31 @@ public:
 	RowVector precon = RowVector(column, row);
 
 	Grid2D(size_t _row, size_t _column, Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth) 
-		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), gridTexture(TextureData<float>(column, row, GL_RGB, GL_FLOAT, std::vector<float>()))
+		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), gridTexture(TextureData<unsigned char>(column, row, GL_RGBA8, GL_UNSIGNED_BYTE, std::vector<unsigned char>()))
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(location.x, location.y, 0), Vector3f(column * cellWidth * 0.1, row * cellWidth * 0.1, cellWidth));
+		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(0, 0, 0), Vector3f(1, 1, 1));
 		fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);
 
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				if(i == column - 2)
+				if(i == 1)
 				{
-					uVelocity(column - 2, j) = 2.0f;
+					uVelocity(1, j) = 2.0f;
+					smoke(1, j) = 100.0f;
 					//vVelocity(1, j) = 2.0f;
 				}
 				//EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
 					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
 				//RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 				
-				gridTexture.pixels.push_back(uVelocity(i, j));
-				gridTexture.pixels.push_back(vVelocity(i, j));
-				gridTexture.pixels.push_back(pressure(i, j));
+				gridTexture.pixels.push_back(0);
+				gridTexture.pixels.push_back(0);
+				gridTexture.pixels.push_back(0);
+				gridTexture.pixels.push_back(255);
 			}
 		}
 
@@ -137,11 +140,18 @@ public:
 
 	}
 
-	// PCG
+	void advect(float timeStep, GridStructureHalo<float>& data1, GridStructureHalo<float>& data2);
+
+	// PCG (TODO: move all but PCGSolve out of function)
+	void PCGSolve(float timeStep);
 	void PCG();
 	void applyA(const RowVector& vector, RowVector& result);
 	void applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector);
 	void constructPreconditioner();
+	void UpdateA(float Acoefficient, size_t i, size_t j);
+
+	// GaussSeidel
+	void GaussSeidel(float timeStep);
 
 	void addforces(float timeStep, float force)
 	{
@@ -154,45 +164,44 @@ public:
 					//uVelocity(i, j) += timeStep * force;
 					vVelocity(i, j) += timeStep * force;
 				}
-
 			}
 		}
 
 		// Temp
 		for(unsigned int j = 1; j < row - 1; j++)
 		{
-			if(gridData(column - 2, j).cellState == GridDataPoint::FLUID)
+			if(gridData(1, j).cellState == GridDataPoint::FLUID)
 			{
-				uVelocity(column - 2, j) += 11.0f * timeStep;
-				vVelocity(column - 2, j) += 11.0f * timeStep;
+				uVelocity(1, j) += 10.0f * timeStep;
 			}
 		}
 	}
 
-
-	void advect(float timeStep, GridStructureHalo<float>& data1, GridStructureHalo<float>& data2);
-	void UpdateA(float Acoefficient, size_t i, size_t j);
-	void Solve(float timeStep);
-
-	inline unsigned char colourClamp(float max, float val)
+	void Solve(float timeStep)
 	{
-		unsigned char t = (val / max) * 255;
-		//std::cout << static_cast<unsigned>(t) << std::endl;
-		return t;
+		GaussSeidel(timeStep);
+	}
+
+
+	inline unsigned char colourClamp(float maxVal, float minVal, float val)
+	{
+		return static_cast<unsigned char>(std::max(std::min(val, maxVal), minVal));
 	}
 
 	void UpdateTexture()
 	{
-		//float uVelocityMax = *std::max_element(uVelocity.grid.begin(), uVelocity.grid.end());
-		//float vVelocityMax = *std::max_element(vVelocity.grid.begin(), vVelocity.grid.end());
-		//float pressureMax = *std::max_element(pressure.grid.begin(), pressure.grid.end());
+		float smokeMax = smoke.max();
+		float smokeMin = smoke.min();
+		unsigned int offset = 0;
 		for(size_t i = 0; i < column; i++)
 		{
 			for(size_t j = 0; j < row; j++)
 			{
-				gridTexture.pixels[i * column + j] = uVelocity(i, j);
-				gridTexture.pixels[i * column + j] = vVelocity(i, j);
-				gridTexture.pixels[i * column + j] = pressure(i, j);
+				gridTexture.pixels[offset] = 0;
+				gridTexture.pixels[1 + offset] = 0;
+				gridTexture.pixels[2 + offset] = 0;
+				gridTexture.pixels[3 + offset] = colourClamp(smokeMax, smokeMin, smoke(i, j));
+				offset += 4;
 			}
 		}
 		fluidRenderComponent->ChangeTextureData(gridTexture.pixels);
