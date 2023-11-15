@@ -128,10 +128,10 @@ int main()
 	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
 	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.05f);
+	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
 
 	double previousFrameTime = 0;
-	//float timeStep = (1 / 30.0f);
+	float timeStep = (1 / 120.0f);
 	while(!glfwWindowShouldClose(window))
 	{ 
 
@@ -145,7 +145,7 @@ int main()
 
 		processInput(window);
 
-		float timeStep = 5 * grid->cellWidth / (grid->uVelocity.max());
+		//float timeStep = 5 * grid->cellWidth / (grid->uVelocity.max());
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
@@ -160,7 +160,6 @@ int main()
 		{
 			for(size_t j = 0; j < column; j++)
 			{
-				//std::cout << "pressure " << grid->pressure(i, j) << std::endl;
 				//grid->PrintCell(i, j);
 			}
 		}

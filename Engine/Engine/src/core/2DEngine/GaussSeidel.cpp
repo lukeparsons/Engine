@@ -4,46 +4,60 @@ void Grid2D::GaussSeidel(float timeStep)
 {
 	float overRelaxationScalar = 1.9;
 	float pressureScale = density * cellWidth / timeStep;
+	pressure.fill(0);
 	for(unsigned int iter = 0; iter < 100; iter++) // 100 here is max iterations
 	{
 		for(size_t i = 0; i < column; i++)
 		{
 			for(size_t j = 0; j < row; j++)
 			{	
-				if(smoke(i, j) == 0)
-				{
-					continue;
-				}
-
-				if(gridData(i, j).cellState != GridDataPoint::SOLID)
+				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
 
-					float d = uVelocity(i + 1, j) - uVelocity(i, j) + vVelocity(i, j + 1) - vVelocity(i, j);
+					int numFluidNeighbours = 0;
 
-					float rightS = smoke(i + 1, j);
-					float leftS = smoke(i - 1, j);
-					float upS = smoke(i, j + 1);
-					float downS = smoke(i, j - 1);
+					int leftS = 0;
+					int rightS = 0;
+					int downS = 0;
+					int upS = 0;
 
-					float s = rightS + leftS + upS + downS;
+					if(gridData(i - 1, j).cellState == GridDataPoint::FLUID)
+					{
+						leftS = 1;
+					}
+					
+					if(gridData(i + 1, j).cellState == GridDataPoint::FLUID)
+					{
+						rightS = 1;
+					}
 
-					if(s == 0)
+					if(gridData(i, j - 1).cellState == GridDataPoint::FLUID)
+					{
+						downS = 1;
+					}
+
+					if(gridData(i, j + 1).cellState == GridDataPoint::FLUID)
+					{
+						upS = 1;
+					}
+					
+					numFluidNeighbours = leftS + rightS + downS + upS;
+
+					if(numFluidNeighbours == 0)
 					{
 						continue;
 					}
 
-					float scale = 1 / s;
-
-					// TODO: Try measuring pressure step
+					float d = uVelocity(i + 1, j) - uVelocity(i, j) + vVelocity(i, j + 1) - vVelocity(i, j);
 
 					// Overrelaxation
-					float p = -d * scale * overRelaxationScalar;
+					float p = -d * overRelaxationScalar / numFluidNeighbours;
 					pressure(i, j) += p * pressureScale;
 
-					uVelocity(i, j) += leftS * p;
-					uVelocity(i + 1, j) -= rightS * p;
-					vVelocity(i, j) += downS * scale;
-					vVelocity(i, j + 1) -= upS * scale;
+					uVelocity(i, j) -= leftS * p;
+					uVelocity(i + 1, j) += rightS * p;
+					vVelocity(i, j) -= downS * p;
+					vVelocity(i, j + 1) += upS * p;
 
 				}
 			}

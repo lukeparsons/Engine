@@ -6,16 +6,16 @@ void Grid2D::PCGSolve(float timeStep)
 	float divergenceScale = 1.0f / cellWidth;
 	float Acoefficient = timeStep / (density * cellWidth * cellWidth);
 
-	size_t i = 0;
-	size_t j = 0;
+	unsigned int i = 0;
+	unsigned int j = 0;
 
 	/* uVelocity in the GridDataPoint refers to the right u velocity arrow for that cell in the MAC Grid
 	* Likewise vVelocity refers to the up v velocity arrow for that cell
 	*/
 
-	for(size_t i = 0; i < column; i++)
+	for(unsigned int i = 0; i < column; i++)
 	{
-		for(size_t j = 0; j < row; j++)
+		for(unsigned int j = 0; j < row; j++)
 		{
 
 			switch(gridData(i, j).cellState)
@@ -47,9 +47,9 @@ void Grid2D::PCGSolve(float timeStep)
 
 	float scale = timeStep / (density * cellWidth);
 
-	for(size_t i = 0; i < column; i++)
+	for(unsigned int i = 0; i < column; i++)
 	{
-		for(size_t j = 0; j < row; j++)
+		for(unsigned int j = 0; j < row; j++)
 		{
 			switch(gridData(i, j).cellState)
 			{
@@ -108,7 +108,7 @@ void Grid2D::PCGSolve(float timeStep)
 	}
 }
 
-void Grid2D::UpdateA(float Acoefficient, size_t i, size_t j)
+void Grid2D::UpdateA(float Acoefficient, unsigned int i, unsigned int j)
 {
 
 	GridDataPoint& cellData = gridData(i, j);
@@ -172,9 +172,9 @@ void Grid2D::PCG()
 		double dP = DotProduct(auxiliaryVector, searchVector);
 		double alpha = sigma / dP;
 
-		for(size_t i = 0; i < column; i++)
+		for(unsigned int i = 0; i < column; i++)
 		{
-			for(size_t j = 0; j < row; j++)
+			for(unsigned int j = 0; j < row; j++)
 			{
 				pressure(i, j) += alpha * searchVector(i, j);
 				residualVector(i, j) -= alpha * auxiliaryVector(i, j); 			//residualVector = residualVector - (alpha * auxiliaryVector);
@@ -191,9 +191,9 @@ void Grid2D::PCG()
 		double sigmaNew = DotProduct(auxiliaryVector, residualVector);
 		double beta = sigmaNew / sigma;
 
-		for(size_t i = 0; i < column; i++)
+		for(unsigned int i = 0; i < column; i++)
 		{
-			for(size_t j = 0; j < row; j++)
+			for(unsigned int j = 0; j < row; j++)
 			{
 				searchVector(i, j) = auxiliaryVector(i, j) + (beta * searchVector(i, j));
 			}
@@ -208,9 +208,9 @@ void Grid2D::PCG()
 
 void Grid2D::applyA(const RowVector& vector, RowVector& result)
 {
-	for(size_t i = 0; i < column; i++)
+	for(unsigned int i = 0; i < column; i++)
 	{
-		for(size_t j = 0; j < row; j++)
+		for(unsigned int j = 0; j < row; j++)
 		{
 			result(i, j) = gridData(i, j).Adiag * vector(i, j)
 				+ gridData(i, j).Ax * vector(i + 1, j)
@@ -229,9 +229,9 @@ void Grid2D::applyPreconditioner(RowVector& residualVector, RowVector& auxiliary
 
 	RowVector q = RowVector(column, row);
 
-	for(size_t i = 0; i < column; i++)
+	for(unsigned int i = 0; i < column; i++)
 	{
-		for(size_t j = 0; j < row; j++)
+		for(unsigned int j = 0; j < row; j++)
 		{
 			if(gridData(i, j).cellState == GridDataPoint::FLUID)
 			{
@@ -249,9 +249,9 @@ void Grid2D::applyPreconditioner(RowVector& residualVector, RowVector& auxiliary
 		}
 	}
 
-	for(size_t i = column - 1; i-- > 0;)
+	for(unsigned int i = column - 1; i-- > 0;)
 	{
-		for(size_t j = row - 1; j-- > 0;)
+		for(unsigned int j = row - 1; j-- > 0;)
 		{
 			if(gridData(i, j).cellState == GridDataPoint::FLUID)
 			{
@@ -272,9 +272,9 @@ void Grid2D::constructPreconditioner()
 	double e = 0;
 
 	precon.fill(0);
-	for(size_t i = 0; i < column; i++)
+	for(unsigned int i = 0; i < column; i++)
 	{
-		for(size_t j = 0; j < row; j++)
+		for(unsigned int j = 0; j < row; j++)
 		{
 			if(gridData(i, j).cellState == GridDataPoint::FLUID)
 			{

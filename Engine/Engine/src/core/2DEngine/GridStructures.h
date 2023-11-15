@@ -31,12 +31,12 @@ template<typename T>
 struct GridStructure
 {
 private:
-	size_t column, row;
+	unsigned int column, row;
 public:
 	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
 	std::vector<T> grid;
 
-	GridStructure(T initValue, size_t _column, size_t _row) : column(_column), row(_row)
+	GridStructure(T initValue, unsigned int _column, unsigned int _row) : column(_column), row(_row)
 	{
 		grid = std::vector<T>(row * column);
 		std::fill(grid.begin(), grid.end(), initValue);
@@ -57,22 +57,22 @@ public:
 		return *std::min_element(grid.begin(), grid.end());
 	}
 
-	virtual void insert(T& dataPoint, size_t i, size_t j)
+	virtual void insert(T& dataPoint, unsigned int i, unsigned int j)
 	{
 		grid[i + column * j] = dataPoint;
 	}
 
-	virtual void insert(T&& dataPoint, size_t i, size_t j)
+	virtual void insert(T&& dataPoint, unsigned int i, unsigned int j)
 	{
 		grid[i + column * j ] = dataPoint;
 	}
 
-	virtual inline T& operator()(size_t i, size_t j)
+	virtual inline T& operator()(unsigned int i, unsigned int j)
 	{
 		return grid[i + column * j];
 	}
 
-	virtual const inline T& operator()(size_t i, size_t j) const
+	virtual const inline T& operator()(unsigned int i, unsigned int j) const
 	{
 		return grid[i + column * j];
 	}
@@ -87,30 +87,29 @@ struct GridStructureHalo : public GridStructure<T>
 {
 private:
 	// These are the column/row of the usable grid space. The row/column stored in the parent GridStructure class is for the usable space and the halo
-	size_t column;
-	size_t row;
+	unsigned int column;
+	unsigned int row;
 
 public:
 
-	GridStructureHalo(T initValue, size_t _column, size_t _row) : GridStructure<T>(initValue, _column + 4, _row + 4), column(_column), row(_row) {};
+	GridStructureHalo(T initValue, unsigned int _column, unsigned int _row) : GridStructure<T>(initValue, _column + 4, _row + 4), column(_column), row(_row) {};
 
-	virtual void insert(T& dataPoint, size_t i, size_t j) override
+	virtual void insert(T& dataPoint, unsigned int i, unsigned int j) override
 	{
 		this->grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
 	}
 
-	virtual void insert(T&& dataPoint, size_t i, size_t j) override
+	virtual void insert(T&& dataPoint, unsigned int i, unsigned int j) override
 	{
 		this->grid[(i + 2) + (column + 4) * (j + 2)] = dataPoint;
 	}
 
-	virtual inline T& operator()(size_t i, size_t j) override
+	virtual inline T& operator()(unsigned int i, unsigned int j) override
 	{
-		size_t t = (i + 2) + (column + 4) * (j + 2);
 		return this->grid[(i + 2) + (column + 4) * (j + 2)];
 	}
 
-	virtual const inline T& operator()(size_t i, size_t j) const override
+	virtual const inline T& operator()(unsigned int i, unsigned int j) const override
 	{
 		return this->grid[(i + 2) + (column + 4) * (j + 2)];
 	}
