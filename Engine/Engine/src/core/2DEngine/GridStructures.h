@@ -5,7 +5,7 @@
 struct GridDataPoint
 {
 
-	enum CellState { FLUID, SOLID, EMPTY, DEFAULT } cellState;
+	enum CellState { SOLID, FLUID, EMPTY, DEFAULT } cellState;
 
 	/* These 'A' named variables store the coefficient matrix for the pressure calculations
 	Each row of the matrix corresponds to one fluid cell

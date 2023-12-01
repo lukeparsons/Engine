@@ -120,18 +120,22 @@ int main()
 	Shader fluidFragmentShader("../Engine/src/renderer/shaders/shaderfiles/fluids/FluidFragment.fragment");
 	ShaderProgram fluidShader(fluidVertexShader, fluidFragmentShader);
 
-	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
-	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
-	std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj", &basicShader);
+	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj", &basicShader);
+	std::shared_ptr<Mesh> monkey = std::make_shared<Mesh>("../Engine/assets/monkey.obj", &basicShader);
+	//std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj", &basicShader);
+
+	std::shared_ptr<Texture> wall = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
 	Scene scene;
 	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
 	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
-	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
+	Grid2D* grid = new Grid2D(row, column, scene, box, Vector2f(0, 0), 1, 0.01f);
+	
+	//scene.CreateModel(monkey, wall);
 
 	double previousFrameTime = 0;
-	float timeStep = (1 / 120.0f);
+	float timeStep = (1 / 60.0f);
 	float frameTime = 0;
 	unsigned int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
@@ -152,12 +156,11 @@ int main()
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
-		grid->addforces(timeStep, -9.81f);
+		grid->addforces(timeStep);
 
 		grid->Solve(timeStep);
 
 		grid->advect(timeStep, grid->uVelocity, grid->vVelocity);
-		//grid->advect(timeStep, grid->pressure);
 
 		for(size_t i = 0; i < row; i++)
 		{
@@ -169,7 +172,9 @@ int main()
 
 		grid->UpdateTexture();
 
-		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
+		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
+
+		scene.Update(cameraMatrix);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

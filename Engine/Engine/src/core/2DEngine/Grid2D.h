@@ -55,6 +55,20 @@ private:
 		return weights[0] * data(i - 1, j) + weights[1] * data(i, j) + weights[2] * data(i + 1, j) + weights[3] * data(i + 2, j);
 	}
 
+	void addgravity(float timeStep)
+	{
+		for(unsigned int i = 0; i < row; i++)
+		{
+			for(unsigned int j = 0; j < column; j++)
+			{
+				if(gridData(i, j).cellState == GridDataPoint::FLUID)
+				{
+					vVelocity(i, j) += timeStep * -9.81;
+				}
+			}
+		}
+	}
+
 public:
 	// TODO: make private
 	const float cellWidth;
@@ -78,7 +92,7 @@ public:
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
-		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(0, 0, 0), Vector3f(1, 1, 1));
+		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(0, 0, 0), Vector3f(column * 0.005f, row * 0.005f, 1 * 0.005f));
 		fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);
 
 		for(unsigned int i = 0; i < column; i++)
@@ -96,7 +110,7 @@ public:
 
 				if(i == 1)
 				{
-					uVelocity(1, j) = 11.0f;
+					uVelocity(1, j) = 20.0f;
 					smoke(1, j) = 100.0f;
 				}
 
@@ -140,29 +154,9 @@ public:
 	// GaussSeidel
 	void GaussSeidel(float timeStep);
 
-	void addforces(float timeStep, float force)
+	void addforces(float timeStep)
 	{
-		for(unsigned int i = 0; i < row; i++)
-		{
-			for(unsigned int j = 0; j < column; j++)
-			{
-				if(gridData(i, j).cellState == GridDataPoint::FLUID)
-				{
-					//uVelocity(i, j) += timeStep * force;
-					vVelocity(i, j) += timeStep * force;
-				}
-			}
-		}
-
-		// Temp
-		for(unsigned int j = 1; j < row - 1; j++)
-		{
-			if(gridData(1, j).cellState == GridDataPoint::FLUID)
-			{
-				//uVelocity(1, j) += 2.0f * timeStep;
-				//smoke(1, j) += 2.0f;
-			}
-		}
+		this->addgravity(timeStep);
 	}
 
 	void Solve(float timeStep)
@@ -191,8 +185,14 @@ public:
 
 	void UpdateTexture()
 	{
-		float smokeMax = smoke.max();
-		float smokeMin = smoke.min();
+		float uMax = uVelocity.max();
+		float uMin = uVelocity.min();
+		float vMax = vVelocity.max();
+		float vMin = vVelocity.min();
+		float pMax = pressure.max();
+		float pMin = pressure.min();
+		//float smokeMax = smoke.max();
+		//float smokeMin = smoke.min();
 		unsigned int offset = 0;
 		for(unsigned int i = 0; i < column; i++)
 		{
@@ -200,17 +200,10 @@ public:
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					gridTexture.pixels[offset] = 0;
-					gridTexture.pixels[1 + offset] = 0;
-					gridTexture.pixels[2 + offset] = 0;
-					if(smoke(i, j) > 0)
-					{
-						gridTexture.pixels[3 + offset] = colourClamp(smokeMax, smokeMin, smoke(i, j));
-					} else
-					{
-						gridTexture.pixels[3 + offset] = 0;
-					}
-
+					gridTexture.pixels[offset] = colourClamp(uMax, uMin, uVelocity(i, j));
+					gridTexture.pixels[1 + offset] = colourClamp(vMax, vMin, vVelocity(i, j));
+					gridTexture.pixels[2 + offset] = colourClamp(pMax, pMin, pressure(i, j));
+					gridTexture.pixels[3 + offset] = 255;
 				}
 
 				offset += 4;

@@ -81,10 +81,6 @@ void Grid2D::advect(float timeStep, GridStructureHalo<float>& data1, GridStructu
 				// smoke
 				clamp(originali, originalj, trueX, trueY, scale, cellWidth, column, row);
 				smoke(i, j) = interpolate(smoke, trueX, trueY, originali, originalj, cellWidth);
-				if(smoke(i, j) < 0)
-				{
-					std::cout << smoke(i, j) << std::endl;
-				}
 
 			}
 		}

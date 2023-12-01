@@ -2,10 +2,10 @@
 
 void Grid2D::GaussSeidel(float timeStep)
 {
-	float overRelaxationScalar = 1.9;
+	float overRelaxationScalar = 1.8;
 	float pressureScale = density * cellWidth / timeStep;
 	pressure.fill(0);
-	for(unsigned int iter = 0; iter < 100; iter++) // 100 here is max iterations
+	for(unsigned int iter = 0; iter < 20; iter++) // 100 here is max iterations
 	{
 		for(size_t i = 0; i < column; i++)
 		{
