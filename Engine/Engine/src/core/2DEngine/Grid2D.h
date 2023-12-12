@@ -19,44 +19,10 @@ private:
 
 	TextureData<unsigned char> gridTexture;
 
-	bool snap_to_grid(unsigned int& i, unsigned int& j)
-	{
-		bool snapped = false;
-		if(i < 0) // Outside grid on left
-		{
-			i = 0;
-			snapped = true;
-		} else if(i >= column) // Outside grid on right
-		{
-			i = column - 1;
-			snapped = true;
-		}
-
-		if(j < 0) // Outside grid below
-		{
-			j = 0;
-			return true;
-		} else if(j >= row) // Outside grid above
-		{
-			j = row - 1;
-			return true;
-		}
-		return snapped;
-	}
-
-
-	inline float calculate_interp_quantity_i(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float>& data) const
-	{
-		return weights[0] * data(i, j - 1) + weights[1] * data(i, j) + weights[2] * data(i, j + 1) + weights[3] * data(i, j + 2);
-	}
-
-	inline float calculate_interp_quantity_j(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float>& data) const
-	{
-		return weights[0] * data(i - 1, j) + weights[1] * data(i, j) + weights[2] * data(i + 1, j) + weights[3] * data(i + 2, j);
-	}
+	const float scaleCellWidth;
+	bool clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j);
 
 public:
-	// TODO: make private
 	const float cellWidth;
 	float density;
 	float temperature;
@@ -74,7 +40,8 @@ public:
 	RowVector precon = RowVector(column, row);
 
 	Grid2D(unsigned int _row, unsigned int _column, Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth)
-		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), gridTexture(TextureData<unsigned char>(column, row, GL_RGBA8, GL_UNSIGNED_BYTE, std::vector<unsigned char>()))
+		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), scaleCellWidth(1 / _cellWidth),
+		gridTexture(TextureData<unsigned char>(column, row, GL_RGBA8, GL_UNSIGNED_BYTE, std::vector<unsigned char>()))
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
@@ -85,24 +52,11 @@ public:
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-
-				if(i >= 0.3 * column && i <= 0.5 * column)
-				{
-					if(j >= 0.4 * row && j <= 0.6 * row)
-					{
-						//gridData(i, j).cellState = GridDataPoint::SOLID;
-					}
-				}
-
 				if(i == 1)
 				{
-					uVelocity(1, j) = 11.0f;
-					smoke(1, j) = 100.0f;
+					uVelocity(1, j) = 5.0f;
+					smoke(1, j) = 20.0f;
 				}
-
-				//EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
-					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
-				//RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
 				
 				gridTexture.pixels.push_back(0);
 				gridTexture.pixels.push_back(0);
@@ -127,9 +81,8 @@ public:
 
 	}
 
-	void advect(float timeStep, GridStructureHalo<float>& data1, GridStructureHalo<float>& data2);
+	void advect(float timeStep);
 
-	// PCG (TODO: move all but PCGSolve out of function)
 	void PCGSolve(float timeStep);
 	void PCG();
 	void applyA(const RowVector& vector, RowVector& result);
@@ -148,26 +101,15 @@ public:
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					//uVelocity(i, j) += timeStep * force;
-					vVelocity(i, j) += timeStep * force;
+					vVelocity(i, j) += timeStep * -9.81f;
 				}
-			}
-		}
-
-		// Temp
-		for(unsigned int j = 1; j < row - 1; j++)
-		{
-			if(gridData(1, j).cellState == GridDataPoint::FLUID)
-			{
-				//uVelocity(1, j) += 2.0f * timeStep;
-				//smoke(1, j) += 2.0f;
 			}
 		}
 	}
 
 	void Solve(float timeStep)
 	{
-		GaussSeidel(timeStep);
+		PCGSolve(timeStep);
 
 		//temp extrapolate
 		for(unsigned int i = 1; i < column - 1; i++)
@@ -182,7 +124,6 @@ public:
 			vVelocity(column - 2, j) = vVelocity(column - 3, j);
 		}
 	}
-
 
 	inline unsigned char colourClamp(float maxVal, float minVal, float val)
 	{

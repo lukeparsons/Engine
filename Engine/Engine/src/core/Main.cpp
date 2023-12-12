@@ -131,7 +131,7 @@ int main()
 	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
 
 	double previousFrameTime = 0;
-	float timeStep = (1 / 120.0f);
+	//float timeStep = (1 / 75.0f);
 	float frameTime = 0;
 	unsigned int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
@@ -139,7 +139,6 @@ int main()
 
 		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
-		//float timeStep = static_cast<float>(currentFrameTime - previousFrameTime) / grid->uVelocity.max();
 		frameTime += currentFrameTime - previousFrameTime;
 		previousFrameTime = currentFrameTime;
 
@@ -148,7 +147,7 @@ int main()
 
 		processInput(window);
 
-		//float timeStep = 5 * grid->cellWidth / (grid->uVelocity.max());
+		float timeStep = 5 * grid->cellWidth / (grid->uVelocity.max());
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
@@ -156,8 +155,7 @@ int main()
 
 		grid->Solve(timeStep);
 
-		grid->advect(timeStep, grid->uVelocity, grid->vVelocity);
-		//grid->advect(timeStep, grid->pressure);
+		grid->advect(timeStep);
 
 		for(size_t i = 0; i < row; i++)
 		{
