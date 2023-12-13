@@ -151,11 +151,11 @@ int main()
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
+		grid->advect(timeStep);
+
 		grid->addforces(timeStep, -9.81f);
 
 		grid->Solve(timeStep);
-
-		grid->advect(timeStep);
 
 		for(size_t i = 0; i < row; i++)
 		{

@@ -18,27 +18,56 @@ void Grid2D::PCGSolve(float timeStep)
 		for(unsigned int j = 0; j < row; j++)
 		{
 
-			switch(gridData(i, j).cellState)
+			// Pressure coefficient update
+			if(gridData(i, j).cellState == GridDataPoint::FLUID)
 			{
-				case GridDataPoint::SOLID:
-					// TODO: Remember to update Adiag, Ax etc in a ChangeState function
-					/*if(gridData(i - 1, j).cellState == FLUID)
-					{
-						// pg 71
-					} */
+				GridDataPoint& cellData = gridData(i, j);
 
-					break;
-				case GridDataPoint::FLUID:
+				negativeDivergences(i, j) -= divergenceScale * (uVelocity(i + 1, j) - uVelocity(i, j) + vVelocity(i, j + 1) - vVelocity(i, j));
 
-					// Pressure coefficient update
+				GridDataPoint::CellState leftState = gridData(i - 1, j).cellState;
+				if(leftState == GridDataPoint::FLUID) // Left neighbour
+				{
+					cellData.Adiag += Acoefficient;
+				} else if(leftState == GridDataPoint::SOLID)
+				{
+					negativeDivergences(i, j) -= divergenceScale * (uVelocity(i, j) - 0); // usolid(i, j) 
+				}
 
-					// TODO: account for solid velocities
-					negativeDivergences(i, j) -= divergenceScale * (uVelocity(i + 1, j) - uVelocity(i, j) + vVelocity(i, j + 1) - vVelocity(i, j));
-					UpdateA(Acoefficient, i, j);
-					break;
-				case GridDataPoint::EMPTY:
-					// Assuming empty fluid cell pressure = 0
-					break;
+				GridDataPoint::CellState rightState = gridData(i + 1, j).cellState;
+				if(rightState == GridDataPoint::FLUID) // Right neighbour
+				{
+					cellData.Adiag += Acoefficient;
+					cellData.Ax = -Acoefficient;
+				} else if(rightState == GridDataPoint::SOLID)
+				{
+					negativeDivergences(i, j) += divergenceScale * (uVelocity(i + 1, j) - 0); // usolid(i + 1, j)
+				} else
+				{
+					cellData.Adiag += Acoefficient; // Right is empty state
+				}
+
+				GridDataPoint::CellState belowState = gridData(i, j - 1).cellState;
+				if(belowState == GridDataPoint::FLUID) // Below neighbour
+				{
+					cellData.Adiag += Acoefficient;
+				} else if(belowState == GridDataPoint::SOLID)
+				{
+					negativeDivergences(i, j) -= divergenceScale * (vVelocity(i, j) - 0); // vsolid(i, j)
+				}
+
+				GridDataPoint::CellState aboveState = gridData(i, j + 1).cellState;
+				if(aboveState == GridDataPoint::FLUID) // Above neighbour
+				{
+					cellData.Adiag += Acoefficient;
+					cellData.Ay = -Acoefficient;
+				} else if(aboveState == GridDataPoint::SOLID)
+				{
+					negativeDivergences(i, j) += divergenceScale * (vVelocity(i, j + 1) - 0); // vsolid(i, j + 1)
+				} else
+				{
+					cellData.Adiag += Acoefficient; // Above is empty
+				}
 			}
 		}
 	}
@@ -56,7 +85,7 @@ void Grid2D::PCGSolve(float timeStep)
 				case GridDataPoint::SOLID:
 					if(gridData(i - 1, j).cellState == GridDataPoint::FLUID)
 					{
-						uVelocity(i, j) = 0; // usolid(i, j
+						uVelocity(i, j) = 0; // usolid(i, j)
 					} else
 					{
 						// Mark uVelocity(i, j) as unknown
@@ -88,72 +117,26 @@ void Grid2D::PCGSolve(float timeStep)
 					}
 					break;
 				case GridDataPoint::EMPTY:
-					if(gridData(i - 1, j).cellState == GridDataPoint::FLUID)
-					{
-						uVelocity(i, j) -= scale * (pressure(i, j) - pressure(i - 1, j));
-					} else
-					{
-						// Mark uVelocity(i, j) as unknown
-					}
-
-					if(gridData(i, j - 1).cellState == GridDataPoint::FLUID)
-					{
-						vVelocity(i, j) -= scale * (pressure(i, j) - pressure(i, j - 1));
-					} else
-					{
-						// Mark vVelocity(i, j) as unknown
-					}
+					uVelocity(i, j) = 0;
+					vVelocity(i, j) = 0;
+					break;
 			}
 		}
 	}
 }
 
-void Grid2D::UpdateA(float Acoefficient, unsigned int i, unsigned int j)
-{
 
-	GridDataPoint& cellData = gridData(i, j);
-
-	if(gridData(i - 1, j).cellState == GridDataPoint::FLUID) // Left neighbour
-	{
-		cellData.Adiag += Acoefficient;
-	}
-
-	GridDataPoint::CellState rightState = gridData(i + 1, j).cellState;
-	if(rightState == GridDataPoint::FLUID) // Right neighbour
-	{
-		cellData.Adiag += Acoefficient;
-		cellData.Ax = -Acoefficient;
-	} else if(rightState == GridDataPoint::EMPTY)
-	{
-		cellData.Adiag += Acoefficient;
-	}
-
-	if(gridData(i, j - 1).cellState == GridDataPoint::FLUID) // Below neighbour
-	{
-		cellData.Adiag += Acoefficient;
-	}
-
-	GridDataPoint::CellState aboveState = gridData(i, j + 1).cellState;
-	if(aboveState == GridDataPoint::FLUID) // Above neighbour
-	{
-		cellData.Adiag += Acoefficient;
-		cellData.Ay = -Acoefficient;
-	} else if(aboveState == GridDataPoint::EMPTY)
-	{
-		cellData.Adiag += Acoefficient;
-	}
-
-}
 void Grid2D::PCG()
 {
-	// PCG algorithm for solving Ap = b
-	pressure.fill(0); // Pressure guess
-	constructPreconditioner();
-
 	if(std::all_of(negativeDivergences.begin(), negativeDivergences.end(), [](float val) { return val == 0; }))
 	{
 		return;
 	}
+
+	// PCG algorithm for solving Ap = b
+	constructPreconditioner();
+	pressure.fill(0); // Initial pressure guess
+
 
 	RowVector residualVector = negativeDivergences;
 	RowVector auxiliaryVector = RowVector(column, row);

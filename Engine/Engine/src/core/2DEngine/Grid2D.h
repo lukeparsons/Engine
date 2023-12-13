@@ -20,7 +20,10 @@ private:
 	TextureData<unsigned char> gridTexture;
 
 	const float scaleCellWidth;
-	bool clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j);
+	void clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j);
+	void calculate_initial_distances();
+
+	GridStructureHalo<float> signedDistance = GridStructureHalo<float>(0, column, row);
 
 public:
 	const float cellWidth;
@@ -33,7 +36,6 @@ public:
 	GridStructureHalo<float> pressure = GridStructureHalo<float>(0, column, row);
 	GridStructureHalo<float> smoke = GridStructureHalo<float>(0, column, row);
 
-	// TODO: Make this a one thick halo
 	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::FLUID), column, row);
 
 	RowVector negativeDivergences = RowVector(column, row);
@@ -54,8 +56,8 @@ public:
 			{
 				if(i == 1)
 				{
-					uVelocity(1, j) = 5.0f;
-					smoke(1, j) = 20.0f;
+					uVelocity(1, j) = 3.0f;
+					smoke(1, j) = 2.0f;
 				}
 				
 				gridTexture.pixels.push_back(0);
@@ -70,7 +72,6 @@ public:
 		{
 			gridData(i, 0).cellState = GridDataPoint::SOLID;
 			gridData(i, row - 1).cellState = GridDataPoint::SOLID;
-
 		}
 
 		for(unsigned int j = 1; j < row - 1; j++)
@@ -79,6 +80,7 @@ public:
 			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
 		}
 
+		calculate_initial_distances();
 	}
 
 	void advect(float timeStep);
@@ -88,9 +90,7 @@ public:
 	void applyA(const RowVector& vector, RowVector& result);
 	void applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector);
 	void constructPreconditioner();
-	void UpdateA(float Acoefficient, unsigned int i, unsigned int j);
 
-	// GaussSeidel
 	void GaussSeidel(float timeStep);
 
 	void addforces(float timeStep, float force)
@@ -110,19 +110,6 @@ public:
 	void Solve(float timeStep)
 	{
 		PCGSolve(timeStep);
-
-		//temp extrapolate
-		for(unsigned int i = 1; i < column - 1; i++)
-		{
-			uVelocity(i, 1) = uVelocity(i, 2);
-			uVelocity(i, row - 2) = uVelocity(i, row - 3);
-		}
-
-		for(unsigned int j = 1; j < row - 1; j++)
-		{
-			vVelocity(1, j) = vVelocity(2, j);
-			vVelocity(column - 2, j) = vVelocity(column - 3, j);
-		}
 	}
 
 	inline unsigned char colourClamp(float maxVal, float minVal, float val)
@@ -144,13 +131,7 @@ public:
 					gridTexture.pixels[offset] = 0;
 					gridTexture.pixels[1 + offset] = 0;
 					gridTexture.pixels[2 + offset] = 0;
-					if(smoke(i, j) > 0)
-					{
-						gridTexture.pixels[3 + offset] = colourClamp(smokeMax, smokeMin, smoke(i, j));
-					} else
-					{
-						gridTexture.pixels[3 + offset] = 0;
-					}
+					gridTexture.pixels[3 + offset] = colourClamp(smokeMax, smokeMin, smoke(i, j));
 
 				}
 

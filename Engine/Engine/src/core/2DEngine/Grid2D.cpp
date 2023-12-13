@@ -2,19 +2,16 @@
 #include <array>
 #include <algorithm>
 
-bool Grid2D::clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j)
+void Grid2D::clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j)
 {
 	int xGrid = std::roundf(x * scaleCellWidth);
-	bool snapped = false;
 
 	if(xGrid < 0)
 	{
 		i = 0;
-		snapped = true;
 	} else if(xGrid > column - 1)
 	{
 		i = column - 1;
-		snapped = true;
 	} else
 	{
 		i = xGrid;
@@ -25,17 +22,13 @@ bool Grid2D::clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j)
 	if(yGrid < 0)
 	{
 		j = 0;
-		return true;
 	} else if(yGrid > row - 1)
 	{
 		j = row - 1;
-		return true;
 	} else
 	{
 		j = yGrid;
 	}
-	
-	return snapped;
 }
 
 static float uVelocityAtPoint(GridStructureHalo<float>& uVelocity, unsigned int i, unsigned int j)
@@ -75,13 +68,9 @@ void Grid2D::advect(float timeStep)
 
 			float xMid = i * cellWidth - timeStep * uVelocityAtPoint(uVelocity, i, j);
 			float yMid = j * cellWidth - timeStep * vVelocityAtPoint(vVelocity, i, j);
+
 			unsigned int iMid, jMid;
-			if(clamp_to_grid(xMid, yMid, iMid, jMid))
-			{
-				uVelocity(i, j) = uVelocity(iMid, jMid);
-				vVelocity(i, j) = vVelocity(iMid, jMid);
-				continue;
-			}
+			clamp_to_grid(xMid, yMid, iMid, jMid);
 
 			// Interpolate velocity fields at mid point
 			float uMid = bicubicInterpolate(uVelocity, iMid, jMid, cellWidth);
@@ -90,12 +79,7 @@ void Grid2D::advect(float timeStep)
 			float xFinal = i * cellWidth - timeStep * uMid;
 			float yFinal = j * cellWidth - timeStep * vMid;
 			unsigned int iFinal , jFinal;
-			if(clamp_to_grid(xMid, yMid, iFinal, jFinal))
-			{
-				uVelocity(i, j) = uVelocity(iFinal, jFinal);
-				vVelocity(i, j) = vVelocity(iFinal, jFinal);
-				continue;
-			}
+			clamp_to_grid(xMid, yMid, iFinal, jFinal);
 
 			uVelocity(i, j) = bicubicInterpolate(uVelocity, iFinal, jFinal, cellWidth);
 			vVelocity(i, j) = bicubicInterpolate(vVelocity, iFinal, jFinal, cellWidth);

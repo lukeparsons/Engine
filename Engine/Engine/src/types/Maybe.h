@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 struct Nothing {};
 
@@ -17,9 +18,11 @@ private:
 
 public:
 
+	Maybe<A>() : nothing(Nothing()), is_just(false) {};
+
 	Maybe<A>(Nothing n) : nothing(n), is_just(false) {};
 
-	Maybe<A>(A val) : value(val), is_just(true) {};
+	Maybe<A>(A&& val) : value(val), is_just(true) {};
 
 	Maybe<A>& operator=(const Maybe<A>& other)
 	{
@@ -36,6 +39,7 @@ public:
 	Maybe<A>& operator=(const A& other)
 	{
 		value = other;
+		is_just = true;
 		return *this;
 	}
 
