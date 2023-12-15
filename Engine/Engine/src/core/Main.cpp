@@ -121,19 +121,18 @@ int main()
 	Shader fluidVertexShader("../Engine/src/renderer/shaders/shaderfiles/fluids/FluidVertex.vertex");
 	Shader fluidFragmentShader("../Engine/src/renderer/shaders/shaderfiles/fluids/FluidFragment.fragment");
 	ShaderProgram fluidShader(fluidVertexShader, fluidFragmentShader);
-
-	//Mesh model("box.obj", "wall.tga", "BasicVertex.vertex", "BasicFragment.fragment");
+	
+	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj", &basicShader);
 	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
 	std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj", &basicShader);
 
+	std::shared_ptr<Texture> wallTex = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
+
 	Scene scene;
-	//EntityID e1 = scene.CreateModel(torus, Vector3f(0, 0, 0));
-	//EntityID e2 = scene.CreateModel(box, Vector3f(2, 2, 2));
 
 	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
 
 	double previousFrameTime = 0;
-	//float timeStep = (1 / 120.0f);
 	float frameTime = 0;
 	unsigned int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
@@ -168,9 +167,11 @@ int main()
 			}
 		}
 
+		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
+
 		grid->UpdateTexture();
 
-		scene.Update(GetTranslationMatrix(Vector3f(0, 0, 0)));
+		scene.Update(cameraMatrix);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

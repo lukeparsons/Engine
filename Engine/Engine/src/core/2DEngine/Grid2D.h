@@ -141,14 +141,6 @@ public:
 
 	void UpdateTexture()
 	{
-		/*float uMax = uVelocity.max();
-		float uMin = uVelocity.min();
-		float vMax = vVelocity.max();
-		float vMin = vVelocity.min();
-		float pMax = pressure.max();
-		float pMin = pressure.min();
-		float smokeMax = smoke.max();
-		float smokeMin = smoke.min(); */
 		unsigned int offset = 0;
 		for(unsigned int i = 0; i < column; i++)
 		{
