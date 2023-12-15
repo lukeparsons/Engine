@@ -23,8 +23,10 @@
 #define column 100
 
 /* Task list TODO:
-* Convert std::cout for errors to proper error handling
-
+* Advection: Fix halo bicubic interpolation
+* Timestep: Add CFL timestep
+* PCG: Check
+* Boundary condition function: Check
 */
 
 static const int width = 1024;
@@ -135,7 +137,6 @@ int main()
 	//scene.CreateModel(monkey, wall);
 
 	double previousFrameTime = 0;
-	float timeStep = (1 / 60.0f);
 	float frameTime = 0;
 	unsigned int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
@@ -143,7 +144,6 @@ int main()
 
 		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
-		//float timeStep = static_cast<float>(currentFrameTime - previousFrameTime) / grid->uVelocity.max();
 		frameTime += currentFrameTime - previousFrameTime;
 		previousFrameTime = currentFrameTime;
 
@@ -152,15 +152,16 @@ int main()
 
 		processInput(window);
 
-		//float timeStep = 5 * grid->cellWidth / (grid->uVelocity.max());
+		float umax = abs(grid->uVelocity.max()) + sqrt(5 * grid->cellWidth * 9.81f);
+		float timeStep = (3 * grid->cellWidth) / umax;
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
-		grid->addforces(timeStep);
+		grid->advect(timeStep);
+    
+		grid->addgravity(timeStep);
 
-		grid->Solve(timeStep);
-
-		grid->advect(timeStep, grid->uVelocity, grid->vVelocity);
+		grid->project(timeStep);
 
 		for(size_t i = 0; i < row; i++)
 		{

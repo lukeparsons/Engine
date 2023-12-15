@@ -19,41 +19,12 @@ private:
 
 	TextureData<unsigned char> gridTexture;
 
-	bool snap_to_grid(unsigned int& i, unsigned int& j)
-	{
-		bool snapped = false;
-		if(i < 0) // Outside grid on left
-		{
-			i = 0;
-			snapped = true;
-		} else if(i >= column) // Outside grid on right
-		{
-			i = column - 1;
-			snapped = true;
-		}
+	const float scaleCellWidth;
+	void clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j);
+	void calculate_initial_distances();
+	void extrapolate();
 
-		if(j < 0) // Outside grid below
-		{
-			j = 0;
-			return true;
-		} else if(j >= row) // Outside grid above
-		{
-			j = row - 1;
-			return true;
-		}
-		return snapped;
-	}
-
-
-	inline float calculate_interp_quantity_i(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float>& data) const
-	{
-		return weights[0] * data(i, j - 1) + weights[1] * data(i, j) + weights[2] * data(i, j + 1) + weights[3] * data(i, j + 2);
-	}
-
-	inline float calculate_interp_quantity_j(int i, int j, std::array<float, 4> weights, const GridStructureHalo<float>& data) const
-	{
-		return weights[0] * data(i - 1, j) + weights[1] * data(i, j) + weights[2] * data(i + 1, j) + weights[3] * data(i + 2, j);
-	}
+	GridStructureHalo<float> signedDistance = GridStructureHalo<float>(0, column, row);
 
 	void addgravity(float timeStep)
 	{
@@ -70,7 +41,6 @@ private:
 	}
 
 public:
-	// TODO: make private
 	const float cellWidth;
 	float density;
 	float temperature;
@@ -81,14 +51,14 @@ public:
 	GridStructureHalo<float> pressure = GridStructureHalo<float>(0, column, row);
 	GridStructureHalo<float> smoke = GridStructureHalo<float>(0, column, row);
 
-	// TODO: Make this a one thick halo
-	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::FLUID), column, row);
+	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::EMPTY), column, row);
 
 	RowVector negativeDivergences = RowVector(column, row);
 	RowVector precon = RowVector(column, row);
 
 	Grid2D(unsigned int _row, unsigned int _column, Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth)
-		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), gridTexture(TextureData<unsigned char>(column, row, GL_RGBA8, GL_UNSIGNED_BYTE, std::vector<unsigned char>()))
+		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), scaleCellWidth(1 / _cellWidth),
+		gridTexture(TextureData<unsigned char>(column, row, GL_RGBA8, GL_UNSIGNED_BYTE, std::vector<unsigned char>()))
 	{
 		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
@@ -99,25 +69,6 @@ public:
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-
-				if(i >= 0.3 * column && i <= 0.5 * column)
-				{
-					if(j >= 0.4 * row && j <= 0.6 * row)
-					{
-						//gridData(i, j).cellState = GridDataPoint::SOLID;
-					}
-				}
-
-				if(i == 1)
-				{
-					uVelocity(1, j) = 20.0f;
-					smoke(1, j) = 100.0f;
-				}
-
-				//EntityID cellID = scene.CreateModel(gridModel, fluidTexture,
-					//Vector3f(location.x, location.y, 0) + Vector3f(i * cellWidth * 2, j * cellWidth * 2, 0), cellScale);
-				//RenderComponent* render = scene.GetComponent<RenderComponent>(cellID);
-				
 				gridTexture.pixels.push_back(0);
 				gridTexture.pixels.push_back(0);
 				gridTexture.pixels.push_back(255);
@@ -125,74 +76,89 @@ public:
 			}
 		}
 
+		uVelocity.initLeftHalo(6.0f);
+		smoke.initLeftHalo(100.0f);
+		pressure.initLeftHalo(20.0f);
+		//vVelocity.initLeftHalo(9.81f);
+
 		// Make the boundary solid
 		for(unsigned int i = 0; i < column; i++)
 		{
 			gridData(i, 0).cellState = GridDataPoint::SOLID;
 			gridData(i, row - 1).cellState = GridDataPoint::SOLID;
-
 		}
 
-		for(unsigned int j = 1; j < row - 1; j++)
+		for(unsigned int j = 0; j < row; j++)
 		{
-			gridData(0, j).cellState = GridDataPoint::SOLID;
+			//gridData(0, j).cellState = GridDataPoint::SOLID;
 			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
 		}
 
+		calculate_initial_distances();
 	}
 
-	void advect(float timeStep, GridStructureHalo<float>& data1, GridStructureHalo<float>& data2);
+	void advect(float timeStep);
 
-	// PCG (TODO: move all but PCGSolve out of function)
 	void PCGSolve(float timeStep);
 	void PCG();
 	void applyA(const RowVector& vector, RowVector& result);
 	void applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector);
 	void constructPreconditioner();
-	void UpdateA(float Acoefficient, unsigned int i, unsigned int j);
 
-	// GaussSeidel
 	void GaussSeidel(float timeStep);
 
 	void addforces(float timeStep)
 	{
 		this->addgravity(timeStep);
-	}
-
-	void Solve(float timeStep)
+  }
+  
+	void boundaryConditions()
 	{
-		GaussSeidel(timeStep);
-
-		//temp extrapolate
-		for(unsigned int i = 1; i < column - 1; i++)
+		// Make the boundary solid
+		for(unsigned int i = 0; i < column; i++)
 		{
-			uVelocity(i, 1) = uVelocity(i, 2);
-			uVelocity(i, row - 2) = uVelocity(i, row - 3);
+			//uVelocity(i, 0) = 0;
+			//vVelocity(i, 0) = 0;
+			uVelocity(i, row - 1) = 0;
+			vVelocity(i, row - 1) = 0;
 		}
 
-		for(unsigned int j = 1; j < row - 1; j++)
+		for(unsigned int j = 0; j < row; j++)
 		{
-			vVelocity(1, j) = vVelocity(2, j);
-			vVelocity(column - 2, j) = vVelocity(column - 3, j);
+			uVelocity(0, j) = 0;
+			vVelocity(0, j) = 0;
+			uVelocity(column - 1, j) = 0;
+			vVelocity(column - 1, j) = 0;
 		}
 	}
 
-
-	inline unsigned char colourClamp(float maxVal, float minVal, float val)
+	void addgravity(float timeStep)
 	{
-		return static_cast<unsigned char>(std::max(std::min(val, maxVal), minVal) * 255);
+		for(unsigned int i = 0; i < row; i++)
+		{
+			for(unsigned int j = 0; j < column; j++)
+			{
+				if(gridData(i, j).cellState == GridDataPoint::FLUID)
+				{
+					vVelocity(i, j) += timeStep * -9.81f;
+				}
+			}
+		}
+	}
+
+	void project(float timeStep)
+	{
+		//boundaryConditions();
+		PCGSolve(timeStep);
+	}
+
+	inline unsigned char colourClamp(float val)
+	{
+		return static_cast<unsigned char>(std::max(0.0f, val) * 12.75f);
 	}
 
 	void UpdateTexture()
 	{
-		float uMax = uVelocity.max();
-		float uMin = uVelocity.min();
-		float vMax = vVelocity.max();
-		float vMin = vVelocity.min();
-		float pMax = pressure.max();
-		float pMin = pressure.min();
-		//float smokeMax = smoke.max();
-		//float smokeMin = smoke.min();
 		unsigned int offset = 0;
 		for(unsigned int i = 0; i < column; i++)
 		{
@@ -200,10 +166,10 @@ public:
 			{
 				if(gridData(i, j).cellState == GridDataPoint::FLUID)
 				{
-					gridTexture.pixels[offset] = colourClamp(uMax, uMin, uVelocity(i, j));
-					gridTexture.pixels[1 + offset] = colourClamp(vMax, vMin, vVelocity(i, j));
-					gridTexture.pixels[2 + offset] = colourClamp(pMax, pMin, pressure(i, j));
-					gridTexture.pixels[3 + offset] = 255;
+					gridTexture.pixels[offset] = 0;
+					gridTexture.pixels[1 + offset] = 0;
+					gridTexture.pixels[2 + offset] = 0;
+					gridTexture.pixels[3 + offset] = colourClamp(smoke(i, j));
 				}
 
 				offset += 4;

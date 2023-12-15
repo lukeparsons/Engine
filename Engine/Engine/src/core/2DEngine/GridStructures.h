@@ -78,10 +78,10 @@ public:
 	}
 };
 
-/*The grid is made up of cells from(2, 2) to(column + 2, row + 2) with a halo(two cell thick wall) around it
+/*The grid is made up of cells from (2, 2) to (column + 1, row + 1) with a halo(two cell thick wall) around it
 * The outer halo bottom left corner is at(0, 0) and the top right is at(column + 3, row + 3)
 * The inner halo bottom left corner is at(1, 1) and the top right is at(column + 2, row + 2)
-* But we can index from(0, 0) to(column, row) by adding 2 to(i, j) */
+* But we can index from (0, 0) to (column - 1, row - 1) by adding 2 to(i, j) */
 template<typename T>
 struct GridStructureHalo : public GridStructure<T>
 {
@@ -93,6 +93,50 @@ private:
 public:
 
 	GridStructureHalo(T initValue, unsigned int _column, unsigned int _row) : GridStructure<T>(initValue, _column + 4, _row + 4), column(_column), row(_row) {};
+
+	void initLeftHalo(T val)
+	{
+		for(unsigned int j = 0; j < row + 4; j++)
+		{
+			this->grid[0 + (column + 4) * j] = val;
+			this->grid[1 + (column + 4) * j] = val;
+		}
+	}
+
+	void haloCondition()
+	{
+		// right
+		T val = (*this)(column - 1, 0);
+		for(unsigned int j = 0; j < row + 4; j++)
+		{
+			if(j >= 2 && j <= row + 2)
+			{
+				val = this->grid[(column + 1) + (column + 4) * j];
+			}
+			
+			this->grid[column + 2 + (column + 4) * j] = val;
+			this->grid[column + 3 + (column + 4) * j] = val;
+		}
+
+		// Top and bottom
+		T topVal = (*this)(0, row - 1);
+		T bottomVal = (*this)(0, 0);
+		for(unsigned int i = 0; i < column + 4; i++)
+		{
+
+			if(i >= 2 && i <= row + 2)
+			{
+				topVal = this->grid[i + (column + 4) * (row + 1)];
+				bottomVal = this->grid[i + (column + 4) * 2];
+			}
+
+			this->grid[i + (column + 4) * (row + 2)] = topVal;
+			this->grid[i + (column + 4) * (row + 3)] = topVal;
+
+			this->grid[i] = bottomVal;
+			this->grid[i + (column + 4)] = bottomVal;
+		}
+	}
 
 	virtual void insert(T& dataPoint, unsigned int i, unsigned int j) override
 	{
