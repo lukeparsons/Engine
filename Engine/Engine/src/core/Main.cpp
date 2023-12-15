@@ -23,8 +23,10 @@
 #define column 100
 
 /* Task list TODO:
-* Convert std::cout for errors to proper error handling
-
+* Advection: Fix halo bicubic interpolation
+* Timestep: Add CFL timestep
+* PCG: Check
+* Boundary condition function: Check
 */
 
 static const int width = 1024;
@@ -131,7 +133,7 @@ int main()
 	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
 
 	double previousFrameTime = 0;
-	//float timeStep = (1 / 75.0f);
+	//float timeStep = (1 / 120.0f);
 	float frameTime = 0;
 	unsigned int frameCount = 0;
 	while(!glfwWindowShouldClose(window))
@@ -147,15 +149,16 @@ int main()
 
 		processInput(window);
 
-		float timeStep = 5 * grid->cellWidth / (grid->uVelocity.max());
+		float umax = abs(grid->uVelocity.max()) + sqrt(5 * grid->cellWidth * 9.81f);
+		float timeStep = (3 * grid->cellWidth) / umax;
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
 		grid->advect(timeStep);
 
-		grid->addforces(timeStep, -9.81f);
+		grid->addgravity(timeStep);
 
-		grid->Solve(timeStep);
+		grid->project(timeStep);
 
 		for(size_t i = 0; i < row; i++)
 		{
