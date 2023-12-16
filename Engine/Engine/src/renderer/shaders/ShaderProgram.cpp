@@ -1,7 +1,7 @@
 #include "ShaderProgram.h"
 #include <stdexcept>
 
-ShaderProgram::ShaderProgram(Shader& vertexShader, Shader& fragmentShader)
+ShaderProgram::ShaderProgram(Shader&& vertexShader, Shader&& fragmentShader)
 {
 	id = glCreateProgram();
 
@@ -21,8 +21,12 @@ ShaderProgram::ShaderProgram(Shader& vertexShader, Shader& fragmentShader)
 		glGetShaderInfoLog(id, sizeof(infoLog), NULL, infoLog);
 		throw std::runtime_error(std::string("Failed to link shader program \n") + infoLog);
 	}
+
+	transformLoc = glGetUniformLocation(id, "transform");
+	modelLoc = glGetUniformLocation(id, "mesh");
 }
 
+ShaderProgram::ShaderProgram(const std::string vertexFile, const std::string fragmentFile) : ShaderProgram(Shader(vertexFile), Shader(fragmentFile)) {};
 ShaderProgram::~ShaderProgram()
 {
 	glDeleteProgram(id);

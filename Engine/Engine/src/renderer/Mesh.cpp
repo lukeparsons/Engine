@@ -12,7 +12,7 @@
 
 static Assimp::Importer importer;
 
-void Mesh::readmesh(const char* fileName)
+void Mesh::readmesh(const std::string fileName)
 {
 	const aiScene* scene = importer.ReadFile(fileName,
 		aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
@@ -55,7 +55,7 @@ void Mesh::readmesh(const char* fileName)
 	}
 }
 
-void Mesh::constructmesh(ShaderProgram* const shaderProgram)
+void Mesh::constructmesh()
 {
 	GLuint VBO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -83,16 +83,12 @@ void Mesh::constructmesh(ShaderProgram* const shaderProgram)
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
 	glBindVertexArray(0);
-
-	transformLoc = glGetUniformLocation(shaderProgram->GetID(), "transform");
-	modelLoc = glGetUniformLocation(shaderProgram->GetID(), "mesh");
-	textureLoc = glGetUniformLocation(shaderProgram->GetID(), "texture");
 }
 
-Mesh::Mesh(const char* fileName, ShaderProgram *const shaderProgram) : shaderProgram(shaderProgram)
+Mesh::Mesh(const std::string fileName, const std::shared_ptr<ShaderProgram> shaderProgram) : shaderProgram(shaderProgram)
 {
 	readmesh(fileName);
-	constructmesh(shaderProgram);
+	constructmesh();
 }
 
 Mesh::Mesh(const Mesh& other)
@@ -100,18 +96,16 @@ Mesh::Mesh(const Mesh& other)
 	vertices = other.vertices;
 	indices = other.indices;
 	shaderProgram = other.shaderProgram;
-	constructmesh(shaderProgram);
+	constructmesh();
 }
 
 void Mesh::Draw(const Matrix4f& cameraMatrix, GLuint textureID, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const
 {
 	glUseProgram(shaderProgram->GetID());
-	glUniformMatrix4fv(transformLoc, 1, GL_TRUE, cameraMatrix.matrix[0]);
-
 
 	// TODO: Include rotation matrix
 	Matrix4f modelMatrix = GetTranslationMatrix(location) * GetScaleMatrix(scale);
-	glUniformMatrix4fv(modelLoc, 1, GL_TRUE, modelMatrix.matrix[0]);
+	shaderProgram->Configure(cameraMatrix, modelMatrix);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

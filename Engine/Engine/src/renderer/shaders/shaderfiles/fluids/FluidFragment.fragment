@@ -1,14 +1,74 @@
 #version 330 core
 
-out vec4 FragColour;
+out vec4 FragColor;
 
 in vec2 TexCoord;
 
-uniform vec4 FluidColour;
-
 uniform sampler2D ourTexture;
+
+uniform float timestep;
+uniform float rdx;
+uniform sampler2D u;
+uniform sampler2D x;
+uniform sampler2D b;
+uniform float alpha;
+uniform float rBeta;
+uniform float halfrdx; // 0.5 / gridsacle
+uniform sampler2D w; // velocity
+uniform sampler2D p; // pressure
 
 void main()
 {
-	FragColour = texture(ourTexture, TexCoord) * FluidColour;
+	FragColor = texture(ourTexture, TexCoord);
+}
+
+vec4 bilerp(sampler2D tex, vec2 uv)
+{
+	vec2 weight = fract(uv);
+
+	vec4 bottom = mix(texture(tex, uv), texture(tex, uv + vec2(1, 0)), weight.x);
+
+	vec4 top = mix(texture(tex, uv + vec2(0, 1)), texture(tex, uv + vec2(1, 1)), weight.x);
+
+	return mix(bottom, top, weight.y);
+}
+
+void advect(in vec2 coords, out vec4 xNew) 
+{
+	vec2 pos = coords - timestep * rdx * vec2(texture(u, coords));
+
+	xNew = bilerp(x, pos);
+}
+
+// TODO: can convert vecs to half
+void jacobi(in vec2 coords, out vec4 xNew) 
+{
+	vec4 xL = texture(x, coords - vec2(1, 0));
+	vec4 xR = texture(x, coords + vec2(1, 0));
+	vec4 xB = texture(x, coords - vec2(0, 1));
+	vec4 xT = texture(x, coords + vec2(0, 1));
+
+	vec4 bC = texture(b, coords);
+	xNew = (xL + xR + xB + xT + alpha * bC) * rBeta;
+}
+
+void divergence(in vec2 coords, out vec4 div) 
+{
+	vec4 wL = texture(x, coords - vec2(1, 0));
+	vec4 wR = texture(x, coords + vec2(1, 0));
+	vec4 wB = texture(x, coords - vec2(0, 1));
+	vec4 wT = texture(x, coords + vec2(0, 1));
+
+	div = vec4(halfrdx * ((wR.x - wL.x) + (wT.y - wB.y))); // W: check casting
+}
+
+void gradient(in vec2 coords, out vec4 uNew)
+{
+	float pL = float(texture(p, coords - vec2(1, 0))); // W: check casting
+	float pR = float(texture(p, coords + vec2(1, 0)));
+	float pB = float(texture(p, coords - vec2(0, 1)));
+	float pT = float(texture(p, coords + vec2(0, 1)));
+
+	uNew = texture(w, coords);
+	uNew.xy -= halfrdx * vec2(pR - pL, pT - pB);
 }

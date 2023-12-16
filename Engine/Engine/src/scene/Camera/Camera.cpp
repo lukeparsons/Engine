@@ -10,6 +10,17 @@ Camera::Camera(Vector3f location) : location(location)
 
 void Camera::ProcessCameraKeyboardInputs(GLFWwindow* window)
 {
+
+	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		moveSpeed = 0.001f;
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+	{
+		moveSpeed = 0.008f;
+	}
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		location += target * moveSpeed;

@@ -203,6 +203,8 @@
     <ClInclude Include="src\core\2DEngine\RowVector.h" />
     <ClInclude Include="src\core\2DEngine\Smoke.h" />
     <ClInclude Include="src\math\Matrix.h" />
+    <ClInclude Include="src\renderer\shaders\BasicShader.h" />
+    <ClInclude Include="src\renderer\shaders\FluidShader.h" />
     <ClInclude Include="src\renderer\Texture.h" />
     <ClInclude Include="src\scene\components\Component.h" />
     <ClInclude Include="src\scene\components\EulerianGridComponent.h" />

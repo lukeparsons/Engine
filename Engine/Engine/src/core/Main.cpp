@@ -18,6 +18,8 @@
 #include "../math/Matrix.h"
 #include "2DEngine/Grid2D.h"
 #include "../renderer/Texture.h"
+#include "../renderer/shaders/BasicShader.h"
+#include "../renderer/shaders/FluidShader.h"
 
 #define row 100
 #define column 100
@@ -113,24 +115,22 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// These shader programs have to stay in scope (for now)
-	Shader basicVertexShader("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex");
-	Shader basicFragmentShader("../Engine/src/renderer/shaders/shaderfiles/BasicFragment.fragment");
-	ShaderProgram basicShader(basicVertexShader, basicFragmentShader);
+	std::shared_ptr<ShaderProgram> basicShader = std::make_unique<BasicShader>();
 
-	Shader fluidVertexShader("../Engine/src/renderer/shaders/shaderfiles/fluids/FluidVertex.vertex");
-	Shader fluidFragmentShader("../Engine/src/renderer/shaders/shaderfiles/fluids/FluidFragment.fragment");
-	ShaderProgram fluidShader(fluidVertexShader, fluidFragmentShader);
+	std::shared_ptr<ShaderProgram> fluidShader = std::make_unique<FluidShader>();
 	
-	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj", &basicShader);
+	//std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj", &fluidShader);
 	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
-	std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj", &basicShader);
+
+	std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj", fluidShader);
 
 	std::shared_ptr<Texture> wallTex = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
 	Scene scene;
 
-	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
+	scene.CreateModel(square, wallTex);
+
+	//Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
 
 	double previousFrameTime = 0;
 	float frameTime = 0;
@@ -148,16 +148,16 @@ int main()
 
 		processInput(window);
 
-		float umax = abs(grid->uVelocity.max()) + sqrt(5 * grid->cellWidth * 9.81f);
-		float timeStep = (3 * grid->cellWidth) / umax;
+		//float umax = abs(grid->uVelocity.max()) + sqrt(5 * grid->cellWidth * 9.81f);
+		//float timeStep = (3 * grid->cellWidth) / umax;
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
-		grid->advect(timeStep);
+		//grid->advect(timeStep);
 
-		grid->addgravity(timeStep);
+		//grid->addgravity(timeStep);
 
-		grid->project(timeStep);
+		//grid->project(timeStep);
 
 		for(size_t i = 0; i < row; i++)
 		{
@@ -169,7 +169,7 @@ int main()
 
 		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
 
-		grid->UpdateTexture();
+		//grid->UpdateTexture();
 
 		scene.Update(cameraMatrix);
 
@@ -178,7 +178,7 @@ int main()
 		frameCount++;
 	}
 	std::cout << "Average FPS " << 60 / (frameTime / frameCount);
-	delete grid;
+	//delete grid;
 	glfwTerminate();
 	return 0;
 }

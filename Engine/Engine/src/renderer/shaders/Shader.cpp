@@ -5,7 +5,7 @@
 #define VERTEX_EXTENSION "vertex"
 #define FRAGMENT_EXTENSION "fragment"
 
-Shader::Shader(const char* path)
+Shader::Shader(const std::string path)
 {
 	std::string shaderCode = ReadFile(path);
 	std::string shaderExtension = ReadFileExtension(path);

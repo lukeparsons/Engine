@@ -9,7 +9,7 @@ public:
 	Vector3f location;
 	Camera(Vector3f location);
 
-	const float moveSpeed = 0.1f;
+	float moveSpeed = 0.008f;
 	const float sensitivity = 0.1f;
 
 	Vector3f target;

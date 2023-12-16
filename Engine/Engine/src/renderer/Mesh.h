@@ -25,16 +25,13 @@ class Mesh
 {
 private:
 	GLuint VAO;
-	unsigned int transformLoc;
-	unsigned int modelLoc;
-	unsigned int textureLoc;
 
-	void readmesh(const char* fileName);
-	void constructmesh(ShaderProgram *const shaderProgram);
+	void readmesh(const std::string fileName);
+	void constructmesh();
 public:
-	ShaderProgram* shaderProgram;
+	std::shared_ptr<ShaderProgram> shaderProgram;
 
-	Mesh(const char* fileName, ShaderProgram *const shaderProgram);
+	Mesh(const std::string fileName, const std::shared_ptr<ShaderProgram> shaderProgram);
 
 	Mesh(const Mesh& other);
 

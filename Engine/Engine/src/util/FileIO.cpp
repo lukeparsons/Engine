@@ -15,7 +15,7 @@
 */
 
 // TODO: this needs cleaning up
-std::string ReadFile(const char* path, std::ios_base::openmode openMode)
+std::string ReadFile(const std::string path, std::ios_base::openmode openMode)
 {
 	std::ifstream file;
 	std::string buffer;
@@ -59,7 +59,7 @@ std::string ReadFile(const char* path, std::ios_base::openmode openMode)
 * @throws std::ifstream::invalid_argument Exception on failure to read extension
 * @returns The extension of the file, not including the dot (.)
 */
-std::string ReadFileExtension(const char* fileName)
+std::string ReadFileExtension(const std::string fileName)
 {
 	std::string extension = std::move(std::string(fileName));
 
