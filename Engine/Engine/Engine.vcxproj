@@ -171,11 +171,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\2DEngine\GaussSeidel.cpp" />
-    <ClCompile Include="src\core\2DEngine\Grid2D.cpp" />
-    <ClCompile Include="src\core\2DEngine\LevelSet.cpp" />
-    <ClCompile Include="src\core\2DEngine\PCG.cpp" />
-    <ClCompile Include="src\scene\components\EulerianGridComponent.cpp" />
+    <ClCompile Include="src\core\2DGrid\GaussSeidel.cpp" />
+    <ClCompile Include="src\core\2DGrid\Grid2D.cpp" />
+    <ClCompile Include="src\core\2DGrid\LevelSet.cpp" />
+    <ClCompile Include="src\core\2DGrid\PCG.cpp" />
+    <ClCompile Include="src\scene\components\FluidComponent.cpp" />
     <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
@@ -197,17 +197,17 @@
     <ClCompile Include="src\util\formats\png\lodepng.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\2DEngine\GridCell2D.h" />
-    <ClInclude Include="src\core\2DEngine\Grid2D.h" />
-    <ClInclude Include="src\core\2DEngine\GridStructures.h" />
-    <ClInclude Include="src\core\2DEngine\RowVector.h" />
-    <ClInclude Include="src\core\2DEngine\Smoke.h" />
+    <ClInclude Include="src\core\2DGrid\Grid2D.h" />
+    <ClInclude Include="src\core\2DGrid\GridStructures.h" />
+    <ClInclude Include="src\core\2DGrid\RowVector.h" />
+    <ClInclude Include="src\core\2DGrid\Smoke.h" />
     <ClInclude Include="src\math\Matrix.h" />
     <ClInclude Include="src\renderer\shaders\BasicShader.h" />
     <ClInclude Include="src\renderer\shaders\FluidShader.h" />
+    <ClInclude Include="src\renderer\shaders\ShaderStore.h" />
     <ClInclude Include="src\renderer\Texture.h" />
     <ClInclude Include="src\scene\components\Component.h" />
-    <ClInclude Include="src\scene\components\EulerianGridComponent.h" />
+    <ClInclude Include="src\scene\components\FluidComponent.h" />
     <ClInclude Include="src\scene\components\RenderComponent.h" />
     <ClInclude Include="src\scene\objects\components\static\StaticComponent.h" />
     <ClInclude Include="src\scene\objects\components\static\TransformComponent.h" />
@@ -217,7 +217,7 @@
     <ClInclude Include="src\renderer\Mesh.h" />
     <ClInclude Include="src\math\Matrix4f.h" />
     <ClInclude Include="src\scene\systems\EngineSystem.h" />
-    <ClInclude Include="src\scene\systems\EulerianFluidSystem.h" />
+    <ClInclude Include="src\scene\systems\FluidSystem.h" />
     <ClInclude Include="src\scene\systems\RenderSystem.h" />
     <ClInclude Include="src\scene\ComponentStore.h" />
     <ClInclude Include="src\scene\SystemManager.h" />
@@ -240,6 +240,7 @@
     <None Include="assimp-vc142-mtd.dll" />
     <None Include="src\renderer\shaders\shaderfiles\BasicFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\BasicVertex.vertex" />
+    <None Include="src\renderer\shaders\shaderfiles\fluids\BoundaryFluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidVertex.vertex" />
     <None Include="src\shaderfiles\BasicFragment.fragment" />

@@ -3,6 +3,7 @@
 #include <any>
 #include "../util/formats/png/lodepng.h"
 
+
 struct Texture
 {
 	virtual void* GetPixelData() = 0;
@@ -15,12 +16,16 @@ struct Texture
 	{};
 };
 
+// TODO: check pixels size = width * height * format
 template<typename T>
-struct TextureData : public Texture
+class TextureData : public Texture
 {
+public:
 	std::vector<T> pixels;
 
 	TextureData(unsigned int _width, unsigned int _height, GLenum _format, GLenum _type, std::vector<T> _pixels) : Texture(_width, _height, _format, _type), pixels(_pixels) {};
+
+	TextureData(unsigned int _width, unsigned int _height, GLenum _format, GLenum _type) : Texture(_width, _height, _format, _type) {}
 
 	virtual void* GetPixelData() override
 	{

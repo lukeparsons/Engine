@@ -110,6 +110,11 @@ public:
 		return dense;
 	}
 
+	inline const ComponentType& GetComponentFromType(EntityID id) const
+	{
+		return *dense[id].get();
+	}
+
 	inline ComponentType& GetComponentFromType(EntityID id)
 	{
 		return *dense[id].get();

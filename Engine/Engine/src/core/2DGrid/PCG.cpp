@@ -1,5 +1,7 @@
 #include "Grid2D.h"
 
+#define MAX_ITERATIONS 100
+
 // TODO: A 1xn or nx1 grid is currently broken
 void Grid2D::PCGSolve(float timeStep)
 {
@@ -147,9 +149,9 @@ void Grid2D::PCG()
 	double sigma = DotProduct(auxiliaryVector, residualVector);
 
 	// TODO: Implement proper scaling
-	double tolerance = 0.000001f;
+	double tolerance = 0.00001f;
 
-	for(unsigned int iter = 0; iter < 200; iter++) // 200 here is max iterations
+	for(unsigned int iter = 0; iter < MAX_ITERATIONS; iter++)
 	{
 		applyA(searchVector, auxiliaryVector);
 		double dP = DotProduct(auxiliaryVector, searchVector);

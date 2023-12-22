@@ -69,22 +69,22 @@
     <ClCompile Include="src\scene\SystemManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\components\EulerianGridComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\components\RenderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\2DEngine\PCG.cpp">
+    <ClCompile Include="src\core\2DGrid\PCG.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\2DEngine\Grid2D.cpp">
+    <ClCompile Include="src\core\2DGrid\Grid2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\2DEngine\GaussSeidel.cpp">
+    <ClCompile Include="src\core\2DGrid\GaussSeidel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\2DEngine\LevelSet.cpp">
+    <ClCompile Include="src\core\2DGrid\LevelSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\components\FluidComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -149,9 +149,6 @@
     <ClInclude Include="src\scene\objects\WorldObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\components\EulerianGridComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\components\RenderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -173,34 +170,37 @@
     <ClInclude Include="src\scene\systems\EngineSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\systems\EulerianFluidSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\SystemManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\2DEngine\GridCell2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\math\Matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\2DEngine\Grid2D.h">
+    <ClInclude Include="src\core\2DGrid\Grid2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\2DEngine\GridStructures.h">
+    <ClInclude Include="src\core\2DGrid\GridStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\2DEngine\Smoke.h">
+    <ClInclude Include="src\core\2DGrid\Smoke.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\2DEngine\RowVector.h">
+    <ClInclude Include="src\core\2DGrid\RowVector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\shaders\BasicShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\shaders\FluidShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\components\FluidComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\systems\FluidSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\shaders\ShaderStore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -214,6 +214,7 @@
     <None Include="src\renderer\shaders\shaderfiles\BasicVertex.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidVertex.vertex" />
+    <None Include="src\renderer\shaders\shaderfiles\fluids\BoundaryFluidFragment.fragment" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\wall.tga" />

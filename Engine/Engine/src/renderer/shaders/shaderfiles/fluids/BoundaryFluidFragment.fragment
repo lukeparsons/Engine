@@ -1,0 +1,21 @@
+#version 330 core
+
+out vec4 FragColor;
+
+in vec2 TexCoord;
+
+uniform sampler2D ourTexture;
+
+uniform vec2 coords;
+uniform float scale;
+uniform sampler2D x;
+
+vec4 boundary(vec2 coords, vec2 offset) 
+{
+	return scale * texture(x, coords + offset);
+} 
+
+void main()
+{
+	FragColor = texture(boundary, TexCoord);
+}

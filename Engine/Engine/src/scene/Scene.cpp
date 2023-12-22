@@ -2,16 +2,15 @@
 #include <ranges>
 #include "components/TransformComponent.h"
 #include "components/RenderComponent.h"
-#include "components/EulerianGridComponent.h"
 #include "../scene/SystemManager.h"
 
 Scene::Scene()
 {
     entities[typeid(TransformComponent)] = std::make_unique<ComponentStore<TransformComponent>>();
     entities[typeid(RenderComponent)] = std::make_unique<ComponentStore<RenderComponent>>();
-    entities[typeid(EulerianGridComponent)] = std::make_unique<ComponentStore<EulerianGridComponent>>();
+    entities[typeid(FluidComponent)] = std::make_unique<ComponentStore<FluidComponent>>();
 
-    systems = std::make_unique<SystemManager>(getStorePointer<TransformComponent>(), getStorePointer<RenderComponent>(), getStorePointer<EulerianGridComponent>());
+    systems = std::make_unique<SystemManager>(getStorePointer<TransformComponent>(), getStorePointer<RenderComponent>(), getStorePointer<FluidComponent>());
 }
 
 Scene::~Scene() = default;

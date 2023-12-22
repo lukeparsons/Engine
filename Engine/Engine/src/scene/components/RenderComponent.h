@@ -1,14 +1,14 @@
 #pragma once
-
 #include "../../renderer/Mesh.h"
 #include "TransformComponent.h"
 
 class RenderComponent : public Component {
-private:
+protected:
 	std::shared_ptr<Texture> texture;
 public:
 	std::shared_ptr<Mesh> mesh;
 	GLuint textureID;
+	std::shared_ptr<ShaderProgram> shaderProgram;
 
 	RenderComponent(EntityID _id);
 

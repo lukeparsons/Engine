@@ -1,10 +1,9 @@
 #include "SystemManager.h"
 
-SystemManager::SystemManager(ComponentStore<TransformComponent>* const transform, ComponentStore<RenderComponent>* const render, ComponentStore<EulerianGridComponent>* euler)
+SystemManager::SystemManager(ComponentStore<TransformComponent>* const transform, ComponentStore<RenderComponent>* const render, ComponentStore<FluidComponent>* const fluid)
 {
 	renderSystem = std::make_unique<RenderSystem>(transform, render);
-
-	eulerFluidSystem = std::make_unique<EulerianFluidSystem>(transform, euler);
+	fluidSystem = std::make_unique<FluidSystem>(transform, fluid);
 }
 
 SystemManager::~SystemManager() = default;

@@ -85,7 +85,7 @@ void Mesh::constructmesh()
 	glBindVertexArray(0);
 }
 
-Mesh::Mesh(const std::string fileName, const std::shared_ptr<ShaderProgram> shaderProgram) : shaderProgram(shaderProgram)
+Mesh::Mesh(const std::string fileName)
 {
 	readmesh(fileName);
 	constructmesh();
@@ -95,17 +95,11 @@ Mesh::Mesh(const Mesh& other)
 {
 	vertices = other.vertices;
 	indices = other.indices;
-	shaderProgram = other.shaderProgram;
 	constructmesh();
 }
 
-void Mesh::Draw(const Matrix4f& cameraMatrix, GLuint textureID, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const
+void Mesh::Draw(const Matrix4f& cameraMatrix, GLuint textureID) const
 {
-	glUseProgram(shaderProgram->GetID());
-
-	// TODO: Include rotation matrix
-	Matrix4f modelMatrix = GetTranslationMatrix(location) * GetScaleMatrix(scale);
-	shaderProgram->Configure(cameraMatrix, modelMatrix);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

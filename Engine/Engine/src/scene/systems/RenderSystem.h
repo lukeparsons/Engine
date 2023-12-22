@@ -10,7 +10,6 @@ class RenderSystem : public EngineSystem
 private:
 	ComponentStore<TransformComponent>* const transformComponents;
 	ComponentStore<RenderComponent>* const renderComponents;
-
 public:
 
 	RenderSystem(ComponentStore<TransformComponent>* const _transformComponents, ComponentStore<RenderComponent>* const _renderComponents)
@@ -20,9 +19,17 @@ public:
 	{
 		for(std::unique_ptr<RenderComponent>& component : renderComponents->GetDenseList())
 		{
+			const TransformComponent& transform = transformComponents->GetComponentFromType(component->entity);
 
-			TransformComponent& transform = transformComponents->GetComponentFromType(component->entity);
-			component->mesh->Draw(cameraMatrix, component->textureID, transform.location, transform.rotation, transform.scale);
+			glUseProgram(component->shaderProgram->GetID());
+
+			// TODO: Include rotation matrix
+			Matrix4f modelMatrix = GetTranslationMatrix(transform.location) * GetScaleMatrix(transform.scale);
+			component->shaderProgram->Configure(cameraMatrix, modelMatrix);
+
+			component->mesh->Draw(cameraMatrix, component->textureID);
+
+			glUseProgram(0);
 		}
 	}
 };

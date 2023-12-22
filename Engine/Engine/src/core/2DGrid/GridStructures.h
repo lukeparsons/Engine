@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <array>
+#include <vector>
 
 struct GridDataPoint
 {

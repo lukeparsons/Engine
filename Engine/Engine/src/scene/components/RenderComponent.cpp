@@ -1,4 +1,6 @@
 #include "RenderComponent.h"
+#include "../../renderer/shaders/BasicShader.h"
+#include "../../renderer/shaders/ShaderStore.h"
 
 static const std::shared_ptr<Texture> defaultTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
@@ -16,6 +18,8 @@ RenderComponent::RenderComponent(EntityID _id) : Component(_id), texture(default
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, texture->format, texture->type, texture->GetPixelData());
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	shaderProgram = g_shaderStore.LoadShader<BasicShader>("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex", "../Engine/src/renderer/shaders/shaderfiles/BasicFragment.fragment");
 }
 
 void RenderComponent::ChangeTexture(std::shared_ptr<Texture> _texture)

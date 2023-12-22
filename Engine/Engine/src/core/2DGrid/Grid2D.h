@@ -1,9 +1,9 @@
 #pragma once
-#include "GridCell2D.h"
 #include "GridStructures.h"
 #include "RowVector.h"
 #include "../../scene/components/RenderComponent.h"
 #include <map>
+#include "../../scene/Scene.h"
 
 static const std::shared_ptr<Texture> fluidTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/smoke.png"));
 static const std::shared_ptr<Texture> solidTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/block.png"));
@@ -29,13 +29,12 @@ private:
 public:
 	const float cellWidth;
 	float density;
-	float temperature;
-	float concentration;
 
 	GridStructureHalo<float> uVelocity = GridStructureHalo<float>(0, column, row);
 	GridStructureHalo<float> vVelocity = GridStructureHalo<float>(0, column, row);
 	GridStructureHalo<float> pressure = GridStructureHalo<float>(0, column, row);
 	GridStructureHalo<float> smoke = GridStructureHalo<float>(0, column, row);
+	GridStructureHalo<float> temparature = GridStructureHalo<float>(0, column, row);
 
 	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::EMPTY), column, row);
 
@@ -46,7 +45,6 @@ public:
 		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), scaleCellWidth(1 / _cellWidth),
 		gridTexture(TextureData<unsigned char>(column, row, GL_RGBA8, GL_UNSIGNED_BYTE, std::vector<unsigned char>()))
 	{
-		Vector3f cellScale = Vector3f(cellWidth, cellWidth, cellWidth);
 
 		fluidID = scene.CreateModel(gridModel, solidTexture, Vector3f(0, 0, 0), Vector3f(1, 1, 1));
 		fluidRenderComponent = scene.GetComponent<RenderComponent>(fluidID);

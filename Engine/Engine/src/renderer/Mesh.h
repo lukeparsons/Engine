@@ -29,13 +29,12 @@ private:
 	void readmesh(const std::string fileName);
 	void constructmesh();
 public:
-	std::shared_ptr<ShaderProgram> shaderProgram;
 
-	Mesh(const std::string fileName, const std::shared_ptr<ShaderProgram> shaderProgram);
+	Mesh(const std::string fileName);
 
 	Mesh(const Mesh& other);
 
-	void Draw(const Matrix4f& cameraMatrix, GLuint textureID, const Vector3f& location, const Vector3f& rotation, const Vector3f& scale) const;
+	void Draw(const Matrix4f& cameraMatrix, GLuint textureID) const;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 };

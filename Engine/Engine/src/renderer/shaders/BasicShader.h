@@ -3,9 +3,21 @@
 
 class BasicShader : public ShaderProgram
 {
+protected:
+	unsigned int transformLoc;
+	unsigned int modelLoc;
+	virtual void init()
+	{
+		transformLoc = glGetUniformLocation(this->id, "transform");
+		modelLoc = glGetUniformLocation(this->id, "mesh");
+	}
+
 public:
 
-	BasicShader() : ShaderProgram("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex", "../Engine/src/renderer/shaders/shaderfiles/BasicFragment.fragment") {};
+	BasicShader(std::string vertexFile, std::string fragmentFile) : ShaderProgram(vertexFile, fragmentFile) 
+	{
+		init();
+	};
 
 	void Configure(const Matrix4f& cameraMatrix, const Matrix4f& modelMatrix) override
 	{

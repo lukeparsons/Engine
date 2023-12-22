@@ -6,21 +6,17 @@ in vec2 TexCoord;
 
 uniform sampler2D ourTexture;
 
+uniform vec2 coords;
 uniform float timestep;
-uniform float rdx;
+uniform float rdx; // cell width
 uniform sampler2D u;
 uniform sampler2D x;
 uniform sampler2D b;
 uniform float alpha;
 uniform float rBeta;
-uniform float halfrdx; // 0.5 / gridsacle
+uniform float halfrdx; // 0.5 / gridscale
 uniform sampler2D w; // velocity
 uniform sampler2D p; // pressure
-
-void main()
-{
-	FragColor = texture(ourTexture, TexCoord);
-}
 
 vec4 bilerp(sampler2D tex, vec2 uv)
 {
@@ -33,15 +29,15 @@ vec4 bilerp(sampler2D tex, vec2 uv)
 	return mix(bottom, top, weight.y);
 }
 
-void advect(in vec2 coords, out vec4 xNew) 
+vec4 advect() 
 {
 	vec2 pos = coords - timestep * rdx * vec2(texture(u, coords));
 
-	xNew = bilerp(x, pos);
+	return bilerp(x, pos);
 }
 
 // TODO: can convert vecs to half
-void jacobi(in vec2 coords, out vec4 xNew) 
+vec4 jacobi() 
 {
 	vec4 xL = texture(x, coords - vec2(1, 0));
 	vec4 xR = texture(x, coords + vec2(1, 0));
@@ -49,26 +45,37 @@ void jacobi(in vec2 coords, out vec4 xNew)
 	vec4 xT = texture(x, coords + vec2(0, 1));
 
 	vec4 bC = texture(b, coords);
-	xNew = (xL + xR + xB + xT + alpha * bC) * rBeta;
+	return (xL + xR + xB + xT + alpha * bC) * rBeta;
 }
 
-void divergence(in vec2 coords, out vec4 div) 
+vec4 divergence() 
 {
 	vec4 wL = texture(x, coords - vec2(1, 0));
 	vec4 wR = texture(x, coords + vec2(1, 0));
 	vec4 wB = texture(x, coords - vec2(0, 1));
 	vec4 wT = texture(x, coords + vec2(0, 1));
 
-	div = vec4(halfrdx * ((wR.x - wL.x) + (wT.y - wB.y))); // W: check casting
+	return vec4(halfrdx * ((wR.x - wL.x) + (wT.y - wB.y))); // W: check casting
 }
 
-void gradient(in vec2 coords, out vec4 uNew)
+vec4 gradient()
 {
 	float pL = float(texture(p, coords - vec2(1, 0))); // W: check casting
 	float pR = float(texture(p, coords + vec2(1, 0)));
 	float pB = float(texture(p, coords - vec2(0, 1)));
 	float pT = float(texture(p, coords + vec2(0, 1)));
 
-	uNew = texture(w, coords);
+	vec4 uNew = texture(w, coords);
 	uNew.xy -= halfrdx * vec2(pR - pL, pT - pB);
+	return uNew;
+}
+
+void main()
+{
+	vec4 advection = advect();
+	vec4 diffusion = jacobi();
+	vec4 diverg = divergence();
+	vec4 newU = gradient();
+	
+	//FragColor = texture(ourTexture, TexCoord);
 }

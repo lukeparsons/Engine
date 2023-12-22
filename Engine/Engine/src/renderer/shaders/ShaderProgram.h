@@ -5,11 +5,8 @@
 
 class ShaderProgram
 {
-private:
-	GLuint id;
 protected:
-	unsigned int transformLoc;
-	unsigned int modelLoc;
+	GLuint id;
 public:
 
 	ShaderProgram(Shader&& vertexShader, Shader&& fragmentShader);
