@@ -87,6 +87,9 @@
     <ClCompile Include="src\scene\components\FluidComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\3DGrid\Grid3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\util\FileIO.h">
@@ -179,13 +182,13 @@
     <ClInclude Include="src\core\2DGrid\Grid2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\2DGrid\GridStructures.h">
+    <ClInclude Include="src\core\2DGrid\GridStructures2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\2DGrid\Smoke.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\2DGrid\RowVector.h">
+    <ClInclude Include="src\core\2DGrid\RowVector2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\shaders\BasicShader.h">
@@ -201,6 +204,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\shaders\ShaderStore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\3DGrid\Grid3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\3DGrid\GridStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\3DGrid\RowVector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

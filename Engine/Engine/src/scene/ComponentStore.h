@@ -43,7 +43,7 @@ public:
 			throw std::out_of_range("Trying to insert value out of sparse set range");
 		}
 
-		dense.push_back(std::make_unique<ComponentType>(ComponentType(id)));
+		dense.push_back(std::make_unique<ComponentType>(id));
 		size_t newDensePos = dense.size() - 1;
 
 		if(id + 1 < std::numeric_limits<EntityID>::max())

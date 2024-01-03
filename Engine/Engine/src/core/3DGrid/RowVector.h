@@ -7,7 +7,7 @@ We store a one cell thick halo grid
 class RowVector
 {
 private:
-	unsigned int row, column;
+	unsigned int row, column, depth;
 	std::vector<double> vector;
 public:
 
@@ -15,9 +15,11 @@ public:
 
 	inline unsigned int getRow() const { return row; }
 
-	RowVector(unsigned int _column, unsigned int _row) : column(_column), row(_row)
+	inline unsigned int getDepth() const { return depth; }
+
+	RowVector(unsigned int _column, unsigned int _row, unsigned int _depth) : column(_column), row(_row), depth(_depth)
 	{
-		vector = std::vector<double>((column + 2) * (row + 2));
+		vector = std::vector<double>((column + 2) * (row + 2) * (depth + 2));
 		std::fill(vector.begin(), vector.end(), 0);
 	}
 
@@ -36,24 +38,27 @@ public:
 		return vector[idx];
 	}
 
-	inline const double& operator()(unsigned int i, unsigned int j) const
+	inline const double& operator()(unsigned int i, unsigned int j, unsigned int z) const
 	{
-		return vector[(i + 1) + (column + 2) * (j + 1)];
+		return vector[(i + 1) + (column + 2) * ((j + 1) + (row + 2) * (z + 1))];
 	}
 
-	inline double& operator()(unsigned int i, unsigned int j)
+	inline double& operator()(unsigned int i, unsigned int j, unsigned int z)
 	{
-		return vector[(i + 1) + (column + 2) * (j + 1)];
+		return vector[(i + 1) + (column + 2) * ((j + 1) + (row + 2) * (z + 1))];
 	}
 
 	inline RowVector operator*(double scalar) const
 	{
-		RowVector result(row, column);
+		RowVector result(row, column, depth);
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				result[i] = (i, j) * scalar;
+				for(unsigned int z = 0; z < row; z++)
+				{
+					result(i, j, z) = (i, j, z) * scalar;
+				}
 			}
 		}
 		return result;
@@ -61,12 +66,15 @@ public:
 
 	inline RowVector operator+(const RowVector& rhs) const
 	{
-		RowVector result(row, column);
+		RowVector result(row, column, depth);
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				result[i] = (i, j) + rhs(i, j);
+				for(unsigned int z = 0; z < depth; z++)
+				{
+					result(i, j, z) = (i, j, z) + rhs(i, j, z);
+				}
 			}
 		}
 		return result;
@@ -74,12 +82,15 @@ public:
 
 	inline RowVector operator-(const RowVector& rhs) const
 	{
-		RowVector result(row, column);
+		RowVector result(row, column, depth);
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				result[i] = (i, j) - rhs(i, j);
+				for(unsigned int z = 0; z < depth; z++)
+				{
+					result(i, j, z) = (i, j, z) - rhs(i, j, z);
+				}
 			}
 		}
 		return result;
@@ -114,7 +125,10 @@ inline double DotProduct(const RowVector& lhs, const RowVector& rhs)
 	{
 		for(unsigned int j = 0; j < lhs.getRow(); j++)
 		{
-			result += lhs(i, j) * rhs(i, j);
+			for(unsigned int z = 0; z < lhs.getDepth(); z++)
+			{
+				result += lhs(i, j, z) * rhs(i, j, z);
+			}
 		}
 	}
 	return result;

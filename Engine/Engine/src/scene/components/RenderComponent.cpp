@@ -24,13 +24,13 @@ RenderComponent::RenderComponent(EntityID _id) : Component(_id), texture(default
 
 void RenderComponent::ChangeTexture(std::shared_ptr<Texture> _texture)
 {
-	if(texture.get() == _texture.get())
+	if(texture == _texture)
 	{
 		return;
 	}
 
 	texture = _texture;
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, texture->format, _texture->width, _texture->height, 0, _texture->format, _texture->type, _texture->GetPixelData());
+	glTexImage2D(GL_TEXTURE_2D, 0, _texture->format, _texture->width, _texture->height, 0, _texture->format, _texture->type, _texture->GetPixelData());
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

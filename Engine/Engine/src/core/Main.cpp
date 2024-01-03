@@ -15,15 +15,15 @@
 #include "../scene/Scene.h"
 #include "../scene/components/RenderComponent.h"
 #include "../math/Matrix.h"
-#include "2DGrid/Grid2D.h"
 #include "../renderer/Texture.h"
 #include "../renderer/shaders/BasicShader.h"
 #include "../renderer/shaders/FluidShader.h"
 #include "../renderer/shaders/ShaderStore.h"
-#include "../scene/components/FluidComponent.h"
+#include "2DGrid/Grid2D.h"
 
 #define row 100
 #define column 100
+#define depth 20
 
 /* Task list TODO:
 * Advection: Fix halo bicubic interpolation
@@ -118,7 +118,7 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	//std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj", &fluidShader);
+	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj");
 	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
 
 	std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj");
@@ -127,9 +127,9 @@ int main()
 
 	Scene scene;
 
-	//scene.CreateModel(square, wallTex);
+	//Grid3D* grid = new Grid3D(row, column, depth, scene, Vector2f(0, 0), 1, 0.01f);
 
-	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.01f);
+	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.0f);
 
 	double previousFrameTime = 0;
 	float frameTime = 0;

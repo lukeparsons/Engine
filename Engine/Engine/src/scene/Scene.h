@@ -2,6 +2,7 @@
 
 #include "components/Component.h"
 #include "components/TransformComponent.h"
+#include "components/RenderComponent.h"
 #include <unordered_map>
 #include <typeindex>
 #include <stdexcept>
@@ -45,7 +46,7 @@ public:
 	~Scene();
 
 	EntityID NewEntity();
-	EntityID CreateModel(std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Texture>& texture, Vector3f location = Vector3f(0, 0, 0), Vector3f scale = Vector3f(1, 1, 1));
+	EntityID CreateModel(std::shared_ptr<Mesh> mesh, const std::shared_ptr<Texture> texture, Vector3f location = Vector3f(0, 0, 0), Vector3f scale = Vector3f(1, 1, 1));
 	void DeleteEntity(EntityID id);
 	std::unordered_map<std::type_index, Component*> GetAllEntityComponents(EntityID id) const;
 
@@ -61,7 +62,7 @@ public:
 			if(!entities.contains(typeid(ComponentType)))
 			{
 				entities[typeid(ComponentType)] =
-					std::make_unique<ComponentStore<ComponentType>>(ComponentStore<ComponentType>());
+					std::make_unique<ComponentStore<ComponentType>>();
 			}
 
 			if(entities[typeid(ComponentType)]->Contains(id))

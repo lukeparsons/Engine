@@ -11,7 +11,7 @@ void Grid2D::GaussSeidel(float timeStep)
 		{
 			for(size_t j = 0; j < row; j++)
 			{	
-				if(gridData(i, j).cellState == GridDataPoint::FLUID)
+				if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 				{
 
 					int numFluidNeighbours = 0;
@@ -21,22 +21,22 @@ void Grid2D::GaussSeidel(float timeStep)
 					int downS = 0;
 					int upS = 0;
 
-					if(gridData(i - 1, j).cellState == GridDataPoint::FLUID)
+					if(gridData(i - 1, j).cellState == GridDataPoint2D::FLUID)
 					{
 						leftS = 1;
 					}
 					
-					if(gridData(i + 1, j).cellState == GridDataPoint::FLUID)
+					if(gridData(i + 1, j).cellState == GridDataPoint2D::FLUID)
 					{
 						rightS = 1;
 					}
 
-					if(gridData(i, j - 1).cellState == GridDataPoint::FLUID)
+					if(gridData(i, j - 1).cellState == GridDataPoint2D::FLUID)
 					{
 						downS = 1;
 					}
 
-					if(gridData(i, j + 1).cellState == GridDataPoint::FLUID)
+					if(gridData(i, j + 1).cellState == GridDataPoint2D::FLUID)
 					{
 						upS = 1;
 					}

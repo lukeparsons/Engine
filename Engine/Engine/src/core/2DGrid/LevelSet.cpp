@@ -13,14 +13,14 @@ using Pointf = Point<float>;
 using GridPoint = Point<unsigned int>;
 
 // TODO: Make this one thick halo only!
-static GridStructureHalo<Maybe<Pointf>> closestPoint = GridStructureHalo<Maybe<Pointf>>(Nothing(), 0, 0);
+static GridStructure2DHalo<Maybe<Pointf>> closestPoint = GridStructure2DHalo<Maybe<Pointf>>(Nothing(), 0, 0);
 
 static float calculateDistance(float x1, float y1, float x2, float y2)
 {
 	return sqrtf(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-static void propagate_point(unsigned int i, unsigned int j, unsigned int iNeighbour, unsigned int jNeighbour, unsigned int column, GridStructureHalo<float>& signedDistance)
+static void propagate_point(unsigned int i, unsigned int j, unsigned int iNeighbour, unsigned int jNeighbour, unsigned int column, GridStructure2DHalo<float>& signedDistance)
 {
 	if(closestPoint(iNeighbour, jNeighbour).isJust())
 	{
@@ -36,12 +36,12 @@ static void propagate_point(unsigned int i, unsigned int j, unsigned int iNeighb
 
 void Grid2D::calculate_initial_distances()
 {
-	closestPoint = GridStructureHalo<Maybe<Pointf>>(Nothing(), column, row);
+	closestPoint = GridStructure2DHalo<Maybe<Pointf>>(Nothing(), column, row);
 
 	for(unsigned int i = 0; i < column; i++) {
 		for(unsigned int j = 0; j < row; j++)
 		{
-			if(gridData(i, j).cellState == GridDataPoint::SOLID)
+			if(gridData(i, j).cellState == GridDataPoint2D::SOLID)
 			{
 				signedDistance(i, j) = 0;
 				closestPoint(i, j) = Pointf(i, j);

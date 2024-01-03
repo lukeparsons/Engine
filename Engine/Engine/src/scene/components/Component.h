@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../../types/EngineTypes.h"
 #include<unordered_map>
 #include<typeindex>

@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-struct GridDataPoint
+struct GridDataPoint2D
 {
 
 	enum CellState { FLUID, SOLID, EMPTY, DEFAULT } cellState;
@@ -21,15 +21,15 @@ struct GridDataPoint
 	float Ax; // Ax stores the coefficient for A(i, j)(i + 1, j)
 	float Ay; // Ax stores the coefficient for A(i, j)(i, j + 1)
 
-	GridDataPoint() : cellState(GridDataPoint::EMPTY), Adiag(0), Ax(0), Ay(0) {};
-	GridDataPoint(CellState state) : cellState(state), Adiag(0), Ax(0), Ay(0) {};
+	GridDataPoint2D() : cellState(GridDataPoint2D::EMPTY), Adiag(0), Ax(0), Ay(0) {};
+	GridDataPoint2D(CellState state) : cellState(state), Adiag(0), Ax(0), Ay(0) {};
 };
 
 /* This data structure relies on an ordered insertion
 * for(1 -> column) { for(1 -> row) { insert() } } is the required order
 */
 template<typename T>
-struct GridStructure
+struct GridStructure2D
 {
 private:
 	unsigned int column, row;
@@ -37,7 +37,7 @@ public:
 	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
 	std::vector<T> grid;
 
-	GridStructure(T initValue, unsigned int _column, unsigned int _row) : column(_column), row(_row)
+	GridStructure2D(T initValue, unsigned int _column, unsigned int _row) : column(_column), row(_row)
 	{
 		grid = std::vector<T>(row * column);
 		std::fill(grid.begin(), grid.end(), initValue);
@@ -73,7 +73,7 @@ public:
 		return grid[i + column * j];
 	}
 
-	virtual const inline T& operator()(unsigned int i, unsigned int j) const
+	virtual inline const T& operator()(unsigned int i, unsigned int j) const
 	{
 		return grid[i + column * j];
 	}
@@ -84,7 +84,7 @@ public:
 * The inner halo bottom left corner is at(1, 1) and the top right is at(column + 2, row + 2)
 * But we can index from (0, 0) to (column - 1, row - 1) by adding 2 to(i, j) */
 template<typename T>
-struct GridStructureHalo : public GridStructure<T>
+struct GridStructure2DHalo : public GridStructure2D<T>
 {
 private:
 	// These are the column/row of the usable grid space. The row/column stored in the parent GridStructure class is for the usable space and the halo
@@ -93,7 +93,7 @@ private:
 
 public:
 
-	GridStructureHalo(T initValue, unsigned int _column, unsigned int _row) : GridStructure<T>(initValue, _column + 4, _row + 4), column(_column), row(_row) {};
+	GridStructure2DHalo(T initValue, unsigned int _column, unsigned int _row) : GridStructure2D<T>(initValue, _column + 4, _row + 4), column(_column), row(_row) {};
 
 	void initLeftHalo(T val)
 	{
@@ -154,7 +154,7 @@ public:
 		return this->grid[(i + 2) + (column + 4) * (j + 2)];
 	}
 
-	virtual const inline T& operator()(unsigned int i, unsigned int j) const override
+	virtual inline const T& operator()(unsigned int i, unsigned int j) const override
 	{
 		return this->grid[(i + 2) + (column + 4) * (j + 2)];
 	}

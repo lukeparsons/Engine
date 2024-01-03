@@ -26,7 +26,7 @@ EntityID Scene::NewEntity()
     return entityIDcount++;
 }
 
-EntityID Scene::CreateModel(std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Texture>& texture, Vector3f location, Vector3f scale)
+EntityID Scene::CreateModel(std::shared_ptr<Mesh> mesh, const std::shared_ptr<Texture> texture, Vector3f location, Vector3f scale)
 {
     EntityID newID = NewEntity();
     TransformComponent* transform = GetComponent<TransformComponent>(newID);

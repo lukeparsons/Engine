@@ -175,6 +175,7 @@
     <ClCompile Include="src\core\2DGrid\Grid2D.cpp" />
     <ClCompile Include="src\core\2DGrid\LevelSet.cpp" />
     <ClCompile Include="src\core\2DGrid\PCG.cpp" />
+    <ClCompile Include="src\core\3DGrid\Grid3D.cpp" />
     <ClCompile Include="src\scene\components\FluidComponent.cpp" />
     <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
@@ -198,9 +199,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\2DGrid\Grid2D.h" />
-    <ClInclude Include="src\core\2DGrid\GridStructures.h" />
-    <ClInclude Include="src\core\2DGrid\RowVector.h" />
+    <ClInclude Include="src\core\2DGrid\GridStructures2D.h" />
+    <ClInclude Include="src\core\2DGrid\RowVector2D.h" />
     <ClInclude Include="src\core\2DGrid\Smoke.h" />
+    <ClInclude Include="src\core\3DGrid\Grid3D.h" />
+    <ClInclude Include="src\core\3DGrid\GridStructures.h" />
+    <ClInclude Include="src\core\3DGrid\RowVector.h" />
     <ClInclude Include="src\math\Matrix.h" />
     <ClInclude Include="src\renderer\shaders\BasicShader.h" />
     <ClInclude Include="src\renderer\shaders\FluidShader.h" />

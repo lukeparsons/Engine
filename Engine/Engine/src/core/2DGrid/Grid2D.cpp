@@ -31,12 +31,12 @@ void Grid2D::clamp_to_grid(float x, float y, unsigned int& i, unsigned int& j)
 	}
 }
 
-static float uVelocityAtPoint(GridStructureHalo<float>& uVelocity, unsigned int i, unsigned int j)
+static float uVelocityAtPoint(GridStructure2DHalo<float>& uVelocity, unsigned int i, unsigned int j)
 {
 	return (uVelocity(i - 1, j) + uVelocity(i, j)) / 2.0f;
 }
 
-static float vVelocityAtPoint(GridStructureHalo<float>& vVelocity, unsigned int i, unsigned int j)
+static float vVelocityAtPoint(GridStructure2DHalo<float>& vVelocity, unsigned int i, unsigned int j)
 {
 	return (vVelocity(i, j - 1) + vVelocity(i, j)) / 2.0f;
 }
@@ -46,7 +46,7 @@ static float cubicInterpolate(std::array<float, 4> axis, float x)
 	return axis[1] + 0.5f * x * (axis[2] - axis[0] + x * (2.0f * axis[0] - 5.0f * axis[1] + 4.0f * axis[2] - axis[3] + x * (3.0f * (axis[1] - axis[2]) + axis[3] - axis[0])));
 }
 
-static float bicubicInterpolate(GridStructureHalo<float>& grid, unsigned int i, unsigned int j, float cellWidth)
+static float bicubicInterpolate(GridStructure2DHalo<float>& grid, unsigned int i, unsigned int j, float cellWidth)
 {
 	float x = i * cellWidth;
 	float y = j * cellWidth;
@@ -84,18 +84,19 @@ void Grid2D::advect(float timeStep)
 
 			float xFinal = i * cellWidth - timeStep * uMid;
 			float yFinal = j * cellWidth - timeStep * vMid;
-			unsigned int iFinal, jFinal;
-			clamp_to_grid(xMid, yMid, iFinal, jFinal);
 
-			if(gridData(iFinal, jFinal).cellState == GridDataPoint::SOLID)
+			unsigned int iFinal, jFinal;
+			clamp_to_grid(xFinal, yFinal, iFinal, jFinal);
+
+			if(gridData(iFinal, jFinal).cellState == GridDataPoint2D::SOLID)
 			{
+				std::cout << i << ", " << j << " | " << iFinal << ", " << jFinal << std::endl;
 				continue;
 			}
 
 			uVelocity(i, j) = bicubicInterpolate(uVelocity, iFinal, jFinal, cellWidth);
 			vVelocity(i, j) = bicubicInterpolate(vVelocity, iFinal, jFinal, cellWidth);
 			smoke(i, j) = bicubicInterpolate(smoke, iFinal, jFinal, cellWidth);
-
 		}
 	}
 	extrapolate();

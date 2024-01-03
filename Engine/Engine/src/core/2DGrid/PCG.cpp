@@ -21,27 +21,27 @@ void Grid2D::PCGSolve(float timeStep)
 		{
 
 			// Pressure coefficient update
-			if(gridData(i, j).cellState == GridDataPoint::FLUID)
+			if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 			{
-				GridDataPoint& cellData = gridData(i, j);
+				GridDataPoint2D& cellData = gridData(i, j);
 
 				negativeDivergences(i, j) -= divergenceScale * (uVelocity(i + 1, j) - uVelocity(i, j) + vVelocity(i, j + 1) - vVelocity(i, j));
 
-				GridDataPoint::CellState leftState = gridData(i - 1, j).cellState;
-				if(leftState == GridDataPoint::FLUID) // Left neighbour
+				GridDataPoint2D::CellState leftState = gridData(i - 1, j).cellState;
+				if(leftState == GridDataPoint2D::FLUID) // Left neighbour
 				{
 					cellData.Adiag += Acoefficient;
-				} else if(leftState == GridDataPoint::SOLID)
+				} else if(leftState == GridDataPoint2D::SOLID)
 				{
 					negativeDivergences(i, j) -= divergenceScale * (uVelocity(i, j) - 0); // usolid(i, j) 
 				}
 
-				GridDataPoint::CellState rightState = gridData(i + 1, j).cellState;
-				if(rightState == GridDataPoint::FLUID) // Right neighbour
+				GridDataPoint2D::CellState rightState = gridData(i + 1, j).cellState;
+				if(rightState == GridDataPoint2D::FLUID) // Right neighbour
 				{
 					cellData.Adiag += Acoefficient;
 					cellData.Ax = -Acoefficient;
-				} else if(rightState == GridDataPoint::SOLID)
+				} else if(rightState == GridDataPoint2D::SOLID)
 				{
 					negativeDivergences(i, j) += divergenceScale * (uVelocity(i + 1, j) - 0); // usolid(i + 1, j)
 				} else
@@ -49,21 +49,21 @@ void Grid2D::PCGSolve(float timeStep)
 					cellData.Adiag += Acoefficient; // Right is empty state
 				}
 
-				GridDataPoint::CellState belowState = gridData(i, j - 1).cellState;
-				if(belowState == GridDataPoint::FLUID) // Below neighbour
+				GridDataPoint2D::CellState belowState = gridData(i, j - 1).cellState;
+				if(belowState == GridDataPoint2D::FLUID) // Below neighbour
 				{
 					cellData.Adiag += Acoefficient;
-				} else if(belowState == GridDataPoint::SOLID)
+				} else if(belowState == GridDataPoint2D::SOLID)
 				{
 					negativeDivergences(i, j) -= divergenceScale * (vVelocity(i, j) - 0); // vsolid(i, j)
 				}
 
-				GridDataPoint::CellState aboveState = gridData(i, j + 1).cellState;
-				if(aboveState == GridDataPoint::FLUID) // Above neighbour
+				GridDataPoint2D::CellState aboveState = gridData(i, j + 1).cellState;
+				if(aboveState == GridDataPoint2D::FLUID) // Above neighbour
 				{
 					cellData.Adiag += Acoefficient;
 					cellData.Ay = -Acoefficient;
-				} else if(aboveState == GridDataPoint::SOLID)
+				} else if(aboveState == GridDataPoint2D::SOLID)
 				{
 					negativeDivergences(i, j) += divergenceScale * (vVelocity(i, j + 1) - 0); // vsolid(i, j + 1)
 				} else
@@ -84,8 +84,8 @@ void Grid2D::PCGSolve(float timeStep)
 		{
 			switch(gridData(i, j).cellState)
 			{
-				case GridDataPoint::SOLID:
-					if(gridData(i - 1, j).cellState == GridDataPoint::FLUID)
+				case GridDataPoint2D::SOLID:
+					if(gridData(i - 1, j).cellState == GridDataPoint2D::FLUID)
 					{
 						uVelocity(i, j) = 0; // usolid(i, j)
 					} else
@@ -93,7 +93,7 @@ void Grid2D::PCGSolve(float timeStep)
 						// Mark uVelocity(i, j) as unknown
 					}
 
-					if(gridData(i, j - 1).cellState == GridDataPoint::FLUID)
+					if(gridData(i, j - 1).cellState == GridDataPoint2D::FLUID)
 					{
 						vVelocity(i, j) = 0; // vsolid(i, j)
 					} else
@@ -101,8 +101,8 @@ void Grid2D::PCGSolve(float timeStep)
 						// Mark vVelocity(i, j) as unknown
 					}
 					break;
-				case GridDataPoint::FLUID:
-					if(gridData(i - 1, j).cellState == GridDataPoint::SOLID)
+				case GridDataPoint2D::FLUID:
+					if(gridData(i - 1, j).cellState == GridDataPoint2D::SOLID)
 					{
 						uVelocity(i, j) = 0; // usolid(i, j)
 					} else
@@ -110,7 +110,7 @@ void Grid2D::PCGSolve(float timeStep)
 						uVelocity(i, j) -= scale * (pressure(i, j) - pressure(i - 1, j));
 					}
 
-					if(gridData(i, j - 1).cellState == GridDataPoint::SOLID)
+					if(gridData(i, j - 1).cellState == GridDataPoint2D::SOLID)
 					{
 						vVelocity(i, j) = 0; // vsolid(i, j)
 					} else
@@ -118,7 +118,7 @@ void Grid2D::PCGSolve(float timeStep)
 						vVelocity(i, j) -= scale * (pressure(i, j) - pressure(i, j - 1));
 					}
 					break;
-				case GridDataPoint::EMPTY:
+				case GridDataPoint2D::EMPTY:
 					uVelocity(i, j) = 0;
 					vVelocity(i, j) = 0;
 					break;
@@ -140,11 +140,11 @@ void Grid2D::PCG()
 	pressure.fill(0); // Initial pressure guess
 
 
-	RowVector residualVector = negativeDivergences;
-	RowVector auxiliaryVector = RowVector(column, row);
+	RowVector2D residualVector = negativeDivergences;
+	RowVector2D auxiliaryVector = RowVector2D(column, row);
 
 	applyPreconditioner(residualVector, auxiliaryVector);
-	RowVector searchVector = auxiliaryVector;
+	RowVector2D searchVector = auxiliaryVector;
 
 	double sigma = DotProduct(auxiliaryVector, residualVector);
 
@@ -191,7 +191,7 @@ void Grid2D::PCG()
 	std::cout << "exceeded iterations" << std::endl;
 }
 
-void Grid2D::applyA(const RowVector& vector, RowVector& result)
+void Grid2D::applyA(const RowVector2D& vector, RowVector2D& result)
 {
 	for(unsigned int i = 0; i < column; i++)
 	{
@@ -208,17 +208,17 @@ void Grid2D::applyA(const RowVector& vector, RowVector& result)
 	Simple to implement, fairly efficient and robust in handling irregular domains (e.g liquid splash)
 	However hard to efficiently parallelize and not optimally scalable
 */
-void Grid2D::applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector)
+void Grid2D::applyPreconditioner(RowVector2D& residualVector, RowVector2D& auxiliaryVector)
 {
 	double t = 0;
 
-	RowVector q = RowVector(column, row);
+	RowVector2D q = RowVector2D(column, row);
 
 	for(unsigned int i = 0; i < column; i++)
 	{
 		for(unsigned int j = 0; j < row; j++)
 		{
-			if(gridData(i, j).cellState == GridDataPoint::FLUID)
+			if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 			{
 				double prevIAx = gridData(i - 1, j).Ax;
 				double prevIAy = gridData(i - 1, j).Ay;
@@ -238,7 +238,7 @@ void Grid2D::applyPreconditioner(RowVector& residualVector, RowVector& auxiliary
 	{
 		for(unsigned int j = row - 1; j-- > 0;)
 		{
-			if(gridData(i, j).cellState == GridDataPoint::FLUID)
+			if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 			{
 				t = q(i, j) - gridData(i, j).Ax * precon(i, j) * auxiliaryVector(i + 1, j)
 					- gridData(i, j).Ay * precon(i, j) * auxiliaryVector(i, j + 1);
@@ -261,7 +261,7 @@ void Grid2D::constructPreconditioner()
 	{
 		for(unsigned int j = 0; j < row; j++)
 		{
-			if(gridData(i, j).cellState == GridDataPoint::FLUID)
+			if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 			{
 				double prevIAx = gridData(i - 1, j).Ax;
 				double prevIAy = gridData(i - 1, j).Ay;

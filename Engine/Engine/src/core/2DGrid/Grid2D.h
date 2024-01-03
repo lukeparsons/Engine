@@ -1,6 +1,6 @@
 #pragma once
-#include "GridStructures.h"
-#include "RowVector.h"
+#include "GridStructures2D.h"
+#include "RowVector2D.h"
 #include "../../scene/components/RenderComponent.h"
 #include <map>
 #include "../../scene/Scene.h"
@@ -24,22 +24,22 @@ private:
 	void calculate_initial_distances();
 	void extrapolate();
 
-	GridStructureHalo<float> signedDistance = GridStructureHalo<float>(0, column, row);
+	GridStructure2DHalo<float> signedDistance = GridStructure2DHalo<float>(0, column, row);
 
 public:
 	const float cellWidth;
 	float density;
 
-	GridStructureHalo<float> uVelocity = GridStructureHalo<float>(0, column, row);
-	GridStructureHalo<float> vVelocity = GridStructureHalo<float>(0, column, row);
-	GridStructureHalo<float> pressure = GridStructureHalo<float>(0, column, row);
-	GridStructureHalo<float> smoke = GridStructureHalo<float>(0, column, row);
-	GridStructureHalo<float> temparature = GridStructureHalo<float>(0, column, row);
+	GridStructure2DHalo<float> uVelocity = GridStructure2DHalo<float>(0, column, row);
+	GridStructure2DHalo<float> vVelocity = GridStructure2DHalo<float>(0, column, row);
+	GridStructure2DHalo<float> pressure = GridStructure2DHalo<float>(0, column, row);
+	GridStructure2DHalo<float> smoke = GridStructure2DHalo<float>(0, column, row);
+	GridStructure2DHalo<float> temparature = GridStructure2DHalo<float>(0, column, row);
 
-	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::EMPTY), column, row);
+	GridStructure2DHalo<GridDataPoint2D> gridData = GridStructure2DHalo<GridDataPoint2D>(GridDataPoint2D(GridDataPoint2D::EMPTY), column, row);
 
-	RowVector negativeDivergences = RowVector(column, row);
-	RowVector precon = RowVector(column, row);
+	RowVector2D negativeDivergences = RowVector2D(column, row);
+	RowVector2D precon = RowVector2D(column, row);
 
 	Grid2D(unsigned int _row, unsigned int _column, Scene& scene, std::shared_ptr<Mesh>& gridModel, const Vector2f& location, float _density, float _cellWidth)
 		: row(_row), column(_column), density(_density), cellWidth(_cellWidth), scaleCellWidth(1 / _cellWidth),
@@ -53,7 +53,7 @@ public:
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				gridData(i, j).cellState = GridDataPoint::FLUID;
+				gridData(i, j).cellState = GridDataPoint2D::FLUID;
 				gridTexture.pixels.push_back(0);
 				gridTexture.pixels.push_back(0);
 				gridTexture.pixels.push_back(255);
@@ -69,14 +69,14 @@ public:
 		// Make the boundary solid
 		for(unsigned int i = 0; i < column; i++)
 		{
-			gridData(i, 0).cellState = GridDataPoint::SOLID;
-			gridData(i, row - 1).cellState = GridDataPoint::SOLID;
+			gridData(i, 0).cellState = GridDataPoint2D::SOLID;
+			gridData(i, row - 1).cellState = GridDataPoint2D::SOLID;
 		}
 
 		for(unsigned int j = 0; j < row; j++)
 		{
 			//gridData(0, j).cellState = GridDataPoint::SOLID;
-			gridData(column - 1, j).cellState = GridDataPoint::SOLID;
+			gridData(column - 1, j).cellState = GridDataPoint2D::SOLID;
 		}
 
 		calculate_initial_distances();
@@ -86,8 +86,8 @@ public:
 
 	void PCGSolve(float timeStep);
 	void PCG();
-	void applyA(const RowVector& vector, RowVector& result);
-	void applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector);
+	void applyA(const RowVector2D& vector, RowVector2D& result);
+	void applyPreconditioner(RowVector2D& residualVector, RowVector2D& auxiliaryVector);
 	void constructPreconditioner();
 
 	void GaussSeidel(float timeStep);
@@ -118,7 +118,7 @@ public:
 		{
 			for(unsigned int j = 0; j < column; j++)
 			{
-				if(gridData(i, j).cellState == GridDataPoint::FLUID)
+				if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 				{
 					vVelocity(i, j) += timeStep * -9.81f;
 				}
@@ -144,7 +144,7 @@ public:
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				if(gridData(i, j).cellState == GridDataPoint::FLUID)
+				if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 				{
 					gridTexture.pixels[offset] = 0;
 					gridTexture.pixels[1 + offset] = 0;
