@@ -1,6 +1,6 @@
 #include "Grid2D.h"
 
-#define MAX_ITERATIONS 100
+#define MAX_ITERATIONS 200
 
 // TODO: A 1xn or nx1 grid is currently broken
 void Grid2D::PCGSolve(float timeStep)

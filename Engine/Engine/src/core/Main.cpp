@@ -19,10 +19,10 @@
 #include "../renderer/shaders/BasicShader.h"
 #include "../renderer/shaders/FluidShader.h"
 #include "../renderer/shaders/ShaderStore.h"
-#include "2DGrid/Grid2D.h"
+#include "3DGrid/Grid3D.h"
 
-#define row 100
-#define column 100
+#define row 20
+#define column 20
 #define depth 20
 
 /* Task list TODO:
@@ -127,9 +127,7 @@ int main()
 
 	Scene scene;
 
-	//Grid3D* grid = new Grid3D(row, column, depth, scene, Vector2f(0, 0), 1, 0.01f);
-
-	Grid2D* grid = new Grid2D(row, column, scene, square, Vector2f(0, 0), 1, 0.0f);
+	Grid3D grid = Grid3D(row, column, depth, scene, Vector3f(0, 0, 0), 1, 0.01f);
 
 	double previousFrameTime = 0;
 	float frameTime = 0;
@@ -147,16 +145,16 @@ int main()
 
 		processInput(window);
 
-		float umax = abs(grid->uVelocity.max()) + sqrt(5 * grid->cellWidth * 9.81f);
-		float timeStep = (3 * grid->cellWidth) / umax;
+		float umax = abs(grid.uVelocity.max()) + sqrt(5 * grid.cellWidth * 9.81f);
+		float timeStep = (3 * grid.cellWidth) / umax;
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
-		grid->advect(timeStep);
+		grid.advect(timeStep);
 
-		grid->addgravity(timeStep);
+		grid.addgravity(timeStep);
 
-		grid->project(timeStep);
+		grid.project(timeStep);
 
 		for(size_t i = 0; i < row; i++)
 		{
@@ -168,7 +166,7 @@ int main()
 
 		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
 
-		grid->UpdateTexture();
+		grid.UpdateRender();
 
 		scene.Update(cameraMatrix);
 
@@ -177,7 +175,6 @@ int main()
 		frameCount++;
 	}
 	std::cout << "Average FPS " << 60 / (frameTime / frameCount);
-	delete grid;
 	glfwTerminate();
 	return 0;
 }

@@ -10,6 +10,8 @@ public:
 	GLuint textureID;
 	std::shared_ptr<ShaderProgram> shaderProgram;
 
+	bool isActive;
+
 	RenderComponent(EntityID _id);
 
 	template<typename T>

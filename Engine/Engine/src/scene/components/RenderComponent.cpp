@@ -4,7 +4,7 @@
 
 static const std::shared_ptr<Texture> defaultTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
-RenderComponent::RenderComponent(EntityID _id) : Component(_id), texture(defaultTexture)
+RenderComponent::RenderComponent(EntityID _id) : Component(_id), texture(defaultTexture), isActive(true)
 {
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);

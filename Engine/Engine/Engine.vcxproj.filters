@@ -72,7 +72,7 @@
     <ClCompile Include="src\scene\components\RenderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\2DGrid\PCG.cpp">
+    <ClCompile Include="src\core\2DGrid\PCG2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\2DGrid\Grid2D.cpp">
@@ -81,13 +81,19 @@
     <ClCompile Include="src\core\2DGrid\GaussSeidel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\2DGrid\LevelSet.cpp">
+    <ClCompile Include="src\core\2DGrid\LevelSet2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\components\FluidComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\3DGrid\Grid3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\3DGrid\LevelSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\3DGrid\PCG.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

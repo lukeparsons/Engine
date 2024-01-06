@@ -34,7 +34,7 @@ public:
 
 	Mesh(const Mesh& other);
 
-	void Draw(const Matrix4f& cameraMatrix, GLuint textureID) const;
+	virtual void Draw(const Matrix4f& cameraMatrix, GLuint textureID) const;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 };

@@ -8,9 +8,9 @@ Scene::Scene()
 {
     entities[typeid(TransformComponent)] = std::make_unique<ComponentStore<TransformComponent>>();
     entities[typeid(RenderComponent)] = std::make_unique<ComponentStore<RenderComponent>>();
-    entities[typeid(FluidComponent)] = std::make_unique<ComponentStore<FluidComponent>>();
+    //entities[typeid(FluidComponent)] = std::make_unique<ComponentStore<FluidComponent>>();
 
-    systems = std::make_unique<SystemManager>(getStorePointer<TransformComponent>(), getStorePointer<RenderComponent>(), getStorePointer<FluidComponent>());
+    systems = std::make_unique<SystemManager>(getStorePointer<TransformComponent>(), getStorePointer<RenderComponent>());
 }
 
 Scene::~Scene() = default;

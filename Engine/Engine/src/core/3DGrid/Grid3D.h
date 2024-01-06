@@ -4,10 +4,16 @@
 #include <map>
 #include <vector>
 #include "../../scene/Scene.h"
+#include "../../types/Maybe.h"
+
+struct GridPoint
+{
+	unsigned int x, y, z;
+	GridPoint(unsigned int _x, unsigned int _y, unsigned int _z) : x(_x), y(_y), z(_z) {};
+};
 
 static const std::shared_ptr<Texture> fluidTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/smoke.png"));
 static const std::shared_ptr<Texture> solidTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/block.png"));
-static const std::shared_ptr<Texture> emptyTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
 class Grid3D
 {
@@ -19,10 +25,11 @@ private:
 
 	const float scaleCellWidth;
 	void clamp_to_grid(float x, float y, float z, unsigned int& i, unsigned int& j, unsigned int& k);
-	//void calculate_initial_distances();
-	//void extrapolate();
+	void calculate_initial_distances();
+	void extrapolate();
 
-	GridStructureHalo<float> signedDistance = GridStructureHalo<float>(0, column, row, depth);
+	GridStructureHalo<float> signedDistance = GridStructureHalo<float>(std::numeric_limits<float>::max(), column, row, depth);
+	GridStructureHalo<Maybe<GridPoint>> closestPoint = GridStructureHalo<Maybe<GridPoint>>(Nothing(), column, row, depth); // TODO: Make this one thick halo only!
 
 	std::shared_ptr<Mesh> cellMesh = std::make_shared<Mesh>("../Engine/assets/box.obj");
 
@@ -42,7 +49,8 @@ public:
 	RowVector negativeDivergences = RowVector(column, row, depth);
 	RowVector precon = RowVector(column, row, depth);
 
-	Grid3D(unsigned int _row, unsigned int _column, unsigned int _depth, Scene& scene, const Vector2f& location, float _density, float _cellWidth)
+	// TODO: include location
+	Grid3D(unsigned int _row, unsigned int _column, unsigned int _depth, Scene& scene, const Vector3f location, float _density, float _cellWidth)
 		: row(_row), column(_column), depth(_depth), density(_density), cellWidth(_cellWidth), scaleCellWidth(1 / _cellWidth)
 	{
 		float scale1 = cellWidth * 5;
@@ -54,24 +62,24 @@ public:
 				for(unsigned int k = 0; k < depth; k++)
 				{
 					gridData(i, j, k).cellState = GridDataPoint::FLUID;
-					EntityID id = scene.CreateModel(cellMesh, solidTexture, Vector3f(i * scale2, j * scale2, k * scale2), Vector3f(scale1, scale1, scale1));
+					EntityID id = scene.CreateModel(cellMesh, fluidTexture, Vector3f(i * scale2, j * scale2, k * scale2), Vector3f(scale1, scale1, scale1));
 					gridData(i, j, k).render = scene.GetComponent<RenderComponent>(id);
 				}
 			}
 		}
 
-		uVelocity.initLeftHalo(6.0f);
-		smoke.initLeftHalo(100.0f);
-		pressure.initLeftHalo(20.0f);
-		//vVelocity.initLeftHalo(9.81f);
+		uVelocity.initBottomHalo(6.0f);
+		smoke.initBottomHalo(100.0f);
+		pressure.initBottomHalo(20.0f);
+		vVelocity.initBottomHalo(9.81f); 
 
 		// Make boundary solid
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				gridData(i, j, 0).cellState = GridDataPoint::FLUID; // front face
-				gridData(i, j, depth - 1).cellState = GridDataPoint::SOLID; // back face
+				//gridData(i, j, 0).cellState = GridDataPoint::SOLID; // front face
+				gridData(i, j, depth - 1).cellState = GridDataPoint::EMPTY; // back face
 			}
 		}
 
@@ -79,7 +87,7 @@ public:
 		{
 			for(unsigned int k = 0; k < depth; k++)
 			{
-				gridData(i, 0, k).cellState = GridDataPoint::SOLID; // bottom face
+				//gridData(i, 0, k).cellState = GridDataPoint::SOLID; // bottom face
 				gridData(i, row - 1, k).cellState = GridDataPoint::SOLID; // top face
 			}
 		}
@@ -93,18 +101,18 @@ public:
 			}
 		}
 
-		//calculate_initial_distances();
+		calculate_initial_distances();
 	}
 
 	void advect(float timeStep);
 
-	/*void PCGSolve(float timeStep);
+	void PCGSolve(float timeStep);
 	void PCG();
 	void applyA(const RowVector& vector, RowVector& result);
 	void applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector);
 	void constructPreconditioner();
 
-	void GaussSeidel(float timeStep); */
+	//void GaussSeidel(float timeStep);
 
 	/*void boundaryConditions()
 	{
@@ -146,7 +154,7 @@ public:
 	void project(float timeStep)
 	{
 		//boundaryConditions();
-		//PCGSolve(timeStep);
+		PCGSolve(timeStep);
 	}
 
 	void UpdateRender()
@@ -157,17 +165,23 @@ public:
 			{
 				for(unsigned int k = 0; k < column; k++)
 				{
+
 					switch(gridData(i, j, k).cellState)
 					{
 						case GridDataPoint::SOLID:
 							gridData(i, j, k).render->ChangeTexture(solidTexture);
 							break;
 						case GridDataPoint::FLUID:
-							gridData(i, j, k).render->ChangeTexture(fluidTexture);
-							break;
 						case GridDataPoint::EMPTY:
-							gridData(i, j, k).render->ChangeTexture(emptyTexture);
-							break;
+							if(smoke(i, j, k) > 1.0f)
+							{
+								gridData(i, j, k).cellState = GridDataPoint::FLUID;
+								gridData(i, j, k).render->isActive = true;
+							} else
+							{
+								gridData(i, j, k).cellState = GridDataPoint::EMPTY;
+								gridData(i, j, k).render->isActive = false;
+							}
 					}
 				}
 			}

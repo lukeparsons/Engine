@@ -19,17 +19,20 @@ public:
 	{
 		for(std::unique_ptr<RenderComponent>& component : renderComponents->GetDenseList())
 		{
-			const TransformComponent& transform = transformComponents->GetComponentFromType(component->entity);
+			if(component->isActive)
+			{
+				const TransformComponent& transform = transformComponents->GetComponentFromType(component->entity);
 
-			glUseProgram(component->shaderProgram->GetID());
+				glUseProgram(component->shaderProgram->GetID());
 
-			// TODO: Include rotation matrix
-			Matrix4f modelMatrix = GetTranslationMatrix(transform.location) * GetScaleMatrix(transform.scale);
-			component->shaderProgram->Configure(cameraMatrix, modelMatrix);
+				// TODO: Include rotation matrix
+				Matrix4f modelMatrix = GetTranslationMatrix(transform.location) * GetScaleMatrix(transform.scale);
+				component->shaderProgram->Configure(cameraMatrix, modelMatrix);
 
-			component->mesh->Draw(cameraMatrix, component->textureID);
+				component->mesh->Draw(cameraMatrix, component->textureID);
 
-			glUseProgram(0);
+				glUseProgram(0);
+			}
 		}
 	}
 };

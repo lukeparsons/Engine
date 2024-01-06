@@ -126,7 +126,6 @@ void Grid3D::advect(float timeStep)
 
 		}
 	}
-	// TODO
-	//extrapolate();
+	extrapolate();
 
 }

@@ -22,10 +22,10 @@ struct GridDataPoint
 	float Adiag;  // ADiag stores the coefficient for A(i, j)(i, j)
 	float Ax; // Ax stores the coefficient for A(i, j)(i + 1, j)
 	float Ay; // Ax stores the coefficient for A(i, j)(i, j + 1)
-	float Ak;
+	float Az;
 
-	GridDataPoint() : cellState(GridDataPoint::EMPTY), render(nullptr), Adiag(0), Ax(0), Ay(0), Ak(0) {};
-	GridDataPoint(CellState state) : cellState(state), render(nullptr), Adiag(0), Ax(0), Ay(0), Ak(0) {};
+	GridDataPoint() : cellState(GridDataPoint::EMPTY), render(nullptr), Adiag(0), Ax(0), Ay(0), Az(0) {};
+	GridDataPoint(CellState state) : cellState(state), render(nullptr), Adiag(0), Ax(0), Ay(0), Az(0) {};
 };
 
 /* This data structure relies on an ordered insertion
@@ -98,15 +98,50 @@ public:
 
 	GridStructureHalo(T initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : GridStructure<T>(initValue, _column + 4, _row + 4, _depth + 4), column(_column), row(_row), depth(_depth) {};
 
-	void initLeftHalo(T val)
+	void initBottomHalo(T val)
 	{
-		for(unsigned int j = 0; j < row + 4; j++)
+		for(unsigned int i = 0; i < column + 4; i++)
 		{
 			for(unsigned int k = 0; k < depth + 4; k++)
 			{
-				this->grid[0 + (column + 4) * (j + (row + 4) * k)] = val;
-				this->grid[1 + (column + 4) * (j + (row + 4) * k)] = val;
+				this->grid[i + (column + 4) * (0 + (row + 4) * k)] = val;
+				this->grid[i + (column + 4) * (1 + (row + 4) * k)] = val;
 			}
+		}
+	}
+
+	void haloCondition()
+	{
+		// right
+		T val = (*this)(column - 1, 0);
+		for(unsigned int j = 0; j < row + 4; j++)
+		{
+			if(j >= 2 && j <= row + 2)
+			{
+				val = this->grid[(column + 1) + (column + 4) * j];
+			}
+
+			this->grid[column + 2 + (column + 4) * j] = val;
+			this->grid[column + 3 + (column + 4) * j] = val;
+		}
+
+		// Top and bottom
+		T topVal = (*this)(0, row - 1);
+		T bottomVal = (*this)(0, 0);
+		for(unsigned int i = 0; i < column + 4; i++)
+		{
+
+			if(i >= 2 && i <= row + 2)
+			{
+				topVal = this->grid[i + (column + 4) * (row + 1)];
+				bottomVal = this->grid[i + (column + 4) * 2];
+			}
+
+			this->grid[i + (column + 4) * (row + 2)] = topVal;
+			this->grid[i + (column + 4) * (row + 3)] = topVal;
+
+			this->grid[i] = bottomVal;
+			this->grid[i + (column + 4)] = bottomVal;
 		}
 	}
 
