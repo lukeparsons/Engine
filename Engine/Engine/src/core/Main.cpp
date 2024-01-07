@@ -39,7 +39,7 @@ static const int viewportX = 0;
 static const int viewportY = 0;
 
 static constexpr float aspectRatio = (float)width / float(height);
-static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
+static const Matrix4f projectionMatrix = GetProjectionMatrix(100.0f, 100.0f, aspectRatio);
 Matrix4f cameraMatrix;
 
 static Camera camera(Vector3f(0, 0, 0));
@@ -127,18 +127,16 @@ int main()
 
 	Scene scene;
 
-	Grid3D grid = Grid3D(row, column, depth, scene, Vector3f(0, 0, 0), 1, 0.01f);
+	Grid3D grid = Grid3D(row, column, depth, scene, Vector3f(0, 0, 0), 1, 0.1f);
 
 	double previousFrameTime = 0;
 	float frameTime = 0;
-	unsigned int frameCount = 0;
+	//float timeStep = 0.0000025;
 	while(!glfwWindowShouldClose(window))
 	{ 
 
 		double currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
-		frameTime += currentFrameTime - previousFrameTime;
-		previousFrameTime = currentFrameTime;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -146,7 +144,7 @@ int main()
 		processInput(window);
 
 		float umax = abs(grid.uVelocity.max()) + sqrt(5 * grid.cellWidth * 9.81f);
-		float timeStep = (3 * grid.cellWidth) / umax;
+		float timeStep = (5 * grid.cellWidth) / grid.uVelocity.max();
 
 		//std::cout << "Time step " << timeStep << std::endl;
 		
@@ -156,13 +154,13 @@ int main()
 
 		grid.project(timeStep);
 
-		for(size_t i = 0; i < row; i++)
+		/*for(size_t i = 0; i < row; i++)
 		{
 			for(size_t j = 0; j < column; j++)
 			{
 				//grid->PrintCell(i, j);
 			}
-		}
+		} */
 
 		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
 
@@ -172,9 +170,10 @@ int main()
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		frameCount++;
+
+		timeStep = glfwGetTime() - currentFrameTime;
 	}
-	std::cout << "Average FPS " << 60 / (frameTime / frameCount);
+	//std::cout << "Average FPS " << 60 / (frameTime / frameCount);
 	glfwTerminate();
 	return 0;
 }

@@ -171,10 +171,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\2DGrid\GaussSeidel.cpp" />
+    <ClCompile Include="src\core\2DGrid\GaussSeidel2D.cpp" />
     <ClCompile Include="src\core\2DGrid\Grid2D.cpp" />
     <ClCompile Include="src\core\2DGrid\LevelSet2D.cpp" />
     <ClCompile Include="src\core\2DGrid\PCG2D.cpp" />
+    <ClCompile Include="src\core\3DGrid\GaussSeidel3D.cpp" />
     <ClCompile Include="src\core\3DGrid\Grid3D.cpp" />
     <ClCompile Include="src\core\3DGrid\LevelSet.cpp" />
     <ClCompile Include="src\core\3DGrid\PCG.cpp" />

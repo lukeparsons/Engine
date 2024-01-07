@@ -6,6 +6,108 @@
 void Grid3D::PCGSolve(float timeStep)
 {
 
+	float divergenceScale = 1.0f / cellWidth;
+
+	float Acoefficient = timeStep / (density * cellWidth * cellWidth);
+
+	unsigned int i = 0;
+	unsigned int j = 0;
+
+	negativeDivergences.fill(0);
+
+	for(unsigned int i = 0; i < column; i++)
+	{
+		for(unsigned int j = 0; j < row; j++)
+		{
+			for(unsigned int k = 0; k < depth; k++)
+			{
+				// Pressure coefficient update
+				if(gridData(i, j, k).cellState == GridDataPoint::FLUID)
+				{
+
+					GridDataPoint& cellData = gridData(i, j, k);
+					cellData.Ax = 0;
+					cellData.Adiag = 0;
+					cellData.Ay = 0;
+					cellData.Az = 0;
+
+					negativeDivergences(i, j, k) -= divergenceScale * (uVelocity.get(i + 1, j, k) - uVelocity.get(i, j, k)
+						+ vVelocity.get(i, j + 1, k) - vVelocity.get(i, j, k)
+						+ wVelocity.get(i, j, k + 1) - wVelocity.get(i, j, k));
+
+					GridDataPoint::CellState leftState = gridData(i - 1, j, k).cellState;
+					if(leftState == GridDataPoint::FLUID) // Left neighbour
+					{
+						cellData.Adiag += Acoefficient;
+					} else if(leftState == GridDataPoint::SOLID)
+					{
+						negativeDivergences(i, j, k) -= divergenceScale * (uVelocity.get(i, j, k) - 0); // usolid(i, j) 
+					}
+
+					GridDataPoint::CellState rightState = gridData(i + 1, j, k).cellState;
+					if(rightState == GridDataPoint::FLUID) // Right neighbour
+					{
+						cellData.Adiag += Acoefficient;
+						cellData.Ax = -Acoefficient;
+					} else if(rightState == GridDataPoint::SOLID)
+					{
+						negativeDivergences(i, j, k) += divergenceScale * (uVelocity.get(i + 1, j, k) - 0); // usolid(i + 1, j)
+					} else
+					{
+						cellData.Adiag += Acoefficient; // Right is empty state
+					}
+
+					GridDataPoint::CellState belowState = gridData(i, j - 1, k).cellState;
+					if(belowState == GridDataPoint::FLUID) // Below neighbour
+					{
+						cellData.Adiag += Acoefficient;
+					} else if(belowState == GridDataPoint::SOLID)
+					{
+						negativeDivergences(i, j, k) -= divergenceScale * (vVelocity.get(i, j, k) - 0); // vsolid(i, j)
+					}
+
+					GridDataPoint::CellState aboveState = gridData(i, j + 1, k).cellState;
+					if(aboveState == GridDataPoint::FLUID) // Above neighbour
+					{
+						cellData.Adiag += Acoefficient;
+						cellData.Ay = -Acoefficient;
+					} else if(aboveState == GridDataPoint::SOLID)
+					{
+						negativeDivergences(i, j, k) += divergenceScale * (vVelocity.get(i, j + 1, k) - 0); // vsolid(i, j + 1)
+					} else
+					{
+						cellData.Adiag += Acoefficient; // Above is empty
+					}
+
+					GridDataPoint::CellState behindState = gridData(i, j, k - 1).cellState;
+					if(behindState == GridDataPoint::FLUID) // Behind neighbour
+					{
+						cellData.Adiag += Acoefficient;
+					} else if(behindState == GridDataPoint::SOLID)
+					{
+						negativeDivergences(i, j, k) -= divergenceScale * (wVelocity.get(i, j, k) - 0); // wsolid()
+					}
+
+					GridDataPoint::CellState infrontState = gridData(i, j, k + 1).cellState;
+					if(infrontState == GridDataPoint::FLUID) // In front neighbour
+					{
+						cellData.Adiag += Acoefficient;
+						cellData.Az = -Acoefficient;
+					} else if(infrontState == GridDataPoint::SOLID)
+					{
+						negativeDivergences(i, j, k) += divergenceScale * (wVelocity.get(i, j, k + 1) - 0); // wsolid
+					} else
+					{
+						cellData.Adiag += Acoefficient; // Above is empty
+					}
+				}
+			}
+		}
+	}
+
+
+	PCG();
+
 	float scale = timeStep / (density * cellWidth);
 
 	for(unsigned int i = 0; i < column; i++)
@@ -22,7 +124,7 @@ void Grid3D::PCGSolve(float timeStep)
 							uVelocity(i, j, k) = 0; // usolid(i, j)
 						} else
 						{
-							// Mark uVelocity(i, j) as unknown
+							// Mark uVelocity.get(i, j) as unknown
 						}
 
 						if(gridData(i, j - 1, k).cellState == GridDataPoint::FLUID)
@@ -30,7 +132,7 @@ void Grid3D::PCGSolve(float timeStep)
 							vVelocity(i, j, k) = 0; // vsolid(i, j)
 						} else
 						{
-							// Mark vVelocity(i, j) as unknown
+							// Mark vVelocity.get(i, j) as unknown
 						}
 
 						if(gridData(i, j, k - 1).cellState == GridDataPoint::FLUID)
@@ -38,7 +140,7 @@ void Grid3D::PCGSolve(float timeStep)
 							wVelocity(i, j, k) = 0; // vsolid(i, j)
 						} else
 						{
-							// Mark wVelocity(i, j) as unknown
+							// Mark wVelocity.get(i, j) as unknown
 						}
 						break;
 					case GridDataPoint::FLUID:
@@ -73,101 +175,6 @@ void Grid3D::PCGSolve(float timeStep)
 
 		}
 	}
-
-	float divergenceScale = 1.0f / cellWidth;
-
-	float Acoefficient = timeStep / (density * cellWidth * cellWidth);
-
-	unsigned int i = 0;
-	unsigned int j = 0;
-
-	for(unsigned int i = 0; i < column; i++)
-	{
-		for(unsigned int j = 0; j < row; j++)
-		{
-			for(unsigned int k = 0; k < depth; k++)
-			{
-				// Pressure coefficient update
-				if(gridData(i, j, k).cellState == GridDataPoint::FLUID)
-				{
-
-					GridDataPoint& cellData = gridData(i, j, k);
-
-					negativeDivergences(i, j, k) -= divergenceScale * (uVelocity(i + 1, j, k) - uVelocity(i, j, k) 
-						+ vVelocity(i, j + 1, k) - vVelocity(i, j, k)
-						+ wVelocity(i, j, k + 1) - wVelocity(i, j, k));
-
-					GridDataPoint::CellState leftState = gridData(i - 1, j, k).cellState;
-					if(leftState == GridDataPoint::FLUID) // Left neighbour
-					{
-						cellData.Adiag += Acoefficient;
-					} else if(leftState == GridDataPoint::SOLID)
-					{
-						negativeDivergences(i, j, k) -= divergenceScale * (uVelocity(i, j, k) - 0); // usolid(i, j) 
-					}
-
-					GridDataPoint::CellState rightState = gridData(i + 1, j, k).cellState;
-					if(rightState == GridDataPoint::FLUID) // Right neighbour
-					{
-						cellData.Adiag += Acoefficient;
-						cellData.Ax = -Acoefficient;
-					} else if(rightState == GridDataPoint::SOLID)
-					{
-						negativeDivergences(i, j, k) += divergenceScale * (uVelocity(i + 1, j, k) - 0); // usolid(i + 1, j)
-					} else
-					{
-						cellData.Adiag += Acoefficient; // Right is empty state
-					}
-
-					GridDataPoint::CellState belowState = gridData(i, j - 1, k).cellState;
-					if(belowState == GridDataPoint::FLUID) // Below neighbour
-					{
-						cellData.Adiag += Acoefficient;
-					} else if(belowState == GridDataPoint::SOLID)
-					{
-						negativeDivergences(i, j, k) -= divergenceScale * (vVelocity(i, j, k) - 0); // vsolid(i, j)
-					}
-
-					GridDataPoint::CellState aboveState = gridData(i, j + 1, k).cellState;
-					if(aboveState == GridDataPoint::FLUID) // Above neighbour
-					{
-						cellData.Adiag += Acoefficient;
-						cellData.Ay = -Acoefficient;
-					} else if(aboveState == GridDataPoint::SOLID)
-					{
-						negativeDivergences(i, j, k) += divergenceScale * (vVelocity(i, j + 1, k) - 0); // vsolid(i, j + 1)
-					} else
-					{
-						cellData.Adiag += Acoefficient; // Above is empty
-					}
-
-					GridDataPoint::CellState behindState = gridData(i, j, k - 1).cellState;
-					if(behindState == GridDataPoint::FLUID) // Behind neighbour
-					{
-						cellData.Adiag += Acoefficient;
-					} else if(behindState == GridDataPoint::SOLID)
-					{
-						negativeDivergences(i, j, k) -= divergenceScale * (wVelocity(i, j, k) - 0); // wsolid()
-					}
-
-					GridDataPoint::CellState infrontState = gridData(i, j, k + 1).cellState;
-					if(infrontState == GridDataPoint::FLUID) // In front neighbour
-					{
-						cellData.Adiag += Acoefficient;
-						cellData.Az = -Acoefficient;
-					} else if(infrontState == GridDataPoint::SOLID)
-					{
-						negativeDivergences(i, j, k) += divergenceScale * (wVelocity(i, j, k + 1) - 0); // wsolid
-					} else
-					{
-						cellData.Adiag += Acoefficient; // Above is empty
-					}
-				}
-			}
-		}
-	}
-
-	PCG();
 }
 
 
@@ -182,7 +189,6 @@ void Grid3D::PCG()
 	constructPreconditioner();
 	pressure.fill(0); // Initial pressure guess
 
-
 	RowVector residualVector = negativeDivergences;
 	RowVector auxiliaryVector = RowVector(column, row, depth);
 
@@ -192,7 +198,7 @@ void Grid3D::PCG()
 	double sigma = DotProduct(auxiliaryVector, residualVector);
 
 	// TODO: Implement proper scaling
-	double tolerance = 0.00001f;
+	double tolerance = 0.01f;
 
 	for(unsigned int iter = 0; iter < MAX_ITERATIONS; iter++)
 	{
@@ -207,7 +213,7 @@ void Grid3D::PCG()
 				for(unsigned int k = 0; k < depth; k++)
 				{
 					pressure(i, j, k) += alpha * searchVector(i, j, k);
-					residualVector(i, j, k) -= alpha * auxiliaryVector(i, j, k); 			//residualVector = residualVector - (alpha * auxiliaryVector);
+					residualVector(i, j, k) -= alpha * auxiliaryVector(i, j, k);
 				}
 
 			}
@@ -278,13 +284,7 @@ void Grid3D::applyPreconditioner(RowVector& residualVector, RowVector& auxiliary
 				if(gridData(i, j, k).cellState == GridDataPoint::FLUID)
 				{
 					double prevIAx = gridData(i - 1, j, k).Ax;
-					double prevIAy = gridData(i - 1, j, k).Ay;
-					double prevIAz = gridData(i - 1, j, k).Az;
-					double prevJAx = gridData(i, j - 1, k).Ax;
 					double prevJAy = gridData(i, j - 1, k).Ay;
-					double prevJAz = gridData(i, j - 1, k).Az;
-					double prevKAx = gridData(i, j, k - 1).Ax;
-					double prevKAy = gridData(i, j, k - 1).Ay;
 					double prevKAz = gridData(i, j, k - 1).Az;
 
 					// Solve Lq = r

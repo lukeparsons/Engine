@@ -78,7 +78,7 @@
     <ClCompile Include="src\core\2DGrid\Grid2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\2DGrid\GaussSeidel.cpp">
+    <ClCompile Include="src\core\2DGrid\GaussSeidel2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\2DGrid\LevelSet2D.cpp">
@@ -94,6 +94,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\3DGrid\PCG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\3DGrid\GaussSeidel3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -89,7 +89,7 @@ public:
 template<typename T>
 struct GridStructureHalo : public GridStructure<T>
 {
-private:
+protected:
 	// These are the column/row of the usable grid space. The row/column stored in the parent GridStructure class is for the usable space and the halo
 	unsigned int column;
 	unsigned int row;
@@ -97,6 +97,21 @@ private:
 public:
 
 	GridStructureHalo(T initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : GridStructure<T>(initValue, _column + 4, _row + 4, _depth + 4), column(_column), row(_row), depth(_depth) {};
+
+	void fillCentre(T val)
+	{
+		for(unsigned int i = 0; i < column; i++)
+		{
+			for(unsigned int j = 0; j < row; j++)
+			{
+				for(unsigned int k = 0; k < depth; k++)
+				{
+					this->grid[(i + 2) + (column + 4) * ((j + 2) + (row + 4) * (k + 2))] = val;
+				}
+			}
+		}
+	}
+
 
 	void initBottomHalo(T val)
 	{
@@ -110,40 +125,6 @@ public:
 		}
 	}
 
-	void haloCondition()
-	{
-		// right
-		T val = (*this)(column - 1, 0);
-		for(unsigned int j = 0; j < row + 4; j++)
-		{
-			if(j >= 2 && j <= row + 2)
-			{
-				val = this->grid[(column + 1) + (column + 4) * j];
-			}
-
-			this->grid[column + 2 + (column + 4) * j] = val;
-			this->grid[column + 3 + (column + 4) * j] = val;
-		}
-
-		// Top and bottom
-		T topVal = (*this)(0, row - 1);
-		T bottomVal = (*this)(0, 0);
-		for(unsigned int i = 0; i < column + 4; i++)
-		{
-
-			if(i >= 2 && i <= row + 2)
-			{
-				topVal = this->grid[i + (column + 4) * (row + 1)];
-				bottomVal = this->grid[i + (column + 4) * 2];
-			}
-
-			this->grid[i + (column + 4) * (row + 2)] = topVal;
-			this->grid[i + (column + 4) * (row + 3)] = topVal;
-
-			this->grid[i] = bottomVal;
-			this->grid[i + (column + 4)] = bottomVal;
-		}
-	}
 
 	virtual void insert(T& dataPoint, unsigned int i, unsigned int j, unsigned int k) override
 	{
@@ -166,3 +147,43 @@ public:
 	}
 };
 
+class VelocityGrid : public GridStructureHalo<float>
+{
+public:
+	VelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : GridStructureHalo<float>(initValue, _column, _row, _depth) {};
+	
+	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) = 0;
+};
+
+class UVelocityGrid : public VelocityGrid
+{
+public:
+	UVelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : VelocityGrid(initValue, _column, _row, _depth) {};
+
+	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) override
+	{
+		return this->grid[(i + 1) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] + this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] / 2.0f;
+	}
+};
+
+class VVelocityGrid : public VelocityGrid
+{
+public:
+	VVelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : VelocityGrid(initValue, _column, _row, _depth) {};
+
+	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) override
+	{
+		return this->grid[(i + 2) + (this->column + 4) * ((j + 1) + (this->row + 4) * (k + 2))] + this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] / 2.0f;
+	}
+};
+
+class WVelocityGrid : public VelocityGrid
+{
+public:
+	WVelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : VelocityGrid(initValue, _column, _row, _depth) {};
+
+	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) override
+	{
+		return this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 1))] + this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] / 2.0f;
+	}
+};

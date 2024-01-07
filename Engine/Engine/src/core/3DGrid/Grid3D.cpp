@@ -35,34 +35,31 @@ void Grid3D::clamp_to_grid(float x, float y, float z, unsigned int& i, unsigned 
 	if(kGrid < 0)
 	{
 		k = 0;
-	} else if(kGrid > row - 1)
+	} else if(kGrid > depth - 1)
 	{
-		k = row - 1;
+		k = depth - 1;
 	} else
 	{
-		k = yGrid;
+		k = kGrid;
 	}
 
-}
-
-static float uVelocityAtPoint(GridStructureHalo<float>& uVelocity, unsigned int i, unsigned int j, unsigned int k)
-{
-	return (uVelocity(i - 1, j, k) + uVelocity(i, j, k)) / 2.0f;
-}
-
-static float vVelocityAtPoint(GridStructureHalo<float>& vVelocity, unsigned int i, unsigned int j, unsigned int k)
-{
-	return (vVelocity(i, j - 1, k) + vVelocity(i, j, k)) / 2.0f;
-}
-
-static float wVelocityAtPoint(GridStructureHalo<float>& wVelocity, unsigned int i, unsigned int j, unsigned int k)
-{
-	return (wVelocity(i, j, k - 1) + wVelocity(i, j, k)) / 2.0f;
 }
 
 static float cubicInterpolate(std::array<float, 4> axis, float x)
 {
 	return axis[1] + 0.5f * x * (axis[2] - axis[0] + x * (2.0f * axis[0] - 5.0f * axis[1] + 4.0f * axis[2] - axis[3] + x * (3.0f * (axis[1] - axis[2]) + axis[3] - axis[0])));
+}
+
+static float bicubicInterpolate(VelocityGrid& grid, unsigned int i, unsigned int j, unsigned int k, float cellWidth)
+{
+	float x = i * cellWidth;
+	float y = j * cellWidth;
+	std::array<float, 4> row;
+	row[0] = cubicInterpolate({ grid.get(i - 1, j - 1, k), grid.get(i, j - 1, k), grid.get(i + 1, j - 1, k), grid.get(i + 2, j - 1, k) }, y);
+	row[1] = cubicInterpolate({ grid.get(i - 1, j, k), grid.get(i, j, k), grid.get(i + 1, j, k), grid.get(i + 2, j, k) }, y);
+	row[2] = cubicInterpolate({ grid.get(i - 1, j + 1, k), grid.get(i, j + 1, k), grid.get(i + 1, j + 1, k), grid.get(i + 2, j + 1, k) }, y);
+	row[3] = cubicInterpolate({ grid.get(i - 1, j + 2, k), grid.get(i, j + 2, k), grid.get(i + 1, j + 2, k), grid.get(i + 2, j + 2, k) }, y);
+	return cubicInterpolate(row, x);
 }
 
 static float bicubicInterpolate(GridStructureHalo<float>& grid, unsigned int i, unsigned int j, unsigned int k, float cellWidth)
@@ -82,10 +79,12 @@ static float bicubicInterpolate(GridStructureHalo<float>& grid, unsigned int i, 
 void Grid3D::advect(float timeStep)
 {
 
-	/*uVelocity.haloCondition();
-	vVelocity.haloCondition();
-	pressure.haloCondition();
-	smoke.haloCondition(); */
+	//uVelocity.haloCondition();
+	//vVelocity.haloCondition();
+	//pressure.haloCondition();
+	//smoke.haloCondition();
+
+	extrapolate();
 
 	// RK-2
 	for(unsigned int i = 0; i < column; i++)
@@ -94,9 +93,9 @@ void Grid3D::advect(float timeStep)
 		{
 			for(unsigned int k = 0; k < row; k++)
 			{
-				float xMid = i * cellWidth - 0.5f * timeStep * uVelocityAtPoint(uVelocity, i, j, k);
-				float yMid = j * cellWidth - 0.5f * timeStep * vVelocityAtPoint(vVelocity, i, j, k);
-				float zMid = k * cellWidth - 0.5f * timeStep * wVelocityAtPoint(wVelocity, i, j, k);
+				float xMid = i * cellWidth - 0.5f * timeStep * uVelocity.get(i, j, k);
+				float yMid = j * cellWidth - 0.5f * timeStep * vVelocity.get(i, j, k);
+				float zMid = k * cellWidth - 0.5f * timeStep * wVelocity.get(i, j, k);
 
 				unsigned int iMid, jMid, kMid;
 				clamp_to_grid(xMid, yMid, zMid, iMid, jMid, kMid);
@@ -122,10 +121,6 @@ void Grid3D::advect(float timeStep)
 				vVelocity(i, j, k) = bicubicInterpolate(wVelocity, iFinal, jFinal, kFinal, cellWidth);
 				smoke(i, j, k) = bicubicInterpolate(smoke, iFinal, jFinal, kFinal, cellWidth);
 			}
-
-
 		}
 	}
-	extrapolate();
-
 }

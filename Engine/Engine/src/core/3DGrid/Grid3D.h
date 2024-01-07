@@ -37,11 +37,11 @@ public:
 	const float cellWidth;
 	float density;
 
-	GridStructureHalo<float> uVelocity = GridStructureHalo<float>(0, column, row, depth);
-	GridStructureHalo<float> vVelocity = GridStructureHalo<float>(0, column, row, depth);
-	GridStructureHalo<float> wVelocity = GridStructureHalo<float>(0, column, row, depth);
-	GridStructureHalo<float> pressure = GridStructureHalo<float>(0, column, row, depth);
-	GridStructureHalo<float> smoke = GridStructureHalo<float>(0, column, row, depth);
+	UVelocityGrid uVelocity = UVelocityGrid(0.0f, column, row, depth);
+	VVelocityGrid vVelocity = VVelocityGrid(0.0f, column, row, depth);
+	WVelocityGrid wVelocity = WVelocityGrid(0.0f, column, row, depth);
+	GridStructureHalo<float> pressure = GridStructureHalo<float>(0.0f, column, row, depth);
+	GridStructureHalo<float> smoke = GridStructureHalo<float>(0.0f, column, row, depth);
 	GridStructureHalo<float> temparature = GridStructureHalo<float>(0, column, row, depth);
 
 	GridStructureHalo<GridDataPoint> gridData = GridStructureHalo<GridDataPoint>(GridDataPoint(GridDataPoint::EMPTY), column, row, depth);
@@ -53,8 +53,8 @@ public:
 	Grid3D(unsigned int _row, unsigned int _column, unsigned int _depth, Scene& scene, const Vector3f location, float _density, float _cellWidth)
 		: row(_row), column(_column), depth(_depth), density(_density), cellWidth(_cellWidth), scaleCellWidth(1 / _cellWidth)
 	{
-		float scale1 = cellWidth * 5;
-		float scale2 = cellWidth * 10;
+		float scale1 = 0.01 * 5;
+		float scale2 = 0.01 * 10;
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
@@ -68,18 +68,25 @@ public:
 			}
 		}
 
-		uVelocity.initBottomHalo(6.0f);
+		/*uVelocity.initBottomHalo(6.0f);
 		smoke.initBottomHalo(100.0f);
 		pressure.initBottomHalo(20.0f);
-		vVelocity.initBottomHalo(9.81f); 
+		vVelocity.initBottomHalo(9.81f);
+		wVelocity.initBottomHalo(5.0f);
+
+		uVelocity.fillCentre(0.f);
+		vVelocity.fillCentre(0.f);
+		wVelocity.fillCentre(0.f);
+		smoke.fillCentre(0.f);
+		pressure.fillCentre(0.f); */
 
 		// Make boundary solid
 		for(unsigned int i = 0; i < column; i++)
 		{
 			for(unsigned int j = 0; j < row; j++)
 			{
-				//gridData(i, j, 0).cellState = GridDataPoint::SOLID; // front face
-				gridData(i, j, depth - 1).cellState = GridDataPoint::EMPTY; // back face
+				gridData(i, j, 0).cellState = GridDataPoint::SOLID; // front face
+				//gridData(i, j, depth - 1).cellState = GridDataPoint::EMPTY; // back face
 			}
 		}
 
@@ -88,6 +95,10 @@ public:
 			for(unsigned int k = 0; k < depth; k++)
 			{
 				//gridData(i, 0, k).cellState = GridDataPoint::SOLID; // bottom face
+				uVelocity(i, 0, k) = 6.0f;
+				vVelocity(i, 0, k) = 10.0f;
+				pressure(i, 0, k) = 5.0f;
+				smoke(i, 0, k) = 10.0f;
 				gridData(i, row - 1, k).cellState = GridDataPoint::SOLID; // top face
 			}
 		}
@@ -112,7 +123,7 @@ public:
 	void applyPreconditioner(RowVector& residualVector, RowVector& auxiliaryVector);
 	void constructPreconditioner();
 
-	//void GaussSeidel(float timeStep);
+	void GaussSeidel(float timeStep);
 
 	/*void boundaryConditions()
 	{
@@ -155,6 +166,7 @@ public:
 	{
 		//boundaryConditions();
 		PCGSolve(timeStep);
+		//GaussSeidel(timeStep);
 	}
 
 	void UpdateRender()
@@ -175,11 +187,11 @@ public:
 						case GridDataPoint::EMPTY:
 							if(smoke(i, j, k) > 1.0f)
 							{
-								gridData(i, j, k).cellState = GridDataPoint::FLUID;
+								//gridData(i, j, k).cellState = GridDataPoint::FLUID;
 								gridData(i, j, k).render->isActive = true;
 							} else
 							{
-								gridData(i, j, k).cellState = GridDataPoint::EMPTY;
+								//gridData(i, j, k).cellState = GridDataPoint::EMPTY;
 								gridData(i, j, k).render->isActive = false;
 							}
 					}

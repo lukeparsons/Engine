@@ -96,9 +96,9 @@ void Grid3D::extrapolate() {
 		int count = 0;
 		if(signedDistance(i + 1, j, k) < d)
 		{
-			uAvg += uVelocity(i + 1, j, k);
-			vAvg += vVelocity(i + 1, j, k);
-			wAvg += wVelocity(i + 1, j, k);
+			uAvg += uVelocity.get(i + 1, j, k);
+			vAvg += vVelocity.get(i + 1, j, k);
+			wAvg += wVelocity.get(i + 1, j, k);
 			count++;
 		} else if(signedDistance(i + 1, j, k) == std::numeric_limits<float>::max())
 		{
@@ -110,9 +110,9 @@ void Grid3D::extrapolate() {
 		}
 		if(signedDistance(i - 1, j, k) < d)
 		{
-			uAvg += uVelocity(i - 1, j, k);
-			vAvg += vVelocity(i - 1, j, k);
-			wAvg += wVelocity(i - 1, j, k);
+			uAvg += uVelocity.get(i - 1, j, k);
+			vAvg += vVelocity.get(i - 1, j, k);
+			wAvg += wVelocity.get(i - 1, j, k);
 			count++;
 		} else if(signedDistance(i - 1, j, k) == std::numeric_limits<float>::max())
 		{
@@ -124,9 +124,9 @@ void Grid3D::extrapolate() {
 		}
 		if(signedDistance(i, j + 1, k) < d)
 		{
-			uAvg += uVelocity(i, j + 1, k);
-			vAvg += vVelocity(i, j + 1, k);
-			wAvg += wVelocity(i, j + 1, k);
+			uAvg += uVelocity.get(i, j + 1, k);
+			vAvg += vVelocity.get(i, j + 1, k);
+			wAvg += wVelocity.get(i, j + 1, k);
 			count++;
 		} else if(signedDistance(i, j + 1, k) == std::numeric_limits<float>::max())
 		{
@@ -138,9 +138,9 @@ void Grid3D::extrapolate() {
 		}
 		if(signedDistance(i, j - 1, k) < d)
 		{
-			uAvg += uVelocity(i, j - 1, k);
-			vAvg += vVelocity(i, j - 1, k);
-			wAvg += wVelocity(i, j - 1, k);
+			uAvg += uVelocity.get(i, j - 1, k);
+			vAvg += vVelocity.get(i, j - 1, k);
+			wAvg += wVelocity.get(i, j - 1, k);
 			count++;
 		} else if(signedDistance(i, j - 1, k) == std::numeric_limits<float>::max())
 		{
@@ -152,9 +152,9 @@ void Grid3D::extrapolate() {
 		}
 		if(signedDistance(i, j, k + 1) < d)
 		{
-			uAvg += uVelocity(i, j, k + 1);
-			vAvg += vVelocity(i, j, k + 1);
-			wAvg += wVelocity(i, j, k + 1);
+			uAvg += uVelocity.get(i, j, k + 1);
+			vAvg += vVelocity.get(i, j, k + 1);
+			wAvg += wVelocity.get(i, j, k + 1);
 			count++;
 		} else if(signedDistance(i, j, k + 1) == std::numeric_limits<float>::max())
 		{
@@ -166,9 +166,9 @@ void Grid3D::extrapolate() {
 		}
 		if(signedDistance(i, j, k - 1) < d)
 		{
-			uAvg += uVelocity(i, j, k - 1);
-			vAvg += vVelocity(i, j, k - 1);
-			wAvg += wVelocity(i, j, k - 1);
+			uAvg += uVelocity.get(i, j, k - 1);
+			vAvg += vVelocity.get(i, j, k - 1);
+			wAvg += wVelocity.get(i, j, k - 1);
 			count++;
 		} else if(signedDistance(i, j, k - 1) == std::numeric_limits<float>::max())
 		{
