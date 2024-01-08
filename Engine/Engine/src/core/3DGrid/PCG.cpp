@@ -105,8 +105,11 @@ void Grid3D::PCGSolve(float timeStep)
 		}
 	}
 
+	set_boundary();
 
 	PCG();
+
+	set_boundary();
 
 	float scale = timeStep / (density * cellWidth);
 
@@ -175,6 +178,8 @@ void Grid3D::PCGSolve(float timeStep)
 
 		}
 	}
+
+	set_boundary();
 }
 
 

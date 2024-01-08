@@ -19,7 +19,7 @@
 #include "../renderer/shaders/BasicShader.h"
 #include "../renderer/shaders/FluidShader.h"
 #include "../renderer/shaders/ShaderStore.h"
-#include "3DGrid/Grid3D.h"
+#include "StableFluids/StableFluids.h"
 
 #define row 20
 #define column 20
@@ -127,11 +127,11 @@ int main()
 
 	Scene scene;
 
-	Grid3D grid = Grid3D(row, column, depth, scene, Vector3f(0, 0, 0), 1, 0.1f);
+	StableFluids fluid = StableFluids(row, column, depth, scene, Vector3f(0, 0, 0), 1, 0.01f);
 
 	double previousFrameTime = 0;
-	float frameTime = 0;
-	//float timeStep = 0.0000025;
+	float frameTime, uMax = 0;
+	float timeStep = 0.0000025;
 	while(!glfwWindowShouldClose(window))
 	{ 
 
@@ -143,35 +143,17 @@ int main()
 
 		processInput(window);
 
-		float umax = abs(grid.uVelocity.max()) + sqrt(5 * grid.cellWidth * 9.81f);
-		float timeStep = (5 * grid.cellWidth) / grid.uVelocity.max();
-
-		//std::cout << "Time step " << timeStep << std::endl;
-		
-		grid.advect(timeStep);
-
-		grid.addgravity(timeStep);
-
-		grid.project(timeStep);
-
-		/*for(size_t i = 0; i < row; i++)
-		{
-			for(size_t j = 0; j < column; j++)
-			{
-				//grid->PrintCell(i, j);
-			}
-		} */
-
 		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
 
-		grid.UpdateRender();
+		fluid.Simulate();
+
+		fluid.UpdateRender();
 
 		scene.Update(cameraMatrix);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		timeStep = glfwGetTime() - currentFrameTime;
 	}
 	//std::cout << "Average FPS " << 60 / (frameTime / frameCount);
 	glfwTerminate();

@@ -27,6 +27,7 @@ private:
 	void clamp_to_grid(float x, float y, float z, unsigned int& i, unsigned int& j, unsigned int& k);
 	void calculate_initial_distances();
 	void extrapolate();
+	void set_boundary();
 
 	GridStructureHalo<float> signedDistance = GridStructureHalo<float>(std::numeric_limits<float>::max(), column, row, depth);
 	GridStructureHalo<Maybe<GridPoint>> closestPoint = GridStructureHalo<Maybe<GridPoint>>(Nothing(), column, row, depth); // TODO: Make this one thick halo only!
@@ -68,17 +69,11 @@ public:
 			}
 		}
 
-		/*uVelocity.initBottomHalo(6.0f);
+		uVelocity.initBottomHalo(6.0f);
 		smoke.initBottomHalo(100.0f);
-		pressure.initBottomHalo(20.0f);
+		pressure.initBottomHalo(5.0f);
 		vVelocity.initBottomHalo(9.81f);
 		wVelocity.initBottomHalo(5.0f);
-
-		uVelocity.fillCentre(0.f);
-		vVelocity.fillCentre(0.f);
-		wVelocity.fillCentre(0.f);
-		smoke.fillCentre(0.f);
-		pressure.fillCentre(0.f); */
 
 		// Make boundary solid
 		for(unsigned int i = 0; i < column; i++)
@@ -95,10 +90,6 @@ public:
 			for(unsigned int k = 0; k < depth; k++)
 			{
 				//gridData(i, 0, k).cellState = GridDataPoint::SOLID; // bottom face
-				uVelocity(i, 0, k) = 6.0f;
-				vVelocity(i, 0, k) = 10.0f;
-				pressure(i, 0, k) = 5.0f;
-				smoke(i, 0, k) = 10.0f;
 				gridData(i, row - 1, k).cellState = GridDataPoint::SOLID; // top face
 			}
 		}
@@ -164,7 +155,6 @@ public:
 
 	void project(float timeStep)
 	{
-		//boundaryConditions();
 		PCGSolve(timeStep);
 		//GaussSeidel(timeStep);
 	}

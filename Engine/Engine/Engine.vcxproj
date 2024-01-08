@@ -179,6 +179,7 @@
     <ClCompile Include="src\core\3DGrid\Grid3D.cpp" />
     <ClCompile Include="src\core\3DGrid\LevelSet.cpp" />
     <ClCompile Include="src\core\3DGrid\PCG.cpp" />
+    <ClCompile Include="src\core\StableFluids\StableFluids.cpp" />
     <ClCompile Include="src\scene\components\FluidComponent.cpp" />
     <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
@@ -208,6 +209,8 @@
     <ClInclude Include="src\core\3DGrid\Grid3D.h" />
     <ClInclude Include="src\core\3DGrid\GridStructures.h" />
     <ClInclude Include="src\core\3DGrid\RowVector.h" />
+    <ClInclude Include="src\core\StableFluids\StableFluids.h" />
+    <ClInclude Include="src\core\StableFluids\GridStructures.h" />
     <ClInclude Include="src\math\Matrix.h" />
     <ClInclude Include="src\renderer\shaders\BasicShader.h" />
     <ClInclude Include="src\renderer\shaders\FluidShader.h" />

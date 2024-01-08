@@ -123,4 +123,25 @@ void Grid3D::advect(float timeStep)
 			}
 		}
 	}
+
+	set_boundary();
+}
+
+void Grid3D::set_boundary()
+{
+	for(unsigned int i = 0; i < column; i++)
+	{
+		for(unsigned int j = 0; j < row; j++)
+		{
+			for(unsigned int k = 0; k < depth; k++)
+			{
+				if(gridData(i, j, k).cellState == GridDataPoint::SOLID)
+				{
+					uVelocity(i, j, k) = 0;
+					vVelocity(i, j, k) = 0;
+					wVelocity(i, j, k) = 0;
+				}
+			}
+		}
+	}
 }
