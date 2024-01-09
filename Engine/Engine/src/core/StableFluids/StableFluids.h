@@ -51,8 +51,9 @@ public:
 	}
 
 	void Simulate(float timeStep);
-	void advect(float timeStep)
+	void advect(float timeStep, GridStructureHalo<float>& grid, GridStructureHalo<float>& prevGrid);
 	void diffuse(float timeStep, float diff, GridStructureHalo<float>& grid, GridStructureHalo<float>& prevGrid);
+	void set_boundary(GridStructureHalo<float>& grid);
 	void project(float timeStep)
 
 	void UpdateRender()

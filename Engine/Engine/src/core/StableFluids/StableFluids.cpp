@@ -13,6 +13,20 @@ void StableFluids::Simulate(float timeStep)
 	// density
 }
 
+void StableFluids::set_boundary(GridStructureHalo<float>& grid)
+{
+	for (unsigned int i = 0; i < column; i++)
+	{
+		for (unsigned int j = 0; j < row; j++)
+		{
+			for (unsigned int k = 0; k < depth; k++)
+			{
+
+			}
+		}
+	}
+}
+
 static unsigned int clamp(float val, unsigned int max)
 {
 	if(val < 0.5)
@@ -26,7 +40,7 @@ static unsigned int clamp(float val, unsigned int max)
 	return static_cast<unsigned int>(val);
 }
 
-void StableFluids::advect(float timeStep, GridStructureHalo<float>& grid)
+void StableFluids::advect(float timeStep, GridStructureHalo<float>& grid, GridStructureHalo<float>& prevGrid)
 {
 	float x, y, z, s0, t0, s1, t1, u0, u1;
 	float dt0 = timeStep * N;
@@ -53,7 +67,7 @@ void StableFluids::advect(float timeStep, GridStructureHalo<float>& grid)
 				t0 = 1.0f - t1;
 
 				u1 = z - k0;
-				u0 = 1.0f - v1;
+				u0 = 1.0f - u1;
 
 				grid(i, j, k) =
 					s0 *
