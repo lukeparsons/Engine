@@ -6,7 +6,6 @@
 class ShaderStore
 {
 private:
-
 	using ShaderFileNames = std::pair<std::string, std::string>;
 
 	std::map<ShaderFileNames, std::shared_ptr<ShaderProgram>> shaders;

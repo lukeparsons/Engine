@@ -25,7 +25,7 @@ public:
 			Matrix4f modelMatrix = GetTranslationMatrix(transform.location) * GetScaleMatrix(transform.scale);
 			component->SetShaderValues(cameraMatrix, modelMatrix);
 
-			component->mesh->Draw(cameraMatrix, component->textureID);
+			component->drawable->Draw(cameraMatrix, component->textureID);
 			glUseProgram(0);
 		}
 	}

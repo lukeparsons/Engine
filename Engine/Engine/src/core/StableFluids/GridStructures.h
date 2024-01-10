@@ -80,6 +80,13 @@ public:
 	{
 		return grid[i + column * (j + row * k)];
 	}
+
+	void SwapWith(GridStructure<T>& other)
+	{
+		std::vector<T> tempGrid = grid;
+		this->grid = other.grid;
+		other.grid = tempGrid;
+	}
 };
 
 /*The grid is made up of cells from (2, 2, 2) to (column + 1, row + 1, depth + 1) with a halo(two cell thick wall) around it
@@ -144,46 +151,5 @@ public:
 	virtual inline const T& operator()(unsigned int i, unsigned int j, unsigned int k) const override
 	{
 		return this->grid[(i + 2) + (column + 4) * ((j + 2) + (row + 4) * (k + 2))];
-	}
-};
-
-class VelocityGrid : public GridStructureHalo<float>
-{
-public:
-	VelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : GridStructureHalo<float>(initValue, _column, _row, _depth) {};
-	
-	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) = 0;
-};
-
-class UVelocityGrid : public VelocityGrid
-{
-public:
-	UVelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : VelocityGrid(initValue, _column, _row, _depth) {};
-
-	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) override
-	{
-		return this->grid[(i + 1) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] + this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] / 2.0f;
-	}
-};
-
-class VVelocityGrid : public VelocityGrid
-{
-public:
-	VVelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : VelocityGrid(initValue, _column, _row, _depth) {};
-
-	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) override
-	{
-		return this->grid[(i + 2) + (this->column + 4) * ((j + 1) + (this->row + 4) * (k + 2))] + this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] / 2.0f;
-	}
-};
-
-class WVelocityGrid : public VelocityGrid
-{
-public:
-	WVelocityGrid(float initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : VelocityGrid(initValue, _column, _row, _depth) {};
-
-	virtual inline float get(unsigned int i, unsigned int j, unsigned int k) override
-	{
-		return this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 1))] + this->grid[(i + 2) + (this->column + 4) * ((j + 2) + (this->row + 4) * (k + 2))] / 2.0f;
 	}
 };

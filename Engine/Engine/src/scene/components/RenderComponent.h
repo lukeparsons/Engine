@@ -1,12 +1,13 @@
 #pragma once
 #include "../../renderer/Mesh.h"
 #include "TransformComponent.h"
+#include "../../renderer/shaders/BasicShader.h"
 
 class RenderComponent : public Component {
 protected:
 	std::shared_ptr<Texture> texture;
 public:
-	std::shared_ptr<Mesh> mesh;
+	std::shared_ptr<Drawable> drawable;
 	GLuint textureID;
 	std::shared_ptr<ShaderProgram> shaderProgram;
 
@@ -23,4 +24,6 @@ public:
 	}
 
 	void ChangeTexture(std::shared_ptr<Texture> _texture);
+
+	void SetColour(std::array<float, 3> colour);
 };

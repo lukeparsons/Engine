@@ -19,11 +19,13 @@
 #include "../renderer/shaders/BasicShader.h"
 #include "../renderer/shaders/FluidShader.h"
 #include "../renderer/shaders/ShaderStore.h"
+#include "StableFluids/Test.h"
 #include "StableFluids/StableFluids.h"
+#include "../renderer/Line.h"
 
-#define row 20
-#define column 20
-#define depth 20
+#define row 42
+#define column 42
+#define depth 42
 
 /* Task list TODO:
 * Advection: Fix halo bicubic interpolation
@@ -32,14 +34,14 @@
 * Boundary condition function: Check
 */
 
-static const int width = 1024;
-static const int height = 576;
+static const int width = 768;
+static const int height = 768;
 
 static const int viewportX = 0;
 static const int viewportY = 0;
 
 static constexpr float aspectRatio = (float)width / float(height);
-static const Matrix4f projectionMatrix = GetProjectionMatrix(100.0f, 100.0f, aspectRatio);
+static const Matrix4f projectionMatrix = GetProjectionMatrix(20.0f, 20.0f, aspectRatio);
 Matrix4f cameraMatrix;
 
 static Camera camera(Vector3f(0, 0, 0));
@@ -127,11 +129,18 @@ int main()
 
 	Scene scene;
 
-	StableFluids fluid = StableFluids(row, column, depth, scene, Vector3f(0, 0, 0), 1, 0.01f);
+	//StableFluids fluid = StableFluids(row, column, depth, scene, Vector3f(0, 0, 0), 0.0f, 0.01f);
+
 
 	double previousFrameTime = 0;
 	float frameTime, uMax = 0;
-	float timeStep = 0.0000025;
+	float timeStep = 0.4f;
+
+	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 1.0f, 0.f, 0.25f));
+	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 0.25f, 1.f, 0.25f));
+	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 0.25f, 0.f, 1.f));
+
+	initsim(scene);
 	while(!glfwWindowShouldClose(window))
 	{ 
 
@@ -143,11 +152,15 @@ int main()
 
 		processInput(window);
 
-		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -5));
+		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -8));
 
-		fluid.Simulate();
+		//fluid.Simulate(timeStep, 0.0f);
 
-		fluid.UpdateRender();
+		sim_main();
+
+		sim_draw();
+
+		//fluid.UpdateRender();
 
 		scene.Update(cameraMatrix);
 

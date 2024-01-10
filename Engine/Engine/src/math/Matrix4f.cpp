@@ -102,7 +102,7 @@ Matrix4f GetProjectionMatrix(float verticalFOV, float horizontalFOV, float aspec
 	horizontalFOV *= (pi / 180);
 	float distanceToNearClipPlaneZ = 1 / (tanf(horizontalFOV));
 
-	float distanceToFarClipPlane = 80.0f;
+	float distanceToFarClipPlane = 120.0f;
 
 	float a = (distanceToFarClipPlane + distanceToNearClipPlaneY) / (distanceToNearClipPlaneY - distanceToFarClipPlane);
 	float b = (2 * distanceToFarClipPlane * distanceToNearClipPlaneY) / (distanceToNearClipPlaneY - distanceToFarClipPlane);

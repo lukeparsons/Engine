@@ -179,7 +179,9 @@
     <ClCompile Include="src\core\3DGrid\Grid3D.cpp" />
     <ClCompile Include="src\core\3DGrid\LevelSet.cpp" />
     <ClCompile Include="src\core\3DGrid\PCG.cpp" />
+    <ClCompile Include="src\core\StableFluids\solver3d.cpp" />
     <ClCompile Include="src\core\StableFluids\StableFluids.cpp" />
+    <ClCompile Include="src\core\StableFluids\Test.h" />
     <ClCompile Include="src\scene\components\FluidComponent.cpp" />
     <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
@@ -212,8 +214,11 @@
     <ClInclude Include="src\core\StableFluids\StableFluids.h" />
     <ClInclude Include="src\core\StableFluids\GridStructures.h" />
     <ClInclude Include="src\math\Matrix.h" />
+    <ClInclude Include="src\renderer\Drawable.h" />
+    <ClInclude Include="src\renderer\Line.h" />
     <ClInclude Include="src\renderer\shaders\BasicShader.h" />
     <ClInclude Include="src\renderer\shaders\FluidShader.h" />
+    <ClInclude Include="src\renderer\shaders\LineShader.h" />
     <ClInclude Include="src\renderer\shaders\ShaderStore.h" />
     <ClInclude Include="src\renderer\Texture.h" />
     <ClInclude Include="src\scene\components\Component.h" />
@@ -253,6 +258,8 @@
     <None Include="src\renderer\shaders\shaderfiles\fluids\BoundaryFluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidVertex.vertex" />
+    <None Include="src\renderer\shaders\shaderfiles\Line.fragment" />
+    <None Include="src\renderer\shaders\shaderfiles\Line.vertex" />
     <None Include="src\shaderfiles\BasicFragment.fragment" />
     <None Include="src\shaderfiles\BasicVertex.vertex" />
     <None Include="src\shaderfiles\fluids\FluidFragment.fragment" />

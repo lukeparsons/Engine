@@ -64,8 +64,8 @@ Matrix4f Camera::GetCameraSpaceMatrix()
 	Vector3f V;
 	Vector3f N;
 
-	float yaw = float(look.x * (3.14 / 180));
-	float pitch = float(look.y * (3.14 / 180));
+	float yaw = float(look.x * (3.14f / 180));
+	float pitch = float(look.y * (3.14f / 180));
 
 	Vector3f dir;
 	dir.x = cos(yaw) * cos(pitch);

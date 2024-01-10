@@ -46,7 +46,8 @@ public:
 	~Scene();
 
 	EntityID NewEntity();
-	EntityID CreateModel(std::shared_ptr<Mesh> mesh, const std::shared_ptr<Texture> texture, Vector3f location = Vector3f(0, 0, 0), Vector3f scale = Vector3f(1, 1, 1));
+	EntityID CreateModel(std::shared_ptr<Drawable> drawable, const std::shared_ptr<Texture> texture, Vector3f location = Vector3f(0, 0, 0), Vector3f scale = Vector3f(1, 1, 1));
+	EntityID CreateLine(std::shared_ptr<Drawable> drawable, Vector3f location = Vector3f(0, 0, 0), Vector3f scale = Vector3f(1, 1, 1));
 	void DeleteEntity(EntityID id);
 	std::unordered_map<std::type_index, Component*> GetAllEntityComponents(EntityID id) const;
 

@@ -1,6 +1,6 @@
 #include "RenderComponent.h"
-#include "../../renderer/shaders/BasicShader.h"
 #include "../../renderer/shaders/ShaderStore.h"
+#include <array>
 
 static const std::shared_ptr<Texture> defaultTexture = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
@@ -33,4 +33,11 @@ void RenderComponent::ChangeTexture(std::shared_ptr<Texture> _texture)
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, _texture->format, _texture->width, _texture->height, 0, _texture->format, _texture->type, _texture->GetPixelData());
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void RenderComponent::SetColour(std::array<float, 3> colour)
+{
+	glUseProgram(shaderProgram->GetID());
+	shaderProgram->SetColour(colour);
+	glUseProgram(0);
 }

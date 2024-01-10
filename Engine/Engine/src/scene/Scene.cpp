@@ -3,6 +3,8 @@
 #include "components/TransformComponent.h"
 #include "components/RenderComponent.h"
 #include "../scene/SystemManager.h"
+#include "../renderer/shaders/ShaderStore.h"
+#include "../renderer/shaders/LineShader.h"
 
 Scene::Scene()
 {
@@ -26,15 +28,27 @@ EntityID Scene::NewEntity()
     return entityIDcount++;
 }
 
-EntityID Scene::CreateModel(std::shared_ptr<Mesh> mesh, const std::shared_ptr<Texture> texture, Vector3f location, Vector3f scale)
+EntityID Scene::CreateModel(std::shared_ptr<Drawable> drawable, const std::shared_ptr<Texture> texture, Vector3f location, Vector3f scale)
 {
     EntityID newID = NewEntity();
     TransformComponent* transform = GetComponent<TransformComponent>(newID);
     transform->location = location;
     transform->scale = scale;
     RenderComponent* render = AddComponent<RenderComponent>(newID);
-    render->mesh = mesh;
+    render->drawable = drawable;
     render->ChangeTexture(texture);
+    return newID;
+}
+
+EntityID Scene::CreateLine(std::shared_ptr<Drawable> drawable, Vector3f location, Vector3f scale)
+{
+    EntityID newID = NewEntity();
+    TransformComponent* transform = GetComponent<TransformComponent>(newID);
+    transform->location = location;
+    transform->scale = scale;
+    RenderComponent* render = AddComponent<RenderComponent>(newID);
+    render->drawable = drawable;
+    render->shaderProgram = g_shaderStore.LoadShader<LineShader>("../Engine/src/renderer/shaders/shaderfiles/Line.vertex", "../Engine/src/renderer/shaders/shaderfiles/Line.fragment");
     return newID;
 }
 

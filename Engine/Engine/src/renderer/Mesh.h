@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vector>
 #include "shaders/ShaderProgram.h"
 #include <glad/glad.h>
@@ -7,6 +6,7 @@
 #include "../math/Vectorf.h"
 #include <assimp/scene.h>
 #include "Texture.h"
+#include "Drawable.h"
 
 struct Vertex
 {
@@ -21,7 +21,7 @@ struct Vertex
 	};
 };
 
-class Mesh
+class Mesh : public Drawable
 {
 private:
 	GLuint VAO;
@@ -34,7 +34,7 @@ public:
 
 	Mesh(const Mesh& other);
 
-	virtual void Draw(const Matrix4f& cameraMatrix, GLuint textureID) const;
+	virtual void Draw(const Matrix4f& cameraMatrix, GLuint textureID) const override;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 };
