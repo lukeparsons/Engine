@@ -46,7 +46,7 @@ Matrix4f cameraMatrix;
 
 static Camera camera(Vector3f(0, 0, 0));
 
-static bool addForceU, addForceV, addForceW = false;
+static bool addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW = false;
 
 ShaderStore g_shaderStore = ShaderStore();
 
@@ -80,6 +80,21 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	if(key == GLFW_KEY_H && action == GLFW_PRESS)
 	{
 		addForceW = true;
+	}
+
+	if (key == GLFW_KEY_C && action == GLFW_PRESS)
+	{
+		negaddForceU = true;
+	}
+
+	if (key == GLFW_KEY_V && action == GLFW_PRESS)
+	{
+		negaddForceV = true;
+	}
+
+	if (key == GLFW_KEY_B && action == GLFW_PRESS)
+	{
+		negaddForceW = true;
 	}
 }
 
@@ -179,7 +194,7 @@ int main()
 
 		//fluid.Simulate(timeStep, 0.0f);
 
-		sim_main(addForceU, addForceV, addForceW);
+		sim_main(addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW);
 
 		sim_draw();
 

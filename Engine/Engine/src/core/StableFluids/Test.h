@@ -20,7 +20,7 @@ static int M = SIZE; // grid x
 static int N = SIZE; // grid y
 static int O = SIZE; // grid z
 static float dt = 0.4f; // time delta
-static float diff = 100.f; // diffuse
+static float diff = 0.f; // diffuse
 static float visc = 0.000f; // viscosity
 static float force = 10.0f;  // added on keypress on an axis
 static float source = 200.0f; // density
@@ -93,12 +93,14 @@ inline void initsim(Scene& scene)
 		}
 	}
 
+	//scene.CreateLine(std::make_shared<Line>(0.f, 0.f, 0.f, .9f, .9f, .9f));
+
 
 	u_prev[IX(2, N / 2, O / 2)] = 100.f;
 }
 
 
-inline void sim_main(bool& addForceU, bool& addForceV, bool& addForceW)
+inline void sim_main(bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW)
 {
 	for(int i = 0; i < (M + 2) * (N + 2) * (O + 2); i++)
 	{
@@ -123,6 +125,24 @@ inline void sim_main(bool& addForceU, bool& addForceV, bool& addForceW)
 		addForceW = false;
 	}
 
+	if (negaddForceU)
+	{
+		u_prev[IX(M - 2, N / 2, O / 2)] = -200.f;
+		negaddForceU = false;
+	}
+
+	if (negaddForceV)
+	{
+		v_prev[IX(M / 2, N - 2, O / 2)] = -200.f;
+		negaddForceV = false;
+	}
+
+	if (negaddForceW)
+	{
+		w_prev[IX(M / 2, N / 2, O - 2)] = -200.f;
+		negaddForceW = false;
+	}
+
 	vel_step(M, N, O, u, v, w, u_prev, v_prev, w_prev, visc, dt);
 	dens_step(M, N, O, dens, dens_prev, u, v, w, diff, dt);
 }
@@ -131,7 +151,7 @@ inline void sim_draw()
 {
 	float h = 1.0f / N;
 	float x, y, z;
-	int tol = 1.f;
+	float tol = 0.2f;
 	for(int i = 1; i <= M; i++)
 	{
 		x = (i - 0.5f) * h;
@@ -143,11 +163,20 @@ inline void sim_draw()
 				z = (k - 0.5f) * h;
 
 				float endX = x + u[IX(i, j, k)];
-				if(endX > tol) endX = tol;
+				if (u[IX(i, j, k)] >= tol || u[IX(i, j, k)] <= -tol)
+				{
+					endX = x;
+				}
 				float endY = y + v[IX(i, j, k)];
-				if(endY > tol) endY = tol;
+				if (v[IX(i, j, k)] >= tol || v[IX(i, j, k)] <= -tol)
+				{
+					endY = y;
+				}
 				float endZ = z + w[IX(i, j, k)];
-				if(endZ > tol) endZ = tol;
+				if (w[IX(i, j, k)] >= tol || w[IX(i, j, k)] <= -tol)
+				{
+					endZ = z;
+				}
 				
 				lines[(i - 1) + M * ((j - 1) + N * (k - 1))]->ChangeLine(x, y, z, endX, endY, endZ);
 			}
