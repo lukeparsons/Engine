@@ -20,8 +20,8 @@ static int M = SIZE; // grid x
 static int N = SIZE; // grid y
 static int O = SIZE; // grid z
 static float dt = 0.4f; // time delta
-static float diff = 0.0f; // diffuse
-static float visc = 0.0f; // viscosity
+static float diff = 100.f; // diffuse
+static float visc = 0.000f; // viscosity
 static float force = 10.0f;  // added on keypress on an axis
 static float source = 200.0f; // density
 static float source_alpha = 0.05; //for displaying density
@@ -98,11 +98,29 @@ inline void initsim(Scene& scene)
 }
 
 
-inline void sim_main()
+inline void sim_main(bool& addForceU, bool& addForceV, bool& addForceW)
 {
 	for(int i = 0; i < (M + 2) * (N + 2) * (O + 2); i++)
 	{
 		u_prev[i] = v_prev[i] = w_prev[i] = dens_prev[i] = 0;
+	}
+
+	if(addForceU)
+	{
+		u_prev[IX(2, N / 2, O / 2)] = 200.f;
+		addForceU = false;
+	}
+
+	if(addForceV)
+	{
+		v_prev[IX(M/2, 2, O / 2)] = 200.f;
+		addForceV = false;
+	}
+
+	if(addForceW)
+	{
+		w_prev[IX(M / 2, N / 2, 2)] = 200.f;
+		addForceW = false;
 	}
 
 	vel_step(M, N, O, u, v, w, u_prev, v_prev, w_prev, visc, dt);
@@ -113,6 +131,7 @@ inline void sim_draw()
 {
 	float h = 1.0f / N;
 	float x, y, z;
+	int tol = 1.f;
 	for(int i = 1; i <= M; i++)
 	{
 		x = (i - 0.5f) * h;
@@ -122,8 +141,15 @@ inline void sim_draw()
 			for(int k = 1; k <= O; k++)
 			{
 				z = (k - 0.5f) * h;
-				lines[(i - 1) + M * ((j - 1) + N * (k - 1))]->ChangeLine(x, y, z, x + u[IX(i, j, k)], y + v[IX(i, j, k)], z + w[IX(i, j, k)]);
-				//lines[(i - 1) + M * ((j - 1) + N * (k - 1))]->ChangeLine(i * 0.25f, 0.1f * j, 0.f * k, 1.f, 1.f, 1.f);
+
+				float endX = x + u[IX(i, j, k)];
+				if(endX > tol) endX = tol;
+				float endY = y + v[IX(i, j, k)];
+				if(endY > tol) endY = tol;
+				float endZ = z + w[IX(i, j, k)];
+				if(endZ > tol) endZ = tol;
+				
+				lines[(i - 1) + M * ((j - 1) + N * (k - 1))]->ChangeLine(x, y, z, endX, endY, endZ);
 			}
 		}
 	}

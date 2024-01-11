@@ -23,9 +23,9 @@
 #include "StableFluids/StableFluids.h"
 #include "../renderer/Line.h"
 
-#define row 42
-#define column 42
-#define depth 42
+#define row 24
+#define column 24
+#define depth 24
 
 /* Task list TODO:
 * Advection: Fix halo bicubic interpolation
@@ -41,10 +41,12 @@ static const int viewportX = 0;
 static const int viewportY = 0;
 
 static constexpr float aspectRatio = (float)width / float(height);
-static const Matrix4f projectionMatrix = GetProjectionMatrix(20.0f, 20.0f, aspectRatio);
+static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 Matrix4f cameraMatrix;
 
 static Camera camera(Vector3f(0, 0, 0));
+
+static bool addForceU, addForceV, addForceW = false;
 
 ShaderStore g_shaderStore = ShaderStore();
 
@@ -63,6 +65,24 @@ void processInput(GLFWwindow* window)
 	camera.ProcessCameraKeyboardInputs(window);
 }
 
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if(key == GLFW_KEY_F && action == GLFW_PRESS)
+	{
+		addForceU = true;
+	}
+
+	if(key == GLFW_KEY_G && action == GLFW_PRESS)
+	{
+		addForceV = true;
+	}
+
+	if(key == GLFW_KEY_H && action == GLFW_PRESS)
+	{
+		addForceW = true;
+	}
+}
+
 double pxpos, pypos;
 bool firstMouse = true;
 void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
@@ -75,6 +95,7 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 	}
 	
 	camera.ProcessCameraMouseInputs(xpos, ypos, pxpos, pypos);
+
 
 	pxpos = xpos;
 	pypos = ypos;
@@ -114,11 +135,13 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
 	
 	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj");
 	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
@@ -152,11 +175,11 @@ int main()
 
 		processInput(window);
 
-		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -8));
+		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -3));
 
 		//fluid.Simulate(timeStep, 0.0f);
 
-		sim_main();
+		sim_main(addForceU, addForceV, addForceW);
 
 		sim_draw();
 
