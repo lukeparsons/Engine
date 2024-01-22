@@ -99,13 +99,13 @@
     <ClCompile Include="src\core\3DGrid\GaussSeidel3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\StableFluids\StableFluids.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\StableFluids\solver3d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\StableFluids\Test.h">
+    <ClCompile Include="src\core\StableFluids\StableFluids.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\StableFluids\Rendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -248,6 +248,12 @@
     <ClInclude Include="src\renderer\Drawable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\StableFluids\Test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\StableFluids\VolumeRendering.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaderfiles\BasicVertex.vertex" />
@@ -256,12 +262,14 @@
     <None Include="src\shaderfiles\fluids\FluidFragment.fragment" />
     <None Include="src\shaderfiles\fluids\FluidVertex.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\BasicFragment.fragment" />
-    <None Include="src\renderer\shaders\shaderfiles\BasicVertex.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidVertex.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\fluids\BoundaryFluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\Line.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\Line.fragment" />
+    <None Include="src\renderer\shaders\shaderfiles\RayMarch.fragment" />
+    <None Include="src\renderer\shaders\shaderfiles\BasicVertex.vertex" />
+    <None Include="src\renderer\shaders\shaderfiles\RayMarch.fragment" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\wall.tga" />

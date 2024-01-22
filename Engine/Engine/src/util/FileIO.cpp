@@ -34,11 +34,11 @@ std::string ReadFile(const std::string path, std::ios_base::openmode openMode)
 		file.read(&buffer[0], length);
 	} catch(const std::ifstream::failure& e)
 	{
-		std::cout << "Error " << e.what() << std::endl;
+		std::cout << "Error opening file " << path << " " << e.what() << std::endl;
 		throw std::ifstream::failure(std::string("Error opening file at path ") + path + " error " + e.what());
 	} catch(std::exception e)
 	{
-		std::cout << "Error " << e.what() << std::endl;
+		std::cout << "Error opening file " << path << " " << e.what() << std::endl;
 	}
 
 	// A file is "bad" (the badbit is set) a error has occured which prevents the stream being read

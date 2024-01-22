@@ -6,8 +6,6 @@
 class LineShader : public ShaderProgram
 {
 protected:
-	unsigned int transformLoc;
-	unsigned int colourLoc;
 	std::array<float, 3> colour = { 0.0f, 0.0f, 0.0f };
 	virtual void init()
 	{
@@ -16,7 +14,8 @@ protected:
 	}
 
 public:
-
+	unsigned int transformLoc;
+	unsigned int colourLoc;
 	LineShader(std::string vertexFile, std::string fragmentFile) : ShaderProgram(vertexFile, fragmentFile) 
 	{
 		init();

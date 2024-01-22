@@ -82,7 +82,7 @@ void Mesh::constructmesh()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 }
 
 Mesh::Mesh(const std::string fileName)
@@ -109,4 +109,9 @@ void Mesh::Draw(const Matrix4f& cameraMatrix, GLuint textureID) const
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
+}
+
+void Mesh::QuickDraw()
+{
+	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 }

@@ -35,6 +35,7 @@ public:
 	Mesh(const Mesh& other);
 
 	virtual void Draw(const Matrix4f& cameraMatrix, GLuint textureID) const override;
+	void QuickDraw();
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 };

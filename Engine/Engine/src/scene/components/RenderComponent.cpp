@@ -38,6 +38,6 @@ void RenderComponent::ChangeTexture(std::shared_ptr<Texture> _texture)
 void RenderComponent::SetColour(std::array<float, 3> colour)
 {
 	glUseProgram(shaderProgram->GetID());
-	shaderProgram->SetColour(colour);
+	//shaderProgram->SetColour(colour);
 	glUseProgram(0);
 }

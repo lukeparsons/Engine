@@ -19,9 +19,9 @@
 #include "../renderer/shaders/BasicShader.h"
 #include "../renderer/shaders/FluidShader.h"
 #include "../renderer/shaders/ShaderStore.h"
-#include "StableFluids/Test.h"
 #include "StableFluids/StableFluids.h"
 #include "../renderer/Line.h"
+#include "StableFluids/VolumeRendering.h"
 
 #define row 24
 #define column 24
@@ -44,9 +44,9 @@ static constexpr float aspectRatio = (float)width / float(height);
 static const Matrix4f projectionMatrix = GetProjectionMatrix(90.0f, 90.0f, aspectRatio);
 Matrix4f cameraMatrix;
 
-static Camera camera(Vector3f(0, 0, 0));
+static Camera camera(Vector3f(0, 0, 5));
 
-static bool addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW = false;
+static bool addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke = false;
 
 ShaderStore g_shaderStore = ShaderStore();
 
@@ -95,6 +95,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (key == GLFW_KEY_B && action == GLFW_PRESS)
 	{
 		negaddForceW = true;
+	}
+
+	if(key == GLFW_KEY_K && action == GLFW_PRESS)
+	{
+		addSmoke = true;
 	}
 }
 
@@ -165,48 +170,55 @@ int main()
 
 	std::shared_ptr<Texture> wallTex = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
-	Scene scene;
+	//Scene scene;
 
-	//StableFluids fluid = StableFluids(row, column, depth, scene, Vector3f(0, 0, 0), 0.0f, 0.01f);
+	StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
 
-
-	double previousFrameTime = 0;
-	float frameTime, uMax = 0;
+	float currentFrameTime = 0;
+	float frameTime = 0.f;
+	unsigned int frameCount = 0;
 	float timeStep = 0.4f;
+
 
 	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 1.0f, 0.f, 0.25f));
 	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 0.25f, 1.f, 0.25f));
 	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 0.25f, 0.f, 1.f));
-
-	initsim(scene);
+	//initsim();
+	//fluid.InitModelRender();
+	InitVolumeRender(column, row, depth, fluid.smoke);
+	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	while(!glfwWindowShouldClose(window))
 	{ 
-
-		double currentFrameTime = glfwGetTime();
+		//currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		processInput(window);
 
-		cameraMatrix = projectionMatrix * camera.GetCameraSpaceMatrix() * GetTranslationMatrix(Vector3f(0, 0, -3));
+		cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 
-		//fluid.Simulate(timeStep, 0.0f);
+		cameraMatrix = projectionMatrix * cameraSpaceMatrix;
 
-		sim_main(addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW);
+		fluid.Simulate(timeStep, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke);
 
-		sim_draw();
+		//fluid.ModelRender(cameraMatrix);
 
-		//fluid.UpdateRender();
+		//sim_main(addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW);
 
-		scene.Update(cameraMatrix);
+		//sim_draw(cameraMatrix);
+
+		//scene.Update(cameraMatrix);
+
+		VolumeRender(cameraMatrix, projectionMatrix, cameraSpaceMatrix, camera, fluid.smoke);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
+		//frameTime = glfwGetTime() - currentFrameTime;
+		//frameCount++;
 	}
-	//std::cout << "Average FPS " << 60 / (frameTime / frameCount);
+	//std::cout << "Average Frametime " << (frameTime / frameCount) << std::endl;
 	glfwTerminate();
 	return 0;
 }

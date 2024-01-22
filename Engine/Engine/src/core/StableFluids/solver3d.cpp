@@ -221,7 +221,7 @@ void dens_step(int M, int N, int O, float* x, float* x0, float* u, float* v, flo
 	SWAP(x0, x); advect(M, N, O, 0, x, x0, u, v, w, dt);
 }
 
-void vel_step(int M, int N, int O, float* u, float* v, float* w, float* u0, float* v0, float* w0, float visc, float dt)
+void vel_step (int M, int N, int O, float* u, float* v, float* w, float* u0, float* v0, float* w0, float visc, float dt)
 {
 	add_source(M, N, O, u, u0, dt); add_source(M, N, O, v, v0, dt); add_source(M, N, O, w, w0, dt);
 	SWAP(u0, u); diffuse(M, N, O, 1, u, u0, visc, dt);

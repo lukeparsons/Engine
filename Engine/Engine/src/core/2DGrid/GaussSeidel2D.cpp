@@ -7,9 +7,9 @@ void Grid2D::GaussSeidel(float timeStep)
 	pressure.fill(0);
 	for(unsigned int iter = 0; iter < 100; iter++) // 100 here is max iterations
 	{
-		for(size_t i = 0; i < column; i++)
+		for(unsigned int i = 0; i < column; i++)
 		{
-			for(size_t j = 0; j < row; j++)
+			for(unsigned int j = 0; j < row; j++)
 			{	
 				if(gridData(i, j).cellState == GridDataPoint2D::FLUID)
 				{

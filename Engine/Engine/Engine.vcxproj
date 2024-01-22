@@ -95,6 +95,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -112,9 +113,11 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>-isystem ext</AdditionalOptions>
-      <AdditionalIncludeDirectories>($ProjectDir)\..\..\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +142,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,10 +160,12 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>-isystem ext</AdditionalOptions>
-      <AdditionalIncludeDirectories>($ProjectDir)\..\..\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\External Libraries\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -179,9 +185,9 @@
     <ClCompile Include="src\core\3DGrid\Grid3D.cpp" />
     <ClCompile Include="src\core\3DGrid\LevelSet.cpp" />
     <ClCompile Include="src\core\3DGrid\PCG.cpp" />
+    <ClCompile Include="src\core\StableFluids\Rendering.cpp" />
     <ClCompile Include="src\core\StableFluids\solver3d.cpp" />
     <ClCompile Include="src\core\StableFluids\StableFluids.cpp" />
-    <ClCompile Include="src\core\StableFluids\Test.h" />
     <ClCompile Include="src\scene\components\FluidComponent.cpp" />
     <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
@@ -213,6 +219,8 @@
     <ClInclude Include="src\core\3DGrid\RowVector.h" />
     <ClInclude Include="src\core\StableFluids\StableFluids.h" />
     <ClInclude Include="src\core\StableFluids\GridStructures.h" />
+    <ClInclude Include="src\core\StableFluids\Test.h" />
+    <ClInclude Include="src\core\StableFluids\VolumeRendering.h" />
     <ClInclude Include="src\math\Matrix.h" />
     <ClInclude Include="src\renderer\Drawable.h" />
     <ClInclude Include="src\renderer\Line.h" />
@@ -260,6 +268,7 @@
     <None Include="src\renderer\shaders\shaderfiles\fluids\FluidVertex.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\Line.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\Line.vertex" />
+    <None Include="src\renderer\shaders\shaderfiles\RayMarch.fragment" />
     <None Include="src\shaderfiles\BasicFragment.fragment" />
     <None Include="src\shaderfiles\BasicVertex.vertex" />
     <None Include="src\shaderfiles\fluids\FluidFragment.fragment" />

@@ -75,7 +75,7 @@ Matrix4f Camera::GetCameraSpaceMatrix()
 
 	N = dir;
 	target = N;
-
+ 
 	U = cross(Vector3f(0, 1, 0), N);
 	normalise(U);
 

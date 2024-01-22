@@ -3,13 +3,14 @@
 #include <glad/glad.h>
 #include "../math/Matrix4f.h"
 #include "Drawable.h"
+#include "shaders/LineShader.h"
+#include "shaders/ShaderStore.h"
 
 class Line : public Drawable
 {
-private:
+public:
 	GLuint VAO, VBO;
 	std::array<float, 6> vertices;
-public:
 
 	Line(float startX, float startY, float startZ, float endX, float endY, float endZ)
 	{

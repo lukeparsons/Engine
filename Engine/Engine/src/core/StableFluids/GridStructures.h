@@ -40,9 +40,11 @@ public:
 	// For coordinates i, j the GridDataPoint for the cell is stored at i + (column + 4) * j
 	std::vector<T> grid;
 
+	#define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k)) 
+
 	GridStructure(T initValue, unsigned int _column, unsigned int _row, unsigned int _depth) : column(_column), row(_row), depth(_depth)
 	{
-		grid = std::vector<T>(row * column * depth);
+		grid = std::vector<T>((row + 2) * (column + 2) * (depth + 2));
 		std::fill(grid.begin(), grid.end(), initValue);
 	}
 
@@ -63,29 +65,22 @@ public:
 
 	virtual void insert(T& dataPoint, unsigned int i, unsigned int j, unsigned int k)
 	{
-		grid[i + column * (j + row * k)] = dataPoint;
+		grid[IX(i, j, k)] = dataPoint;
 	}
 
 	virtual void insert(T&& dataPoint, unsigned int i, unsigned int j, unsigned int k)
 	{
-		grid[i + column * (j + row * k)] = dataPoint;
+		grid[IX(i, j, k)] = dataPoint;
 	}
 
 	virtual inline T& operator()(unsigned int i, unsigned int j, unsigned int k)
 	{
-		return grid[i + column * (j + row * k)];
+		return grid[IX(i, j, k)];
 	}
 
 	virtual inline const T& operator()(unsigned int i, unsigned int j, unsigned int k) const
 	{
-		return grid[i + column * (j + row * k)];
-	}
-
-	void SwapWith(GridStructure<T>& other)
-	{
-		std::vector<T> tempGrid = grid;
-		this->grid = other.grid;
-		other.grid = tempGrid;
+		return grid[IX(i, j, k)];
 	}
 };
 
@@ -119,7 +114,6 @@ public:
 		}
 	}
 
-
 	void initBottomHalo(T val)
 	{
 		for(unsigned int i = 0; i < column + 4; i++)
@@ -133,22 +127,22 @@ public:
 	}
 
 
-	virtual void insert(T& dataPoint, unsigned int i, unsigned int j, unsigned int k) override
+	void insert(T& dataPoint, unsigned int i, unsigned int j, unsigned int k) override
 	{
 		this->grid[(i + 2) + (column + 4) * ((j + 2) + (row + 4) * (k + 2))] = dataPoint;
 	}
 
-	virtual void insert(T&& dataPoint, unsigned int i, unsigned int j, unsigned int k) override
+	void insert(T&& dataPoint, unsigned int i, unsigned int j, unsigned int k) override
 	{
 		this->grid[(i + 2) + (column + 4) * ((j + 2) + (row + 4) * (k + 2))] = dataPoint;
 	}
 
-	virtual inline T& operator()(unsigned int i, unsigned int j, unsigned int k) override
+	inline T& operator()(unsigned int i, unsigned int j, unsigned int k) override
 	{
 		return this->grid[(i + 2) + (column + 4) * ((j + 2) + (row + 4) * (k + 2))];
 	}
 
-	virtual inline const T& operator()(unsigned int i, unsigned int j, unsigned int k) const override
+	inline const T& operator()(unsigned int i, unsigned int j, unsigned int k) const override
 	{
 		return this->grid[(i + 2) + (column + 4) * ((j + 2) + (row + 4) * (k + 2))];
 	}
