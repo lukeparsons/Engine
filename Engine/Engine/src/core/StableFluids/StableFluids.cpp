@@ -6,13 +6,11 @@
 
 void StableFluids::add_source(GridStructure<float>& grid, GridStructure<float>& prevGrid, float timeStep)
 {
-	
 
 	for(int i = 0; i <= column + 1; i++)
 	{
 		for(int j = 0; j <= row + 1; j++)
 		{
-			
 			for(int k = 0; k <= depth + 1; k++)
 			{
 				grid(i, j, k) += timeStep * prevGrid(i, j, k);

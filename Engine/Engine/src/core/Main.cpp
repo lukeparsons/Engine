@@ -172,7 +172,7 @@ int main()
 
 	//Scene scene;
 
-	StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
+	StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0000001f, 0.01f);
 
 	float currentFrameTime = 0;
 	float frameTime = 0.f;
@@ -201,7 +201,7 @@ int main()
 
 		cameraMatrix = projectionMatrix * cameraSpaceMatrix;
 
-		fluid.Simulate(timeStep, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke);
+		fluid.Simulate(timeStep, 0.00001f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke);
 
 		//fluid.ModelRender(cameraMatrix);
 

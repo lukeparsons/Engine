@@ -62,10 +62,5 @@ public:
 	void VelocityRender(Matrix4f& cameraMatrix);
 	void InitModelRender();
 	void ModelRender(Matrix4f& cameraMatrix);
-	
-	inline float colourClamp(float val)
-	{
-		return (std::max(0.0f, val) * 0.01f);
-	}
 
 };
