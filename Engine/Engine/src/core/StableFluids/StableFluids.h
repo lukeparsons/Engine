@@ -48,7 +48,7 @@ public:
 		: row(_row), column(_column), depth(_depth), viscosity(_viscosity), cellWidth(_cellWidth), N(std::max(std::max(column, row), depth))
 	{}
 
-	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke);
+	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke, bool& clear);
 	void add_source(GridStructure<float>& grid, GridStructure<float>& prevGrid, float timeStep);
 	void density_step(GridStructure<float>* grid, GridStructure<float>* prevGrid, float diffRate, float timeStep);
 	void velocity_step(GridStructure<float>* u, GridStructure<float>* v, GridStructure<float>* w, GridStructure<float>* u0, GridStructure<float>* v0, GridStructure<float>* w0, float timeStep);

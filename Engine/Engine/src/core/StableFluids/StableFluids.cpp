@@ -219,7 +219,7 @@ void StableFluids::project(GridStructure<float>& u, GridStructure<float>& v, Gri
 	set_boundary(3, w);
 }
 
-void StableFluids::Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke)
+void StableFluids::Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke, bool& clear)
 {
 	prevUVelocity.fill(0.f);
 	prevVVelocity.fill(0.f);
@@ -228,7 +228,7 @@ void StableFluids::Simulate(float timeStep, float diffRate, bool& addForceU, boo
 
 	if(addForceU)
 	{
-		prevUVelocity(2, row / 2, depth / 2) = 100.f;
+		prevUVelocity(column / 2, 2, depth / 2) = 200.f;
 		addForceU = false;
 	}
 
@@ -264,8 +264,21 @@ void StableFluids::Simulate(float timeStep, float diffRate, bool& addForceU, boo
 
 	if(addSmoke)
 	{
-		prevSmoke(column / 2, 2, depth / 2) = 100.f;
+		prevSmoke(column / 2, 2, depth / 2) = 75.f;
 		addSmoke = false;
+	}
+
+	if(clear)
+	{
+		prevSmoke.fill(0);
+		prevUVelocity.fill(0);
+		prevVVelocity.fill(0);
+		prevWVelocity.fill(0);
+		smoke.fill(0);
+		uVelocity.fill(0);
+		prevVVelocity.fill(0);
+		prevWVelocity.fill(0);
+		clear = false;
 	}
 
 	velocity_step(&uVelocity, &vVelocity, &wVelocity, &prevUVelocity, &prevVVelocity, &prevWVelocity, timeStep);
