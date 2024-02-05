@@ -1,19 +1,13 @@
 #version 330 core
 
 in vec4 VertexPos;
-in vec2 TexCoord;
 out vec4 FragColor;
 
 uniform vec2 WindowSize;
-
 uniform vec3 CameraPos;
-uniform float CameraZTarget;
-uniform mat4 projection;
-uniform mat4 cameraSpace;
+uniform vec3 halfBoxSize;
 
 uniform sampler3D smoke;
-
-uniform vec3 boxSize;
 
 float sdf_cuboid(vec3 pos, vec3 size) 
 {
@@ -24,13 +18,13 @@ float sdf_cuboid(vec3 pos, vec3 size)
 
 float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 {
-	float depth = sdf_cuboid(rayorigin, vec3(1.0, 1.0, 1.0));
+	float depth = sdf_cuboid(rayorigin, halfBoxSize);
 
 	vec3 current_pos = vec3((FragPos.xy + 1.0) / 2.0, (-FragPos.z + 1.0) / 2.0);
 
 	const float MARCH_SIZE = 0.05;
 
-	float res = 0.1;
+	float res = 0.2;
 
 	float hypotenuse = length(vec3(2, 2, 2));
 
@@ -41,7 +35,7 @@ float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 		current_pos = rayorigin + depth * raydir;
 		current_pos = vec3((current_pos.xy + 1.0) / 2.0, (-current_pos.z + 1.0) / 2.0);
 
-		float dist = sdf_cuboid(current_pos, vec3(1.0, 1.0, 1.0));
+		float dist = sdf_cuboid(current_pos, halfBoxSize);
 
 		if(dist < 0.0) {
 			res += texture(smoke, current_pos).r;
@@ -61,5 +55,5 @@ void main()
 	vec3 raydir = normalize(FragPos.xyz - CameraPos);
 
 	float res = ray_march(CameraPos, raydir, FragPos.xyz);
-	FragColor = vec4(0.2, 0.2, 0.2, res);
+	FragColor = vec4(0.6, 0.6, 0.6, res);
 }

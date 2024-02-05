@@ -22,17 +22,11 @@
 #include "StableFluids/StableFluids.h"
 #include "../renderer/Line.h"
 #include "StableFluids/VolumeRendering.h"
+#include "../ui/UIManager.h"
 
 #define row 24
 #define column 24
 #define depth 24
-
-/* Task list TODO:
-* Advection: Fix halo bicubic interpolation
-* Timestep: Add CFL timestep
-* PCG: Check
-* Boundary condition function: Check
-*/
 
 static const int width = 768;
 static const int height = 768;
@@ -47,6 +41,7 @@ Matrix4f cameraMatrix;
 static Camera camera(Vector3f(0, 0, 5));
 
 static bool addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear = false;
+static bool cursorShown = false;
 
 ShaderStore g_shaderStore = ShaderStore();
 
@@ -112,18 +107,30 @@ double pxpos, pypos;
 bool firstMouse = true;
 void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	if (firstMouse)
+	if(firstMouse)
 	{
 		pxpos = xpos;
 		pypos = ypos;
 		firstMouse = false;
 	}
-	
-	camera.ProcessCameraMouseInputs(xpos, ypos, pxpos, pypos);
 
+	if(!cursorShown)
+	{
+		camera.ProcessCameraMouseInputs(xpos, ypos, pxpos, pypos);
 
-	pxpos = xpos;
-	pypos = ypos;
+		pxpos = xpos;
+		pypos = ypos;
+	}
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		cursorShown = !cursorShown;
+		cursorShown ? glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
 }
 
 static const std::shared_ptr<int> h = std::make_shared<int>(10);
@@ -162,11 +169,14 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
+
+
 	
 	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj");
 	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
@@ -177,6 +187,8 @@ int main()
 
 	//Scene scene;
 
+	InitUI(window);
+
 	StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
 
 	float currentFrameTime = 0;
@@ -184,21 +196,18 @@ int main()
 	unsigned int frameCount = 0;
 	float timeStep = 0.4f;
 
-
-	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 1.0f, 0.f, 0.25f));
-	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 0.25f, 1.f, 0.25f));
-	//scene.CreateLine(std::make_shared<Line>(0.25f, 0.f, 0.25f, 0.25f, 0.f, 1.f));
-	//initsim();
-	//fluid.InitModelRender();
-	InitVolumeRender(column, row, depth, fluid.smoke);
+	VolumeRender volRender = VolumeRender(column, row, depth, &fluid.smoke);
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	while(!glfwWindowShouldClose(window))
 	{ 
 		//currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
 
-		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+
+		glClearColor(0.5f, 0.4f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		PrepareFrameUI(fluid, volRender, &timeStep);
 
 		processInput(window);
 
@@ -206,17 +215,13 @@ int main()
 
 		cameraMatrix = projectionMatrix * cameraSpaceMatrix;
 
-		fluid.Simulate(timeStep, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
-
-		//fluid.ModelRender(cameraMatrix);
-
-		//sim_main(addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW);
-
-		//sim_draw(cameraMatrix);
+		fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
 		//scene.Update(cameraMatrix);
 
-		VolumeRender(cameraMatrix, projectionMatrix, cameraSpaceMatrix, camera, fluid.smoke);
+		volRender.RenderVolume(cameraMatrix, camera);
+
+		RenderUI();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -224,6 +229,7 @@ int main()
 		//frameCount++;
 	}
 	//std::cout << "Average Frametime " << (frameTime / frameCount) << std::endl;
+	ShutdownUI();
 	glfwTerminate();
 	return 0;
 }

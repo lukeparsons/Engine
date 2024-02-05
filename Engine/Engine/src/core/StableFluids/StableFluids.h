@@ -15,11 +15,7 @@ class StableFluids
 private:
 	EntityID fluidID;
 
-	unsigned int column, row, depth, N;
-
 	std::shared_ptr<Mesh> cellMesh = std::make_shared<Mesh>("../Engine/assets/box.obj");
-
-	float viscosity;
 
 	std::array<float, 6> vertices = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 
@@ -27,7 +23,9 @@ private:
 
 public:
 	const float cellWidth;
-	float density;
+	float density, viscosity, diffusionRate;
+
+	unsigned int column, row, depth, N;
 
 	GridStructure<float> uVelocity = GridStructure<float>(0.0f, column, row, depth);
 	GridStructure<float> vVelocity = GridStructure<float>(0.0f, column, row, depth);
@@ -48,12 +46,12 @@ public:
 		: row(_row), column(_column), depth(_depth), viscosity(_viscosity), cellWidth(_cellWidth), N(std::max(std::max(column, row), depth))
 	{}
 
-	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke, bool& clear);
+	void Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke, bool& clear);
 	void add_source(GridStructure<float>& grid, GridStructure<float>& prevGrid, float timeStep);
-	void density_step(GridStructure<float>* grid, GridStructure<float>* prevGrid, float diffRate, float timeStep);
+	void density_step(GridStructure<float>* grid, GridStructure<float>* prevGrid, float timeStep);
 	void velocity_step(GridStructure<float>* u, GridStructure<float>* v, GridStructure<float>* w, GridStructure<float>* u0, GridStructure<float>* v0, GridStructure<float>* w0, float timeStep);
 	void advect(int b, GridStructure<float>& grid, GridStructure<float>& prevGrid, GridStructure<float>& u, GridStructure<float>& v, GridStructure<float>& w, float timeStep);
-	void diffuse(int b, GridStructure<float>& grid, GridStructure<float>& prevGrid, float diffRate, float timeStep);
+	void diffuse(int b, GridStructure<float>& grid, GridStructure<float>& prevGrid, float timeStep);
 	void lin_solve(int b, GridStructure<float>& grid, GridStructure<float>& prevGrid, float a, float c);
 	void project(GridStructure<float>& u, GridStructure<float>& v, GridStructure<float>& w, GridStructure<float>& p, GridStructure<float>& div);
 	void set_boundary(int b, GridStructure<float>& grid);

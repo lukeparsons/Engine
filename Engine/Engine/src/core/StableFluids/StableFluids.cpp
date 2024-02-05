@@ -113,9 +113,9 @@ void StableFluids::lin_solve(int b, GridStructure<float>& grid, GridStructure<fl
 	}
 }
 
-void StableFluids::diffuse(int b, GridStructure<float>& grid, GridStructure<float>& prevGrid, float diffRate, float timeStep)
+void StableFluids::diffuse(int b, GridStructure<float>& grid, GridStructure<float>& prevGrid, float timeStep)
 {
-	float scale = timeStep * diffRate * N * N * N;
+	float scale = timeStep * viscosity * N * N * N;
 	lin_solve(b, grid, prevGrid, scale, 1 + 6 * scale);
 }
 
@@ -219,7 +219,7 @@ void StableFluids::project(GridStructure<float>& u, GridStructure<float>& v, Gri
 	set_boundary(3, w);
 }
 
-void StableFluids::Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke, bool& clear)
+void StableFluids::Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negaddForceU, bool& negaddForceV, bool& negaddForceW, bool& addSmoke, bool& clear)
 {
 	prevUVelocity.fill(0.f);
 	prevVVelocity.fill(0.f);
@@ -282,14 +282,14 @@ void StableFluids::Simulate(float timeStep, float diffRate, bool& addForceU, boo
 	}
 
 	velocity_step(&uVelocity, &vVelocity, &wVelocity, &prevUVelocity, &prevVVelocity, &prevWVelocity, timeStep);
-	density_step(&smoke, &prevSmoke, diffRate, timeStep);
+	density_step(&smoke, &prevSmoke, timeStep);
 }
 
-void StableFluids::density_step(GridStructure<float>* grid, GridStructure<float>* prevGrid, float diffRate, float timeStep)
+void StableFluids::density_step(GridStructure<float>* grid, GridStructure<float>* prevGrid, float timeStep)
 {
 	add_source(*grid, *prevGrid, timeStep);
 	SWAP(prevGrid, grid); 
-	diffuse(0, *grid, *prevGrid, diffRate, timeStep);
+	diffuse(0, *grid, *prevGrid, timeStep);
 	SWAP(prevGrid, grid); 
 	advect(0, *grid, *prevGrid, uVelocity, vVelocity, wVelocity, timeStep);
 }
@@ -301,11 +301,11 @@ void StableFluids::velocity_step(GridStructure<float>* u, GridStructure<float>* 
 	add_source(*w, *w0, timeStep);
 
 	SWAP(u0, u); 
-	diffuse(1, *u, *u0, viscosity, timeStep);
+	diffuse(1, *u, *u0, timeStep);
 	SWAP(v0, v); 
-	diffuse(2, *v, *v0, viscosity, timeStep);
+	diffuse(2, *v, *v0, timeStep);
 	SWAP(w0, w); 
-	diffuse(3, *w, *w0, viscosity, timeStep);
+	diffuse(3, *w, *w0, timeStep);
 
 	project(*u, *v, *w, *u0, *v0);
 
