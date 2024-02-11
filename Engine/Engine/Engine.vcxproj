@@ -101,7 +101,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\..\External Libraries\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,7 +125,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\..\External Libraries\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -148,7 +148,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\..\External Libraries\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -173,7 +173,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\..\External Libraries\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -185,9 +185,11 @@
     <ClCompile Include="src\core\3DGrid\Grid3D.cpp" />
     <ClCompile Include="src\core\3DGrid\LevelSet.cpp" />
     <ClCompile Include="src\core\3DGrid\PCG.cpp" />
+    <ClCompile Include="src\core\StableFluids\OpenCLFluids.cpp" />
     <ClCompile Include="src\core\StableFluids\Rendering.cpp" />
     <ClCompile Include="src\core\StableFluids\StableFluids.cpp" />
     <ClCompile Include="src\core\StableFluids\VolumeRendering.cpp" />
+    <ClCompile Include="src\opencl\kernel.cpp" />
     <ClCompile Include="src\scene\components\FluidComponent.cpp" />
     <ClCompile Include="src\scene\components\RenderComponent.cpp" />
     <ClCompile Include="src\scene\objects\WorldObject.cpp" />
@@ -225,10 +227,14 @@
     <ClInclude Include="src\core\3DGrid\Grid3D.h" />
     <ClInclude Include="src\core\3DGrid\GridStructures.h" />
     <ClInclude Include="src\core\3DGrid\RowVector.h" />
+    <ClInclude Include="src\core\StableFluids\OpenCLFluids.h" />
     <ClInclude Include="src\core\StableFluids\StableFluids.h" />
     <ClInclude Include="src\core\StableFluids\GridStructures.h" />
     <ClInclude Include="src\core\StableFluids\VolumeRendering.h" />
     <ClInclude Include="src\math\Matrix.h" />
+    <ClInclude Include="src\opencl\kernel.hpp" />
+    <ClInclude Include="src\opencl\opencl.hpp" />
+    <ClInclude Include="src\opencl\utilities.hpp" />
     <ClInclude Include="src\renderer\Drawable.h" />
     <ClInclude Include="src\renderer\Line.h" />
     <ClInclude Include="src\renderer\shaders\BasicShader.h" />

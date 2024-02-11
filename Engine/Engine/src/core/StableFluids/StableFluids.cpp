@@ -6,7 +6,6 @@
 
 void StableFluids::add_source(GridStructure<float>& grid, GridStructure<float>& prevGrid, float timeStep)
 {
-
 	for(int i = 0; i <= column + 1; i++)
 	{
 		for(int j = 0; j <= row + 1; j++)
@@ -32,7 +31,6 @@ void StableFluids::set_boundary(int b, GridStructure<float>& grid)
 		}
 	}
 
-	
 	for(j = 1; j <= row; j++)
 	{
 		

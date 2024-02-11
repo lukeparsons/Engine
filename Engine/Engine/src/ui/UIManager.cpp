@@ -27,7 +27,9 @@ void PrepareFrameUI(StableFluids& fluid, VolumeRender& volRender, float* timeSte
 	ImGui::SliderFloat("Viscosity", &viscScale, 0.0f, 1.0f);
 	fluid.viscosity = viscScale / 10000;
 
-	ImGui::SliderFloat("Diffusion Rate", &fluid.diffusionRate , 0.0f, 1.0f);
+	float diffScale = fluid.diffusionRate * 1000;
+	ImGui::SliderFloat("Diffusion Rate", &diffScale , 0.0f, 1.0f);
+	fluid.diffusionRate = diffScale / 1000;
 
 	ImGui::SliderFloat3("Box Size", volRender.scale.data(), 1, 10);
 }
