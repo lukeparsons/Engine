@@ -6,8 +6,6 @@ string opencl_c_container()
 
 	#define IX(i,j,k,column,row)((i)+(j)*(column)+(k)*(column)*(row))
 
-
-
 	void lin_solve(const int b, global float* grid, global float* prevGrid, const float a, const float c, const uint column, const uint row)
 	{
 		const uint i = get_global_id(0);
@@ -36,70 +34,61 @@ string opencl_c_container()
 		lin_solve(b, grid, prevGrid, scale, 1 + 6 * scale, column, row);
 	}
 
-	kernel void advect(const int b, global float* grid, global float* prevGrid, global float* u, global float* v, global float* w, const float timeStep)
+	kernel void advect(const int b, global float* grid, global float* prevGrid, global float* u, global float* v, global float* w, const float timeStep,
+		const uint N, const uint column, const uint row, const uint depth)
 	{
-		uint i, j, k, 
-	}
+		const uint i = get_global_id(0);
+		const uint j = get_global_id(1);
+		const uint k = get_global_id(2);
+		uint idx = IX(i, j, k, column, row);
 
-	void StableFluids::advect(int b, GridStructure<float>& grid, GridStructure<float>& prevGrid, GridStructure<float>& u, GridStructure<float>& v, GridStructure<float>& w, float timeStep)
-	{
-		int i, j, k, i0, j0, k0, i1, j1, k1;
-		float x, y, z, s0, t0, s1, t1, u1, u0, dtx, dty, dtz;
+		const float dtx = timeStep * N;
 
-		dtx = dty = dtz = timeStep * N;
-
-		for(i = 1; i <= column; i++)
+		float x = i - dtx * u[idx];
+		float y = j - dtx * v[idx];
+		float z = k - dtx * w[idx];
+		if(x < 0.5f)
 		{
-			for(j = 1; j <= row; j++)
-			{
-				for(k = 1; k <= depth; k++)
-				{
-					x = i - dtx * u(i, j, k);
-					y = j - dty * v(i, j, k);
-					z = k - dtz * w(i, j, k);
-					if(x < 0.5f)
-					{
-						x = 0.5f;
-					}
-					if(x > column + 0.5f)
-					{
-						x = column + 0.5f;
-					}
-					i0 = (int)x;
-					i1 = i0 + 1;
-					if(y < 0.5f)
-					{
-						y = 0.5f;
-					}
-					if(y > row + 0.5f)
-					{
-						y = row + 0.5f;
-					}
-					j0 = (int)y;
-					j1 = j0 + 1;
-					if(z < 0.5f)
-					{
-						z = 0.5f;
-					} if(z > depth + 0.5f)
-					{
-						z = depth + 0.5f;
-					}
-					k0 = (int)z;
-					k1 = k0 + 1;
-
-					s1 = x - i0;
-					s0 = 1 - s1;
-					t1 = y - j0;
-					t0 = 1 - t1;
-					u1 = z - k0;
-					u0 = 1 - u1;
-					grid(i, j, k) = s0 * (t0 * u0 * prevGrid(i0, j0, k0) + t1 * u0 * prevGrid(i0, j1, k0) + t0 * u1 * prevGrid(i0, j0, k1) + t1 * u1 * prevGrid(i0, j1, k1)) +
-						s1 * (t0 * u0 * prevGrid(i1, j0, k0) + t1 * u0 * prevGrid(i1, j1, k0) + t0 * u1 * prevGrid(i1, j0, k1) + t1 * u1 * prevGrid(i1, j1, k1));
-				}
-			}
+			x = 0.5f;
 		}
-		set_boundary(b, grid);
+		if(x > column + 0.5f)
+		{
+			x = column + 0.5f;
+		}
+		int i0 = (int)x;
+		int i1 = i0 + 1;
+		if(y < 0.5f)
+		{
+			y = 0.5f;
+		}
+		if(y > row + 0.5f)
+		{
+			y = row + 0.5f;
+		}
+		int j0 = (int)y;
+		int j1 = j0 + 1;
+		if(z < 0.5f)
+		{
+			z = 0.5f;
+		} if(z > depth + 0.5f)
+		{
+			z = depth + 0.5f;
+		}
+		int k0 = (int)z;
+		int k1 = k0 + 1;
+
+		int s1 = x - i0;
+		int s0 = 1 - s1;
+		int t1 = y - j0;
+		int t0 = 1 - t1;
+		int u1 = z - k0;
+		int u0 = 1 - u1;
+		//grid[idx] = s0 * (t0 * u0 * prevGrid(i0, j0, k0) + t1 * u0 * prevGrid(i0, j1, k0) + t0 * u1 * prevGrid(i0, j0, k1) + t1 * u1 * prevGrid(i0, j1, k1)) +
+			//s1 * (t0 * u0 * prevGrid(i1, j0, k0) + t1 * u0 * prevGrid(i1, j1, k0) + t0 * u1 * prevGrid(i1, j0, k1) + t1 * u1 * prevGrid(i1, j1, k1));
+
+		// set_boundary after
 	}
+
 
 
 	kernel void add_source(global float* grid, global float* prevGrid, const float timeStep, const uint column, const uint row)

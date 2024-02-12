@@ -33,7 +33,6 @@ void StableFluids::set_boundary(int b, GridStructure<float>& grid)
 
 	for(j = 1; j <= row; j++)
 	{
-		
 		for(k = 1; k <= depth; k++)
 		{
 			grid(0, j, k) = b == 1 ? -grid(1, j, k) : grid(1, j, k);
@@ -44,7 +43,6 @@ void StableFluids::set_boundary(int b, GridStructure<float>& grid)
 	
 	for(i = 1; i <= column; i++)
 	{
-		
 		for(k = 1; k <= depth; k++)
 		{
 			grid(i, 0, k) = b == 2 ? -grid(i, 1, k) : grid(i, 1, k);
