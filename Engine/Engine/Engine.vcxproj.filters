@@ -132,10 +132,10 @@
     <ClCompile Include="src\core\StableFluids\VolumeRendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\opencl\kernel.cpp">
+    <ClCompile Include="src\core\StableFluids\OpenCL\OpenCLFluids.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\StableFluids\OpenCLFluids.cpp">
+    <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -317,7 +317,7 @@
     <ClInclude Include="src\opencl\utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\StableFluids\OpenCLFluids.h">
+    <ClInclude Include="src\core\StableFluids\OpenCL\OpenCLFluids.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

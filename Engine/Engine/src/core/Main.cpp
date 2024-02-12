@@ -23,7 +23,7 @@
 #include "../renderer/Line.h"
 #include "StableFluids/VolumeRendering.h"
 #include "../ui/UIManager.h"
-#include "StableFluids/OpenCLFluids.h"
+#include "StableFluids/OpenCL/OpenCLFluids.h"
 
 #define row 24
 #define column 24
@@ -141,13 +141,15 @@ static const std::shared_ptr<int> m = std::make_shared<int>(20);
 int main()
 {
 
+	initsim(column, row, depth);
+
+	return 0;
+
 	glfwInit();
 	// opengl 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	test();
 
 	// TODO: Should throw an exception, not maybe
 	Maybe<GLFWwindow*> maybeWindow = ConstructWindow(width, height, "Engine");
