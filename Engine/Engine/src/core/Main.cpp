@@ -141,10 +141,6 @@ static const std::shared_ptr<int> m = std::make_shared<int>(20);
 int main()
 {
 
-	initsim(column, row, depth);
-
-	return 0;
-
 	glfwInit();
 	// opengl 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -192,16 +188,17 @@ int main()
 
 	//Scene scene;
 
-	InitUI(window);
+	//InitUI(window);
 
-	StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
+	//StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
+	OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
 
 	float currentFrameTime = 0;
 	float frameTime = 0.f;
 	unsigned int frameCount = 0;
 	float timeStep = 0.4f;
 
-	VolumeRender volRender = VolumeRender(column, row, depth, &fluid.smoke);
+	VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke->data());
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	while(!glfwWindowShouldClose(window))
 	{ 
@@ -212,7 +209,7 @@ int main()
 		glClearColor(0.5f, 0.4f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		PrepareFrameUI(fluid, volRender, &timeStep);
+		//PrepareFrameUI(fluid, volRender, &timeStep);
 
 		processInput(window);
 
@@ -220,13 +217,15 @@ int main()
 
 		cameraMatrix = projectionMatrix * cameraSpaceMatrix;
 
-		fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
+		//fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
+
+		openCLfluid.Simulate();
 
 		//scene.Update(cameraMatrix);
 
 		volRender.RenderVolume(cameraMatrix, camera);
 
-		RenderUI();
+		//RenderUI();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -234,7 +233,7 @@ int main()
 		//frameCount++;
 	}
 	//std::cout << "Average Frametime " << (frameTime / frameCount) << std::endl;
-	ShutdownUI();
+	//ShutdownUI();
 	glfwTerminate();
 	return 0;
 }

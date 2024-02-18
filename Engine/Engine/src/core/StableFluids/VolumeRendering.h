@@ -39,11 +39,11 @@ struct VolumeRender
 	int column, row, depth;
 	std::shared_ptr<Mesh> rect;
 	GLuint textureID;
-	GridStructure<float>* smoke;
+	const float* smoke;
 	std::array<float, 3> scale = { 1, 1, 1 };
 	std::shared_ptr<VolumeShader> volShader;
 
-	VolumeRender(int _column, int _row, int _depth, GridStructure<float>* _smoke) : column(_column + 2), row(_row + 2), depth(_depth + 2), smoke(_smoke)
+	VolumeRender(int _column, int _row, int _depth, const float* _smoke) : column(_column + 2), row(_row + 2), depth(_depth + 2), smoke(_smoke)
 	{
 		rect = std::make_shared<Mesh>("../Engine/assets/box.obj");
 		volShader = g_shaderStore.LoadShader<VolumeShader>("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex", "../Engine/src/renderer/shaders/shaderfiles/RayMarch.fragment");
@@ -59,7 +59,7 @@ struct VolumeRender
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, column, row, depth, 0, GL_RED, GL_FLOAT, smoke->grid.data());
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, column, row, depth, 0, GL_RED, GL_FLOAT, smoke);
 	}
 
 	void RenderVolume(Matrix4f& cameraMatrix, Camera& camera);
