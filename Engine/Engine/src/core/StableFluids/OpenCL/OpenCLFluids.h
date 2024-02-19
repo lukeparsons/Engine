@@ -1,5 +1,6 @@
 #pragma once
 #include "../../../opencl/opencl.hpp"
+#include "../../../renderer/shaders/LineShader.h"
 
 class OpenCLFluids
 {
@@ -10,95 +11,66 @@ private:
 
 	void set_boundary(int b, Memory<float>& grid);
 
-	Kernel uAddSource, vAddSource, wAddSource, smokeAddSource;
-	Kernel project1, project2, linsolve;
-	Kernel smokeLinSolve, uLinSolve, vLinSolve, wLinSolve, projectLinSolve;
-	Kernel uAdvect, vAdvect, wAdvect, smokeAdvect;
+	Kernel addSource, project1, linsolve, project2, advect;
 
-	Memory<float>* uVelocity;
-	Memory<float>* vVelocity;
-	Memory<float>* wVelocity;
-	Memory<float>* prevUVelocity;
-	Memory<float>* prevVVelocity;
-	Memory<float>* prevWVelocity;
-	Memory<float>* prevSmoke;
+	Memory<float> uVelocity;
+	Memory<float> vVelocity;
+	Memory<float> wVelocity;
+	Memory<float> prevUVelocity;
+	Memory<float> prevVVelocity;
+	Memory<float> prevWVelocity;
+	Memory<float> prevSmoke;
 
-	inline void read(Memory<float>* grid, unsigned int column, unsigned int row, unsigned int depth)
+	float scale;
+
+	inline void read(Memory<float>& grid, unsigned int column, unsigned int row, unsigned int depth)
 	{
-		grid->read_from_device_3d(0, column, 0, row, 0, depth, column, row, depth);
+		grid.read_from_device_3d(0, column, 0, row, 0, depth, column, row, depth);
 	}
 
-	inline void read(std::initializer_list<Memory<float>*> list, unsigned int column, unsigned int row, unsigned int depth)
+	inline void write(Memory<float>& grid, unsigned int column, unsigned int row, unsigned int depth)
 	{
-		for(std::initializer_list<Memory<float>*>::reference elem : list)
-		{
-			elem->read_from_device_3d(0, column, 0, row, 0, depth, column, row, depth);
-		}
+		grid.write_to_device_3d(0, column, 0, row, 0, depth, column, row, depth);
 	}
 
-	inline void write(Memory<float>* grid, unsigned int column, unsigned int row, unsigned int depth)
-	{
-		grid->write_to_device_3d(0, column, 0, row, 0, depth, column, row, depth);
-	}
-
-	inline void write(std::initializer_list<Memory<float>*> list, unsigned int column, unsigned int row, unsigned int depth)
-	{
-		for(std::initializer_list<Memory<float>*>::reference elem : list)
-		{
-			elem->write_to_device_3d(0, column, 0, row, 0, depth, column, row, depth);
-		}
-	}
-
-	inline void read_all(Memory<float>* grid)
+	inline void read_all(Memory<float>& grid)
 	{
 		read(grid, column + 2, row + 2, depth + 2);
 	}
 
-	inline void read_all(std::initializer_list<Memory<float>*> list)
-	{
-		read(list, column + 2, row + 2, depth + 2);
-	}
-
-	inline void write_all(Memory<float>* grid)
+	inline void write_all(Memory<float>& grid)
 	{
 		write(grid, column + 2, row + 2, depth + 2);
 	}
 
-	inline void write_all(std::initializer_list<Memory<float>*> list)
+	inline void write_centre(Memory<float>& grid)
 	{
-		write(list, column + 2, row + 2, depth + 2);
+		grid.write_to_device_3d(0, column, 0, row, 0, depth, column, row, depth);
 	}
 
-	inline void write_centre(Memory<float>* grid)
+	inline void read_centre(Memory<float>& grid)
 	{
-		grid->write_to_device_3d(0, column, 0, row, 0, depth, column, row, depth);
+		grid.read_from_device_3d(0, column, 0, row, 0, depth, column, row, depth);
 	}
 
-	inline void write_centre(std::initializer_list<Memory<float>*> list)
-	{
-		write(list, column, row, depth);
-	}
+	void project(Memory<float>* u, Memory<float>* v, Memory<float>* w, Memory<float>* u0, Memory<float>* v0);
+	void lin_solve(const int b, Memory<float>& grid);
 
-	inline void read_centre(Memory<float>* grid)
-	{
-		grid->read_from_device_3d(0, column, 0, row, 0, depth, column, row, depth);
-	}
+	void density_step(float timeStep, float diffRate);
+	void velocity_step(float timeStep);
 
-	inline void read_centre(std::initializer_list<Memory<float>*> list)
-	{
-		read(list, column, row, depth);
-	}
+	std::shared_ptr<LineShader> lineShader;
+	GLuint VAO, VBO, textureID;
 
-	void project();
-	void lin_solve(const int b, Kernel& kernel_linsolve, Memory<float>* grid);
-
-	void density_step();
-	void velocity_step();
+	std::array<float, 6> vertices = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 
 public:
-	Memory<float>* smoke;
+	Memory<float> smoke;
 
 	OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth);
 
-	void Simulate();
+	void Simulate(float timeStep, float diffRate, bool& addForceV, bool& addSmoke);
+
+	void InitVelocityRender();
+	void VelocityRender(Matrix4f& cameraMatrix);
 };

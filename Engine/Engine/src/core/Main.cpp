@@ -24,6 +24,7 @@
 #include "StableFluids/VolumeRendering.h"
 #include "../ui/UIManager.h"
 #include "StableFluids/OpenCL/OpenCLFluids.h"
+#include "StableFluids/OpenCL/Test.h"
 
 #define row 24
 #define column 24
@@ -192,13 +193,14 @@ int main()
 
 	//StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
 	OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
+	openCLfluid.InitVelocityRender();
 
 	float currentFrameTime = 0;
 	float frameTime = 0.f;
 	unsigned int frameCount = 0;
 	float timeStep = 0.4f;
 
-	VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke->data());
+	//VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data());
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	while(!glfwWindowShouldClose(window))
 	{ 
@@ -219,11 +221,14 @@ int main()
 
 		//fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
-		openCLfluid.Simulate();
+		openCLfluid.Simulate(0.4f, 0.0f, addForceV, addSmoke);
 
 		//scene.Update(cameraMatrix);
 
-		volRender.RenderVolume(cameraMatrix, camera);
+		openCLfluid.VelocityRender(cameraMatrix);
+
+		//volRender.RenderVolume(cameraMatrix, camera);
+		//openCLfluid.VelocityRender(cameraMatrix);
 
 		//RenderUI();
 

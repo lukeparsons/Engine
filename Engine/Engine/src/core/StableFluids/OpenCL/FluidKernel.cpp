@@ -4,29 +4,7 @@ string opencl_c_container()
 {
 	return R( // ########################## begin of OpenCL C code ####################################################################
 
-	#define IX(i,j,k,column,row)((i)+(j)*(column)+(k)*(column)*(row))
-
-	kernel void lin_solve(global float* grid, global float* prevGrid, const float a, const float c, const uint column, const uint row)
-	{
-		const uint i = get_global_id(0);
-		const uint j = get_global_id(1);
-		const uint k = get_global_id(2);
-		uint idx = IX(i, j, k, column, row);
-
-		uint left = idx - 1;
-		uint right = idx + 1;
-		uint up = idx + row;
-		uint down = idx - row;
-		uint behind = idx + column * row;
-		uint infront = idx - column * row;
-
-		const float invC = 1.0f / c;
-
-		grid[idx] = (prevGrid[idx] + a *
-			(grid[left] + grid[right]
-			+ grid[down] + grid[up]
-			+ grid[behind] + grid[infront])) * invC;
-	}
+	#define IX(i,j,k,column,row)((i)+(column)*(j)+(column)*(row)*(k))
 
 	kernel void advect(global float* grid, global float* prevGrid, global float* u, global float* v, global float* w, const float timeStep,
 		const uint N, const uint column, const uint row, const uint depth)
@@ -34,6 +12,12 @@ string opencl_c_container()
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);
+
+		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row)
+		{
+			return;
+		}
+
 		uint idx = IX(i, j, k, column, row);
 
 		const float dtx = timeStep * N;
@@ -84,12 +68,43 @@ string opencl_c_container()
 
 	}
 
+	kernel void lin_solve(global float* grid, global float* prevGrid, const float a, const float c, const uint column, const uint row)
+	{
+		const uint i = get_global_id(0);
+		const uint j = get_global_id(1);
+		const uint k = get_global_id(2);
+		uint idx = IX(i, j, k, column, row);
+
+		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row) // TODO: change to depth
+		{
+			return;
+		}
+
+		uint left = idx - 1;
+		uint right = idx + 1;
+		uint up = idx + row;
+		uint down = idx - row;
+		uint behind = idx + column * row;
+		uint infront = idx - column * row;
+
+		grid[idx] = (prevGrid[idx] + a *
+			(grid[left] + grid[right]
+				+ grid[down] + grid[up]
+				+ grid[behind] + grid[infront])) / c;
+	}
+
 	kernel void project1(global float* u, global float* v, global float* w, global float* p, global float* div, const uint N, const uint column, const uint row)
 	{
 		const float h = 1.0f / N;
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);
+
+		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row)
+		{
+			return;
+		}
+
 		uint idx = IX(i, j, k, column, row);
 
 		uint left = idx - 1;
@@ -108,6 +123,12 @@ string opencl_c_container()
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);
+
+		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row)
+		{
+			return;
+		}
+
 		uint idx = IX(i, j, k, column, row);
 
 		uint left = idx - 1;
@@ -127,14 +148,7 @@ string opencl_c_container()
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);
-		uint idx = IX(i, j, k, column, row);
-
-		uint left = idx - 1;
-		uint right = idx + 1;
-		uint up = idx + row;
-		uint down = idx - row;
-		uint behind = idx + column * row;
-		uint infront = idx - column * row;
+		uint idx = IX(i, j, k, column + 2, row + 2);
 
 		grid[idx] += timeStep * prevGrid[idx];
 	}

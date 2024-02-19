@@ -459,6 +459,44 @@ public:
 	inline const cl::Buffer& get_cl_buffer() const { return device_buffer; }
 };
 
+class Image3D
+{
+private:
+	cl::Image3D image;
+	float* host_buffer;
+	cl::CommandQueue cl_queue;
+public:
+	inline Image3D(Device& device, cl::ImageFormat format, uint width, uint height, uint depth)
+	{
+		if(!device.is_initialized()) print_error("No Device selected. Call Device constructor.");
+		this->cl_queue = device.get_cl_queue();
+		cl_int err;
+		image = cl::Image3D(device.get_cl_context(), CL_MEM_READ_WRITE, format, width, height, depth, 0Ui64, 0Ui64, nullptr, &err);
+		if(err) print_error("Error creating image");
+		host_buffer = new float[width * height * depth];
+	}
+
+	inline Image3D() {};
+
+	inline void write_to_device(const cl::size_t<3> region, const cl::size_t<3> origin = cl::size_t<3>())
+	{
+		cl_queue.enqueueWriteImage(image, true, origin, region, 0, 0, host_buffer);
+	}
+
+	inline void read_from_device(const cl::size_t<3> region, const cl::size_t<3> origin = cl::size_t<3>())
+	{
+		cl_queue.enqueueReadImage(image, true, origin, region, 0, 0, host_buffer);
+	}
+
+	inline ~Image3D()
+	{
+		delete host_buffer;
+	}
+
+	inline float& operator[](const ulong i) { return host_buffer[i]; }
+	inline const float& operator[](const ulong i) const { return host_buffer[i]; }
+};
+
 class Kernel {
 private:
 	ulong N = 0ull; // kernel range

@@ -138,6 +138,9 @@
     <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\StableFluids\OpenCL\RenderingCL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\util\FileIO.h">
@@ -318,6 +321,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\StableFluids\OpenCL\OpenCLFluids.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\StableFluids\OpenCL\Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

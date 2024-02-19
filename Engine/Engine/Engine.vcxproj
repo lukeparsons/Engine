@@ -187,6 +187,7 @@
     <ClCompile Include="src\core\3DGrid\PCG.cpp" />
     <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernel.cpp" />
     <ClCompile Include="src\core\StableFluids\OpenCL\OpenCLFluids.cpp" />
+    <ClCompile Include="src\core\StableFluids\OpenCL\RenderingCL.cpp" />
     <ClCompile Include="src\core\StableFluids\Rendering.cpp" />
     <ClCompile Include="src\core\StableFluids\StableFluids.cpp" />
     <ClCompile Include="src\core\StableFluids\VolumeRendering.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="src\core\3DGrid\GridStructures.h" />
     <ClInclude Include="src\core\3DGrid\RowVector.h" />
     <ClInclude Include="src\core\StableFluids\OpenCL\OpenCLFluids.h" />
+    <ClInclude Include="src\core\StableFluids\OpenCL\Test.h" />
     <ClInclude Include="src\core\StableFluids\StableFluids.h" />
     <ClInclude Include="src\core\StableFluids\GridStructures.h" />
     <ClInclude Include="src\core\StableFluids\VolumeRendering.h" />
