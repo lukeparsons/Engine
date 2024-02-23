@@ -119,7 +119,6 @@ void OpenCLFluids::density_step(const float timeStep, const float diffRate)
 	addSource.set_parameters(0, smoke, prevSmoke, timeStep);
 	addSource.run();
 	//SWAP(prevSmoke, smoke);
-	smoke.read_from_device();
 
 	linsolve.set_parameters(0, prevSmoke, smoke, scale, (float)(1.0f + 6.0f * scale));
 	lin_solve(0, prevSmoke);
@@ -143,10 +142,6 @@ void OpenCLFluids::velocity_step(float timeStep)
 	addSource.run();
 	addSource.set_parameters(0, wVelocity, prevWVelocity, timeStep);
 	addSource.run();
-
-	uVelocity.read_from_device();
-	vVelocity.read_from_device();
-	wVelocity.read_from_device(); 
 
 	// diffuse
 	//SWAP(prevUVelocity, uVelocity);
@@ -213,7 +208,6 @@ void OpenCLFluids::project(Memory<float>* u, Memory<float>* v, Memory<float>* w,
 	u->read_from_device();
 	v->read_from_device();
 	w->read_from_device();
-
 	set_boundary(1, *u);
 	set_boundary(2, *v);
 	set_boundary(3, *w);
