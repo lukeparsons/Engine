@@ -2,7 +2,7 @@
 #include <array>
 #include <iostream>
 
-#define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k))
+#define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k)) 
 
 #define SWAP(x0, x) {Memory<float>* tmp = x0; x0 = x; x = tmp;}
 
@@ -47,14 +47,14 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 
 	const uint workgroup_size = 64u;
 
-	addSource = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "add_source", smoke, prevSmoke, timeStep, column + 2u, row + 2u), column + 2u, row + 2u, depth + 2u);
+	addSource = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "add_source", smoke, prevSmoke, timeStep, column, row), column + 2u, row + 2u, depth + 2u);
 
 	linsolve = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "lin_solve", smoke, prevSmoke, scale, (float)(1 + 6 * scale), column, row), column + 2u, row + 2u, depth + 2u);
 
 	project1 = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "project1", uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity, N, column, row), column + 2u, row + 2u, depth + 2u);
 	project2 = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "project2", uVelocity, vVelocity, wVelocity, prevUVelocity, N, column, row), column + 2u, row + 2u, depth + 2u);
 
-	advect = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "advect", smoke, prevSmoke, uVelocity, vVelocity, wVelocity, timeStep, N, column, row, depth), column + 2u, row + 2u, depth + 2u);
+	advect = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "advect", smoke, prevSmoke, prevUVelocity, prevVVelocity, prevWVelocity, timeStep, N, column, row, depth), column + 2u, row + 2u, depth + 2u);
 
 	// initialize memory
 	for(uint n = 0u; n < grid_size; n++)
@@ -109,16 +109,6 @@ void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceV, boo
 	prevSmoke.write_to_device();
 
 	velocity_step(timeStep);
-
-	for(uint n = 0u; n < (column + 2) * (row + 2) * (depth + 2); n++)
-	{
-		float b = smoke[n];
-		if(b != 0.0f)
-		{
-			//std::cout << b << std::endl;
-		}
-
-	}
 	density_step(timeStep, diffRate);
 }
 
@@ -140,7 +130,6 @@ void OpenCLFluids::density_step(const float timeStep, const float diffRate)
 	smoke.read_from_device();
 	set_boundary(0, smoke);
 	smoke.write_to_device();
-
 }
 
 void OpenCLFluids::velocity_step(float timeStep)
@@ -150,19 +139,19 @@ void OpenCLFluids::velocity_step(float timeStep)
 	// TODO: non-in-order enqueue for speed up
 	addSource.set_parameters(0, uVelocity, prevUVelocity, timeStep);
 	addSource.run();
-	addSource.set_parameters(0, vVelocity, prevVVelocity);
+	addSource.set_parameters(0, vVelocity, prevVVelocity, timeStep);
 	addSource.run();
-	addSource.set_parameters(0, wVelocity, prevWVelocity);
+	addSource.set_parameters(0, wVelocity, prevWVelocity, timeStep);
 	addSource.run();
+
+	uVelocity.read_from_device();
+	vVelocity.read_from_device();
+	wVelocity.read_from_device(); 
 
 	// diffuse
 	//SWAP(prevUVelocity, uVelocity);
 	//SWAP(prevVVelocity, vVelocity);
 	//SWAP(prevWVelocity, wVelocity);
-
-	uVelocity.read_from_device();
-	vVelocity.read_from_device();
-	wVelocity.read_from_device();
 
 	linsolve.set_parameters(0, prevUVelocity, uVelocity, scale, (float)(1.0f + 6.0f * scale));
 	lin_solve(1, prevUVelocity);
@@ -179,7 +168,7 @@ void OpenCLFluids::velocity_step(float timeStep)
 	//SWAP(prevVVelocity, vVelocity);
 	//SWAP(prevWVelocity, wVelocity);
 
-	// TODO: only update timestep
+	// TODO: only update timestep and dont need to run sequentially
 	advect.set_parameters(0, uVelocity, prevUVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep);
 	advect.run();
 	uVelocity.read_from_device();
@@ -199,25 +188,26 @@ void OpenCLFluids::velocity_step(float timeStep)
 	wVelocity.write_to_device();
 
 	project(&uVelocity, &vVelocity, &wVelocity, &prevUVelocity, &prevVVelocity);
+
 }
 
-void OpenCLFluids::project(Memory<float>* u, Memory<float>* v, Memory<float>* w, Memory<float>* u0, Memory<float>* v0)
+// TODO remove pointers
+void OpenCLFluids::project(Memory<float>* u, Memory<float>* v, Memory<float>* w, Memory<float>* p, Memory<float>* div)
 {
-
-	project1.set_parameters(0, *u, *v, *w, *u0, *v0);
+	project1.set_parameters(0, *u, *v, *w, *p, *div);
 	project1.run();
 
-	u0->read_from_device();
-	v0->read_from_device();
-	set_boundary(0, *u0);
-	set_boundary(0, *v0);
-	u0->write_to_device();
-	v0->write_to_device();
+	p->read_from_device();
+	div->read_from_device();
+	set_boundary(0, *div);
+	set_boundary(0, *p);
+	p->write_to_device();
+	div->write_to_device();
 
-	linsolve.set_parameters(0, *u0, *v0, 1.0f, 6.0f);
-	lin_solve(0, *u0);
+	linsolve.set_parameters(0, *p, *div, 1.0f, 6.0f);
+	lin_solve(0, *p);
 
-	project2.set_parameters(0, *u, *v, *w, *u0);
+	project2.set_parameters(0, *u, *v, *w, *p);
 	project2.run();
 
 	u->read_from_device();
@@ -230,7 +220,7 @@ void OpenCLFluids::project(Memory<float>* u, Memory<float>* v, Memory<float>* w,
 	u->write_to_device();
 	v->write_to_device();
 	w->write_to_device();
-}
+} 
 
 void OpenCLFluids::lin_solve(const int b, Memory<float>& grid)
 {
@@ -242,28 +232,6 @@ void OpenCLFluids::lin_solve(const int b, Memory<float>& grid)
 		grid.write_to_device();
 	}
 }
-
-/*void OpenCLFluids::lin_solve(const int b, Memory<float>& grid, Memory<float>& prevGrid, float a, float c)
-{
-	c = 1.0f / c;
-
-	for(int t = 0; t < MAX_ITERATIONS; t++)
-	{
-		for(int i = 1; i <= column; i++)
-		{
-			for(int j = 1; j <= row; j++)
-			{
-				for(int k = 1; k <= depth; k++)
-				{
-					grid[IX(i, j, k)] = (prevGrid[IX(i, j, k)] + a * (grid[IX(i - 1, j, k)] + grid[IX(i + 1, j, k)]
-						+ grid[IX(i, j - 1, k)] + grid[IX(i, j + 1, k)]
-						+ grid[IX(i, j, k - 1)] + grid[IX(i, j, k + 1)])) * c;
-				}
-			}
-		}
-		set_boundary(b, grid);
-	}
-} */
 
 void OpenCLFluids::set_boundary(int b, Memory<float>& grid)
 {

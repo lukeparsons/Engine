@@ -178,8 +178,6 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-
-	
 	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj");
 	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
 
@@ -193,14 +191,14 @@ int main()
 
 	//StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
 	OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
-	openCLfluid.InitVelocityRender();
+	//openCLfluid.InitVelocityRender();
 
 	float currentFrameTime = 0;
 	float frameTime = 0.f;
 	unsigned int frameCount = 0;
 	float timeStep = 0.4f;
 
-	//VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data());
+	VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data());
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	while(!glfwWindowShouldClose(window))
 	{ 
@@ -225,10 +223,9 @@ int main()
 
 		//scene.Update(cameraMatrix);
 
-		openCLfluid.VelocityRender(cameraMatrix);
-
-		//volRender.RenderVolume(cameraMatrix, camera);
 		//openCLfluid.VelocityRender(cameraMatrix);
+
+		volRender.RenderVolume(cameraMatrix, camera);
 
 		//RenderUI();
 
