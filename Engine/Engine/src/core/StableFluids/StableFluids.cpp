@@ -272,8 +272,8 @@ void StableFluids::Simulate(float timeStep, bool& addForceU, bool& addForceV, bo
 		prevWVelocity.fill(0);
 		smoke.fill(0);
 		uVelocity.fill(0);
-		prevVVelocity.fill(0);
-		prevWVelocity.fill(0);
+		vVelocity.fill(0);
+		wVelocity.fill(0);
 		clear = false;
 	}
 

@@ -70,7 +70,7 @@ public:
 
 	OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth);
 
-	void Simulate(float timeStep, float diffRate, bool& addForceV, bool& addSmoke);
+	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear);
 
 	void InitVelocityRender();
 	void VelocityRender(Matrix4f& cameraMatrix);

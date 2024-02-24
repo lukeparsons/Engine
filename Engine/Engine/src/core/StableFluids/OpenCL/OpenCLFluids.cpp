@@ -48,9 +48,6 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 	smoke = Memory<float>(device, grid_size, 3);
 	prevSmoke = Memory<float>(device, grid_size, 3);
 
-	//imageRegion[0] = column + 2; imageRegion[1] = row + 2; imageRegion[2] = depth + 2;
-	//outputImage = Image3D(device, cl::ImageFormat(CL_R, CL_RGB), column + 2, column + 2, column + 2);
-
 	const float timeStep = 0.4f;
 	viscosity = 0.0f;
 
@@ -99,9 +96,10 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 	//wait();
 }
 
-void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceV, bool& addSmoke)
+void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear)
 {
 
+	// TODO: in kernel?
 	for(uint n = 0u; n < (column + 2) * (row + 2) * (depth + 2); n++)
 	{
 		prevUVelocity[n] = 0.0f;
@@ -110,16 +108,75 @@ void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceV, boo
 		prevSmoke[n] = 0.0f;
 	}
 
+	const float vel = 400.0f;
+
 	if(addForceV)
 	{
-		prevVVelocity[IX(column / 2, 2, depth / 2)] = 400.f;
+		prevVVelocity[IX(column / 2, 2, depth / 2)] = vel;
 		addForceV = false;
+	}
+
+	if(addForceU)
+	{
+		prevUVelocity[IX(column / 2, 2, depth / 2)] = vel;
+		addForceU = false;
+	}
+
+	if(addForceV)
+	{
+		prevVVelocity[IX(column / 2, 2, depth / 2)] = vel;
+		addForceV = false;
+	}
+
+	if(addForceW)
+	{
+		prevWVelocity[IX(column / 2, row / 2, 2)] = vel;
+		addForceW = false;
+	}
+
+	if(negAddForceU)
+	{
+		prevUVelocity[IX(column - 2, row / 2, depth / 2)] = -vel;
+		negAddForceU = false;
+	}
+
+	if(negAddForceV)
+	{
+		prevVVelocity[IX(column / 2, row - 2, depth / 2)] = -vel;
+		negAddForceV = false;
+	}
+
+	if(negAddForceW)
+	{
+		prevWVelocity[IX(column / 2, row / 2, depth - 2)] = -vel;
+		negAddForceW = false;
 	}
 
 	if(addSmoke)
 	{
 		prevSmoke[IX(column / 2, 2, depth / 2)] = 400.f;
 		addSmoke = false;
+	}
+
+	if(clear)
+	{
+		// TODO: in kernel?
+		for(uint n = 0u; n < (column + 2) * (row + 2) * (depth + 2); n++)
+		{
+			prevUVelocity[n] = 0.0f;
+			prevVVelocity[n] = 0.0f;
+			prevWVelocity[n] = 0.0f;
+			prevSmoke[n] = 0.0f;
+			smoke[n] = 0.0f;
+			uVelocity[n] = 0.0f;
+			vVelocity[n] = 0.0f;
+			wVelocity[n] = 0.0f;
+		}
+		uVelocity.write_to_device();
+		vVelocity.write_to_device();
+		wVelocity.write_to_device();
+		smoke.write_to_device();
+		clear = false;
 	}
 
 	prevUVelocity.write_to_device();

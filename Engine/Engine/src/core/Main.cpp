@@ -219,7 +219,7 @@ int main()
 
 		//fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
-		openCLfluid.Simulate(0.4f, 0.0f, addForceV, addSmoke);
+		openCLfluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
 		//scene.Update(cameraMatrix);
 
