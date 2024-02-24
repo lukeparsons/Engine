@@ -13,11 +13,6 @@ string opencl_c_container()
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);
 
-		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row)
-		{
-			return;
-		}
-
 		uint idx = IX(i, j, k, column, row);
 
 		const float dtx = timeStep * N;
@@ -78,11 +73,6 @@ string opencl_c_container()
 		const uint k = get_global_id(2);
 		uint idx = IX(i, j, k, column, row);
 
-		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row) // TODO: change to depth
-		{
-			return;
-		}
-
 		uint left = idx - 1;
 		uint right = idx + 1;
 		uint up = IX(i, j + 1, k, column, row);
@@ -103,11 +93,6 @@ string opencl_c_container()
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);
 
-		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row)
-		{
-			return;
-		}
-
 		uint idx = IX(i, j, k, column, row);
 
 		uint left = idx - 1;
@@ -126,11 +111,6 @@ string opencl_c_container()
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);
-
-		if(i == 0 || j == 0 || k == 0 || i > column || j > row || k > row)
-		{
-			return;
-		}
 
 		uint idx = IX(i, j, k, column, row);
 
