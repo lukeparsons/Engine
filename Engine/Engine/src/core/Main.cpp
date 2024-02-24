@@ -26,9 +26,9 @@
 #include "StableFluids/OpenCL/OpenCLFluids.h"
 #include "StableFluids/OpenCL/Test.h"
 
-#define row 24
-#define column 24
-#define depth 24
+#define row 80
+#define column 80
+#define depth 80
 
 static const int width = 768;
 static const int height = 768;

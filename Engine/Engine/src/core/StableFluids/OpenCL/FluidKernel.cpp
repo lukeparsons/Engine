@@ -156,5 +156,83 @@ string opencl_c_container()
 		grid[idx] += timeStep * prevGrid[idx];
 	}
 
+	// b = 1
+	kernel void sidesBoundaryFace(global float* grid, const int is1B, const uint column, const uint row)
+	{
+		const uint j = get_global_id(0);
+		const uint k = get_global_id(1);
+
+		grid[IX(0, j, k, column, row)] = grid[IX(1, j, k, column, row)] * is1B;
+		grid[IX(column + 1, j, k, column, row)] = grid[IX(column, j, k, column, row)] * is1B;
+	}
+
+	// b = 2
+	kernel void topBottomBoundaryFace(global float* grid, const int is2B, const uint column, const uint row)
+	{
+		const uint i = get_global_id(0);
+		const uint k = get_global_id(1);
+
+		grid[IX(i, 0, k, column, row)] = grid[IX(i, 1, k, column, row)] * is2B;
+		grid[IX(i, row + 1, k, column, row)] = grid[IX(i, row, k, column, row)] * is2B;
+	}
+
+	// b = 3
+	kernel void frontBackBoundaryFace(global float* grid, const int is3B, const uint column, const uint row, const uint depth)
+	{
+		const uint i = get_global_id(0);
+		const uint j = get_global_id(1);
+
+		grid[IX(i, j, 0, column, row)] = grid[IX(i, j, 1, column, row)] * is3B;
+		grid[IX(i, j, depth + 1, column, row)] = grid[IX(i, j, depth, column, row)] * is3B;
+	}
+
+	// 1 -> column
+	kernel void boundaryIEdge(global float* grid, const uint column, const uint row, const uint depth)
+	{
+		const uint i = get_global_id(0);
+
+		grid[IX(i, 0, 0, column, row)] = 0.5f * (grid[IX(i, 1, 0, column, row)] + grid[IX(i, 0, 1, column, row)]);
+		grid[IX(i, row + 1, 0, column, row)] = 0.5f * (grid[IX(i, row, 0, column, row)] + grid[IX(i, row + 1, 1, column, row)]);
+		grid[IX(i, 0, depth + 1, column, row)] = 0.5f * (grid[IX(i, 0, depth, column, row)] + grid[IX(i, 1, depth + 1, column, row)]);
+		grid[IX(i, row + 1, depth + 1, column, row)] = 0.5f * (grid[IX(i, row, depth + 1, column, row)] + grid[IX(i, row + 1, depth, column, row)]);
+	}
+
+	// 1 -> row
+	kernel void boundaryJEdge(global float* grid, const uint column, const uint row, const uint depth)
+	{
+		const uint j = get_global_id(0);
+
+		grid[IX(0, j, 0, column, row)] = 0.5f * (grid[IX(1, j, 0, column, row)] + grid[IX(0, j, 1, column, row)]);
+		grid[IX(column + 1, j, 0, column, row)] = 0.5f * (grid[IX(column, j, 0, column, row)] + grid[IX(column + 1, j, 1, column, row)]);
+		grid[IX(0, j, depth + 1, column, row)] = 0.5f * (grid[IX(0, j, depth, column, row)] + grid[IX(1, j, depth + 1, column, row)]);
+		grid[IX(column + 1, j, depth + 1, column, row)] = 0.5f * (grid[IX(column, j, depth + 1, column, row)] + grid[IX(column + 1, j, depth, column, row)]);
+	}
+
+	// 1 -> depth
+	kernel void boundaryKEdge(global float* grid, const uint column, const uint row)
+	{
+		const uint k = get_global_id(0);
+
+		grid[IX(0, 0, k, column, row)] = 0.5f * (grid[IX(0, 1, k, column, row)] + grid[IX(1, 0, k, column, row)]);
+		grid[IX(0, row + 1, k, column, row)] = 0.5f * (grid[IX(0, row, k, column, row)] + grid[IX(1, row + 1, k, column, row)]);
+		grid[IX(column + 1, 0, k, column, row)] = 0.5f * (grid[IX(column, 0, k, column, row)] + grid[IX(column + 1, 1, k, column, row)]);
+		grid[IX(column + 1, row + 1, k, column, row)] = 0.5f * (grid[IX(column + 1, row, k, column, row)] + grid[IX(column, row + 1, k, column, row)]);
+	}
+
+	kernel void boundaryCorners(global float* grid, const uint column, const uint row, const uint depth)
+	{
+		grid[IX(0, 0, 0, column, row)] = (1.0f / 3.0f) * (grid[IX(1, 0, 0, column, row)] + grid[IX(0, 1, 0, column, row)] + grid[IX(0, 0, 1, column, row)]);
+		grid[IX(0, row + 1, 0, column, row)] = (1.0f / 3.0f) * (grid[IX(1, row + 1, 0, column, row)] + grid[IX(0, row, 0, column, row)] + grid[IX(0, row + 1, 1, column, row)]);
+
+		grid[IX(column + 1, 0, 0, column, row)] = (1.0f / 3.0f) * (grid[IX(column, 0, 0, column, row)] + grid[IX(column + 1, 1, 0, column, row)] + grid[IX(column + 1, 0, 1, column, row)]);
+		grid[IX(column + 1, row + 1, 0, column, row)] = (1.0f / 3.0f) * (grid[IX(column, row + 1, 0, column, row)] + grid[IX(column + 1, row, 0, column, row)] + grid[IX(column + 1, row + 1, 1, column, row)]);
+
+		grid[IX(0, 0, depth + 1, column, row)] = (1.0f / 3.0f) * (grid[IX(1, 0, depth + 1, column, row)] + grid[IX(0, 1, depth + 1, column, row)] + grid[IX(0, 0, depth, column, row)]);
+		grid[IX(0, row + 1, depth + 1, column, row)] = (1.0f / 3.0f) * (grid[IX(1, row + 1, depth + 1, column, row)] + grid[IX(0, row, depth + 1, column, row)] + grid[IX(0, row + 1, depth, column, row)]);
+
+		grid[IX(column + 1, 0, depth + 1, column, row)] = (1.0f / 3.0f) * (grid[IX(column, 0, depth + 1, column, row)] + grid[IX(column + 1, 1, depth + 1, column, row)] + grid[IX(column + 1, 0, depth, column, row)]);
+		grid[IX(column + 1, row + 1, depth + 1, column, row)] = (1.0f / 3.0f) * (grid[IX(column, row + 1, depth + 1, column, row)] + grid[IX(column + 1, row, depth + 1, column, row)] + grid[IX(column + 1, row + 1, depth, column, row)]);
+	}
+
 	);
 } // ############################################################### end of OpenCL C code #####################################################################

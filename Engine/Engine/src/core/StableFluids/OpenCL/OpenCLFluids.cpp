@@ -2,9 +2,13 @@
 #include <array>
 #include <iostream>
 
-#define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k)) 
+/*TODO:
+	- Cleanup
+	- Test removing boundaries
+	- Test different workgroup sizes
+	- Non-sequential running*/
 
-#define SWAP(x0, x) {Memory<float>* tmp = x0; x0 = x; x = tmp;}
+#define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k)) 
 
 #define MAX_ITERATIONS 10
 
@@ -19,6 +23,12 @@ static std::array<int, 3> index_to_coords(uint idx, uint column, uint row)
 static Kernel& MakeKernel3D(Kernel&& kernel, uint column, uint row, uint depth)
 {
 	kernel.set_ranges({ column, row, depth }, { 1, 1, 1 });
+	return kernel;
+}
+
+static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
+{
+	kernel.set_ranges({ x, y }, { 1, 1 });
 	return kernel;
 }
 
@@ -55,6 +65,16 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 	project2 = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "project2", uVelocity, vVelocity, wVelocity, prevUVelocity, N, column, row), column + 2u, row + 2u, depth + 2u);
 
 	advect = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "advect", smoke, prevSmoke, prevUVelocity, prevVVelocity, prevWVelocity, timeStep, N, column, row, depth), column + 2u, row + 2u, depth + 2u);
+
+	sidesBoundaryFace = MakeKernel2D(Kernel(device, row * depth, workgroup_size, "sidesBoundaryFace", smoke, 1, column, row), row, depth);
+	topBottomBoundaryFace = MakeKernel2D(Kernel(device, column * depth, workgroup_size, "topBottomBoundaryFace", smoke, 1, column, row), column, depth);
+	frontBackBoundaryFace = MakeKernel2D(Kernel(device, column * row, workgroup_size, "frontBackBoundaryFace", smoke, 1, column, row, depth), column, row);
+
+	boundaryIEdge = Kernel(device, column, workgroup_size, "boundaryIEdge", smoke, column, row, depth);
+	boundaryJEdge = Kernel(device, row, workgroup_size, "boundaryJEdge", smoke, column, row, depth);
+	boundaryKEdge = Kernel(device, column, workgroup_size, "boundaryKEdge", smoke, column, row, depth);
+
+	boundaryCorners = Kernel(device, 1, 1, "boundaryCorners", smoke, column, row, depth);
 
 	// initialize memory
 	for(uint n = 0u; n < grid_size; n++)
@@ -126,9 +146,9 @@ void OpenCLFluids::density_step(const float timeStep, const float diffRate)
 
 	advect.set_parameters(0, smoke, prevSmoke, uVelocity, vVelocity, wVelocity, timeStep);
 	advect.run();
-	smoke.read_from_device();
 	set_boundary(0, smoke);
-	smoke.write_to_device();
+	smoke.read_from_device();
+	//smoke.write_to_device();
 }
 
 void OpenCLFluids::velocity_step(float timeStep)
@@ -157,7 +177,7 @@ void OpenCLFluids::velocity_step(float timeStep)
 	linsolve.set_parameters(0, prevWVelocity, wVelocity);
 	lin_solve(3, prevWVelocity);
 	
-	project(&prevUVelocity, &prevVVelocity, &prevWVelocity, &uVelocity, &vVelocity);
+	project(prevUVelocity, prevVVelocity, prevWVelocity, uVelocity, vVelocity);
 
 	//SWAP(prevUVelocity, uVelocity);
 	//SWAP(prevVVelocity, vVelocity);
@@ -166,54 +186,53 @@ void OpenCLFluids::velocity_step(float timeStep)
 	// TODO: only update timestep and dont need to run sequentially
 	advect.set_parameters(0, uVelocity, prevUVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep);
 	advect.run();
-	uVelocity.read_from_device();
+	//uVelocity.read_from_device();
 	set_boundary(1, uVelocity);
-	uVelocity.write_to_device();
+	//uVelocity.write_to_device();
 
 	advect.set_parameters(0, vVelocity, prevVVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep);
 	advect.run();
-	vVelocity.read_from_device();
+	//vVelocity.read_from_device();
 	set_boundary(2, vVelocity);
-	vVelocity.write_to_device();
+	//vVelocity.write_to_device();
 
 	advect.set_parameters(0, wVelocity, prevWVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep);
 	advect.run();
-	wVelocity.read_from_device();
+	//wVelocity.read_from_device();
 	set_boundary(3, wVelocity);
-	wVelocity.write_to_device();
+	//wVelocity.write_to_device();
 
-	project(&uVelocity, &vVelocity, &wVelocity, &prevUVelocity, &prevVVelocity);
+	project(uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity);
 
 }
 
-// TODO remove pointers
-void OpenCLFluids::project(Memory<float>* u, Memory<float>* v, Memory<float>* w, Memory<float>* p, Memory<float>* div)
+void OpenCLFluids::project(Memory<float>& u, Memory<float>& v, Memory<float>& w, Memory<float>& p, Memory<float>& div)
 {
-	project1.set_parameters(0, *u, *v, *w, *p, *div);
+	project1.set_parameters(0, u, v, w, p, div);
 	project1.run();
 
-	p->read_from_device();
-	div->read_from_device();
-	set_boundary(0, *div);
-	set_boundary(0, *p);
-	p->write_to_device();
-	div->write_to_device();
+	p.read_from_device();
+	//div.read_from_device();
+	set_boundary(0, div);
+	set_boundary(0, p);
+	//p.write_to_device();
+	//div.write_to_device();
 
-	linsolve.set_parameters(0, *p, *div, 1.0f, 6.0f);
-	lin_solve(0, *p);
+	linsolve.set_parameters(0, p, div, 1.0f, 6.0f);
+	lin_solve(0, p);
 
-	project2.set_parameters(0, *u, *v, *w, *p);
+	project2.set_parameters(0, u, v, w, p);
 	project2.run();
 
-	u->read_from_device();
-	v->read_from_device();
-	w->read_from_device();
-	set_boundary(1, *u);
-	set_boundary(2, *v);
-	set_boundary(3, *w);
-	u->write_to_device();
-	v->write_to_device();
-	w->write_to_device();
+	//u->read_from_device();
+	//v->read_from_device();
+	//w->read_from_device();
+	set_boundary(1, u);
+	set_boundary(2, v);
+	set_boundary(3, w);
+	//u->write_to_device();
+	//v->write_to_device();
+	//w->write_to_device();
 } 
 
 void OpenCLFluids::lin_solve(const int b, Memory<float>& grid)
@@ -221,77 +240,33 @@ void OpenCLFluids::lin_solve(const int b, Memory<float>& grid)
 	for(int t = 0; t < MAX_ITERATIONS; t++)
 	{
 		linsolve.run();
-		grid.read_from_device();
+		//grid.read_from_device();
 		set_boundary(b, grid);
-		grid.write_to_device();
+		//grid.write_to_device();
 	}
 }
 
 void OpenCLFluids::set_boundary(int b, Memory<float>& grid)
 {
-	int i, j, k;
+	// TODO: non sequential
+	b == 3 ? sidesBoundaryFace.set_parameters(0, grid, -1) : sidesBoundaryFace.set_parameters(0, grid, 1);
+	sidesBoundaryFace.run(cl::NDRange{ 1, 1 });
 
-	for(i = 1; i <= column; i++)
-	{
-		for(j = 1; j <= row; j++)
-		{
-			grid[IX(i, j, 0)] = b == 3 ? -grid[IX(i, j, 1)] : grid[IX(i, j, 1)];
-			grid[IX(i, j, depth + 1)] = b == 3 ? -grid[IX(i, j, depth)] : grid[IX(i, j, depth)];
-		}
-	}
+	b == 2 ? topBottomBoundaryFace.set_parameters(0, grid, -1) : topBottomBoundaryFace.set_parameters(0, grid, 1);
+	topBottomBoundaryFace.run(cl::NDRange{ 1, 1 });
 
-	for(j = 1; j <= row; j++)
-	{
-		for(k = 1; k <= depth; k++)
-		{
-			grid[IX(0, j, k)] = b == 1 ? -grid[IX(1, j, k)] : grid[IX(1, j, k)];
-			grid[IX(column + 1, j, k)] = b == 1 ? -grid[IX(column, j, k)] : grid[IX(column, j, k)];
-		}
-	}
+	b == 1 ? frontBackBoundaryFace.set_parameters(0, grid, -1) : frontBackBoundaryFace.set_parameters(0, grid, 1);
+	frontBackBoundaryFace.run(cl::NDRange{ 1, 1 });
 
+	boundaryIEdge.set_parameters(0, grid);
+	boundaryIEdge.run(cl::NDRange{ 1 });
 
-	for(i = 1; i <= column; i++)
-	{
-		for(k = 1; k <= depth; k++)
-		{
-			grid[IX(i, 0, k)] = b == 2 ? -grid[IX(i, 1, k)] : grid[IX(i, 1, k)];
-			grid[IX(i, row + 1, k)] = b == 2 ? -grid[IX(i, row, k)] : grid[IX(i, row, k)];
-		}
-	}
+	boundaryJEdge.set_parameters(0, grid);
+	boundaryJEdge.run(cl::NDRange{ 1 });
 
-	for(i = 1; i <= column; i++)
-	{
-		grid[IX(i, 0, 0)] = 0.5f * (grid[IX(i, 1, 0)] + grid[IX(i, 0, 1)]);
-		grid[IX(i, row + 1, 0)] = 0.5f * (grid[IX(i, row, 0)] + grid[IX(i, row + 1, 1)]);
-		grid[IX(i, 0, depth + 1)] = 0.5f * (grid[IX(i, 0, depth)] + grid[IX(i, 1, depth + 1)]);
-		grid[IX(i, row + 1, depth + 1)] = 0.5f * (grid[IX(i, row, depth + 1)] + grid[IX(i, row + 1, depth)]);
-	}
+	boundaryKEdge.set_parameters(0, grid);
+	boundaryKEdge.run(cl::NDRange{ 1 });
 
-	for(j = 1; j <= row; j++)
-	{
-		grid[IX(0, j, 0)] = 0.5f * (grid[IX(1, j, 0)] + grid[IX(0, j, 1)]);
-		grid[IX(column + 1, j, 0)] = 0.5f * (grid[IX(column, j, 0)] + grid[IX(column + 1, j, 1)]);
-		grid[IX(0, j, depth + 1)] = 0.5f * (grid[IX(0, j, depth)] + grid[IX(1, j, depth + 1)]);
-		grid[IX(column + 1, j, depth + 1)] = 0.5f * (grid[IX(column, j, depth + 1)] + grid[IX(column + 1, j, depth)]);
-	}
-
-	for(k = 1; k <= depth; k++)
-	{
-		grid[IX(0, 0, k)] = 0.5f * (grid[IX(0, 1, k)] + grid[IX(1, 0, k)]);
-		grid[IX(0, row + 1, k)] = 0.5f * (grid[IX(0, row, k)] + grid[IX(1, row + 1, k)]);
-		grid[IX(column + 1, 0, k)] = 0.5f * (grid[IX(column, 0, k)] + grid[IX(column + 1, 1, k)]);
-		grid[IX(column + 1, row + 1, k)] = 0.5f * (grid[IX(column + 1, row, k)] + grid[IX(column, row + 1, k)]);
-	}
-
-	grid[IX(0, 0, 0)] = (1.0f / 3.0f) * (grid[IX(1, 0, 0)] + grid[IX(0, 1, 0)] + grid[IX(0, 0, 1)]);
-	grid[IX(0, row + 1, 0)] = (1.0f / 3.0f) * (grid[IX(1, row + 1, 0)] + grid[IX(0, row, 0)] + grid[IX(0, row + 1, 1)]);
-
-	grid[IX(column + 1, 0, 0)] = (1.0f / 3.0f) * (grid[IX(column, 0, 0)] + grid[IX(column + 1, 1, 0)] + grid[IX(column + 1, 0, 1)]);
-	grid[IX(column + 1, row + 1, 0)] = (1.0f / 3.0f) * (grid[IX(column, row + 1, 0)] + grid[IX(column + 1, row, 0)] + grid[IX(column + 1, row + 1, 1)]);
-
-	grid[IX(0, 0, depth + 1)] = (1.0f / 3.0f) * (grid[IX(1, 0, depth + 1)] + grid[IX(0, 1, depth + 1)] + grid[IX(0, 0, depth)]);
-	grid[IX(0, row + 1, depth + 1)] = (1.0f / 3.0f) * (grid[IX(1, row + 1, depth + 1)] + grid[IX(0, row, depth + 1)] + grid[IX(0, row + 1, depth)]);
-
-	grid[IX(column + 1, 0, depth + 1)] = (1.0f / 3.0f) * (grid[IX(column, 0, depth + 1)] + grid[IX(column + 1, 1, depth + 1)] + grid[IX(column + 1, 0, depth)]);
-	grid[IX(column + 1, row + 1, depth + 1)] = (1.0f / 3.0f) * (grid[IX(column, row + 1, depth + 1)] + grid[IX(column + 1, row, depth + 1)] + grid[IX(column + 1, row + 1, depth)]);
+	boundaryCorners.set_parameters(0, grid);
+	boundaryCorners.run(cl::NDRange{ 1 });
 }

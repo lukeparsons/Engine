@@ -566,6 +566,13 @@ public:
 		}
 		return *this;
 	}
+
+	inline Kernel& run(cl::NDRange&& offset)
+	{
+		cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, cl_range_local, nullptr, nullptr);
+		return* this;
+	}
+
 	inline Kernel& run(const uint t=1u, const vector<Event>* event_waitlist=nullptr, Event* event_returned=nullptr) {
 		enqueue_run(t, event_waitlist, event_returned);
 		finish_queue();

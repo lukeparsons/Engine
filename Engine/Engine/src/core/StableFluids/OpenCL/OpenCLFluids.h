@@ -9,9 +9,8 @@ private:
 
 	float viscosity;
 
-	void set_boundary(int b, Memory<float>& grid);
-
 	Kernel addSource, project1, linsolve, project2, advect;
+	Kernel sidesBoundaryFace, topBottomBoundaryFace, frontBackBoundaryFace, boundaryIEdge, boundaryJEdge, boundaryKEdge, boundaryCorners;
 
 	Memory<float> uVelocity;
 	Memory<float> vVelocity;
@@ -53,11 +52,13 @@ private:
 		grid.read_from_device_3d(0, column, 0, row, 0, depth, column, row, depth);
 	}
 
-	void project(Memory<float>* u, Memory<float>* v, Memory<float>* w, Memory<float>* u0, Memory<float>* v0);
+	void project(Memory<float>& u, Memory<float>& v, Memory<float>& w, Memory<float>& u0, Memory<float>& v0);
 	void lin_solve(const int b, Memory<float>& grid);
 
 	void density_step(float timeStep, float diffRate);
 	void velocity_step(float timeStep);
+
+	void set_boundary(int b, Memory<float>& grid);
 
 	std::shared_ptr<LineShader> lineShader;
 	GLuint VAO, VBO, textureID;
