@@ -43,7 +43,8 @@ Matrix4f cameraMatrix;
 static Camera camera(Vector3f(0, 0, 5));
 
 static bool addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear = false;
-static bool cursorShown = false;
+static bool cursorShown, forceMode = false;
+static float xForceMotion, yForceMotion = 0.0f;
 
 ShaderStore g_shaderStore = ShaderStore();
 
@@ -103,6 +104,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	{
 		clear = true;
 	}
+
+	if(key == GLFW_KEY_E && action == GLFW_PRESS)
+	{
+		forceMode = !forceMode;
+		xForceMotion = 0.0f;
+		yForceMotion = 0.0f;
+	}
 }
 
 double pxpos, pypos;
@@ -114,6 +122,12 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 		pxpos = xpos;
 		pypos = ypos;
 		firstMouse = false;
+	}
+
+	if(forceMode)
+	{
+		xForceMotion = xpos - pxpos;
+		yForceMotion = ypos - pypos;
 	}
 
 	if(!cursorShown)
@@ -141,6 +155,7 @@ static const std::shared_ptr<int> m = std::make_shared<int>(20);
 
 int main()
 {
+
 
 	glfwInit();
 	// opengl 3.3
@@ -219,8 +234,7 @@ int main()
 
 		//fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
-		openCLfluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
-
+		openCLfluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
 		//scene.Update(cameraMatrix);
 
 		//openCLfluid.VelocityRender(cameraMatrix);

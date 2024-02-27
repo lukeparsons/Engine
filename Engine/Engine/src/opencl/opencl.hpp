@@ -222,6 +222,9 @@ private:
 	cl::Buffer device_buffer; // device buffer
 	Device* device = nullptr; // pointer to linked Device
 	cl::CommandQueue cl_queue; // command queue
+
+	uint arr_range = 0;
+
 	inline void initialize_auxiliary_pointers() {
 		/********/ x = s0 = host_buffer; /******/ if(d>0x4u) s4 = host_buffer+N*0x4ull; if(d>0x8u) s8 = host_buffer+N*0x8ull; if(d>0xCu) sC = host_buffer+N*0xCull;
 		if(d>0x1u) y = s1 = host_buffer+N; /****/ if(d>0x5u) s5 = host_buffer+N*0x5ull; if(d>0x9u) s9 = host_buffer+N*0x9ull; if(d>0xDu) sD = host_buffer+N*0xDull;
@@ -250,6 +253,7 @@ public:
 		this->N = N;
 		this->d = dimensions;
 		allocate_device_buffer(device, allocate_device);
+		arr_range = range();
 		if(allocate_host) {
 			host_buffer = new T[N*(ulong)d];
 			initialize_auxiliary_pointers();
@@ -262,6 +266,7 @@ public:
 		if(N*(ulong)dimensions==0ull) print_error("Memory size must be larger than 0.");
 		this->N = N;
 		this->d = dimensions;
+		range = range();
 		allocate_device_buffer(device, allocate_device);
 		this->host_buffer = host_buffer;
 		initialize_auxiliary_pointers();
@@ -279,6 +284,7 @@ public:
 		d = memory.dimensions();
 		device = memory.device;
 		cl_queue = memory.device->get_cl_queue();
+		arr_range = range();
 		if(memory.device_buffer_exists) {
 			device_buffer = memory.get_cl_buffer(); // transfer device_buffer pointer
 			device->info.memory_used += (uint)(capacity()/1048576ull); // track device memory usage
@@ -363,6 +369,41 @@ public:
 	inline void write_to_device(const bool blocking=true, const vector<Event>* event_waitlist=nullptr, Event* event_returned=nullptr) {
 		if(host_buffer_exists&&device_buffer_exists) cl_queue.enqueueWriteBuffer(device_buffer, blocking, 0ull, capacity(), (void*)host_buffer, event_waitlist, event_returned);
 	}
+
+	inline void enqueue_fill_device(T value)
+	{
+		cl_queue.enqueueFillBuffer(device_buffer, value, 0u, arr_range * sizeof(T));
+
+	}
+
+	inline void fill_host(T value)
+	{
+		std::fill(host_buffer, host_buffer + arr_range, value);
+	}
+
+	inline T* enable_mapping_write(const ulong offset = 0u)
+	{
+		T* val = (T*)cl_queue.enqueueMapBuffer(device_buffer, CL_TRUE, CL_MAP_WRITE, offset * sizeof(T), (range() - offset) * sizeof(T));
+		cl_queue.finish();
+		return val;
+	}
+
+	inline void disable_mapping(T* arr)
+	{
+		cl_queue.enqueueUnmapMemObject(device_buffer, arr);
+		cl_queue.finish();
+	}
+
+	inline void enqueue_read(const bool blocking = CL_FALSE)
+	{
+		cl_queue.enqueueReadBuffer(device_buffer, blocking, 0ull, arr_range * sizeof(T), (void*)(host_buffer), nullptr, nullptr);
+	}
+
+	inline void enqueue_write(const bool blocking = CL_FALSE)
+	{
+		cl_queue.enqueueWriteBuffer(device_buffer, blocking, 0ull, arr_range * sizeof(T), (void*)(host_buffer), nullptr, nullptr);
+	}
+
 	inline void read_from_device(const ulong offset, const ulong length, const bool blocking=true, const vector<Event>* event_waitlist=nullptr, Event* event_returned=nullptr) {
 		if(host_buffer_exists&&device_buffer_exists) {
 			const ulong safe_offset=min(offset, range()), safe_length=min(length, range()-safe_offset);
@@ -560,27 +601,30 @@ public:
 		link_parameters(starting_position, parameters...); // expand variadic template to link kernel parameters
 		return *this;
 	}
-	inline Kernel& enqueue_run(const uint t=1u, const vector<Event>* event_waitlist=nullptr, Event* event_returned=nullptr) {
+	/*inline void enqueue_run(const uint t = 1u, const vector<Event>* event_waitlist = nullptr, Event* event_returned = nullptr) {
 		for(uint i=0u; i<t; i++) {
 			cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, event_waitlist, event_returned);
 		}
-		return *this;
-	}
+	}*/
 
-	inline Kernel& run(cl::NDRange&& offset)
+	inline void enqueue_run(cl::NDRange&& offset)
 	{
 		cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, cl_range_local, nullptr, nullptr);
-		return* this;
 	}
 
-	inline Kernel& run(const uint t=1u, const vector<Event>* event_waitlist=nullptr, Event* event_returned=nullptr) {
+	inline void enqueue_run()
+	{
+		cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, nullptr, nullptr);
+	}
+
+	/*inline Kernel& run(const uint t = 1u, const vector<Event>* event_waitlist = nullptr, Event* event_returned = nullptr) {
 		enqueue_run(t, event_waitlist, event_returned);
 		finish_queue();
 		return *this;
-	}
-	inline Kernel& operator()(const uint t=1u, const vector<Event>* event_waitlist=nullptr, Event* event_returned=nullptr) {
+	}*/
+	/*inline Kernel& operator()(const uint t = 1u, const vector<Event>* event_waitlist = nullptr, Event* event_returned = nullptr) {
 		return run(t, event_waitlist, event_returned);
-	}
+	} */
 	inline Kernel& finish_queue() {
 		cl_queue.finish();
 		return *this;

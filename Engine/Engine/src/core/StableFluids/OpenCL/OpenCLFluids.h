@@ -8,9 +8,12 @@ private:
 	unsigned int column, row, depth, N;
 
 	float viscosity;
+	float* arr;
 
 	Kernel addSource, project1, linsolve, project2, advect;
 	Kernel sidesBoundaryFace, topBottomBoundaryFace, frontBackBoundaryFace, boundaryIEdge, boundaryJEdge, boundaryKEdge, boundaryCorners;
+
+	cl::CommandQueue cl_queue;
 
 	Memory<float> uVelocity;
 	Memory<float> vVelocity;
@@ -70,8 +73,17 @@ public:
 
 	OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth);
 
-	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear);
+	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear,
+		float xForce, float yForce);
 
 	void InitVelocityRender();
 	void VelocityRender(Matrix4f& cameraMatrix);
+
+	~OpenCLFluids()
+	{
+		prevUVelocity.disable_mapping(arr);
+		prevVVelocity.disable_mapping(arr);
+		prevWVelocity.disable_mapping(arr);
+		prevSmoke.disable_mapping(arr);
+	}
 };
