@@ -1,13 +1,15 @@
 #pragma once
 
 #define WORKGROUP_SIZE 64 // needs to be 64 to fully use AMD GPUs
+#define CL_HPP_TARGET_OPENCL_VERSION 200
+#pragma OPENCL EXTENSION cl_amd_printf : enable
 //#define PTX
 //#define LOG
 
 #ifndef _WIN32
 #pragma GCC diagnostic ignored "-Wignored-attributes" // ignore compiler warnings for CL/cl.hpp with g++
 #endif // _WIN32
-#include <CL/cl.hpp> // OpenCL 1.0, 1.1, 1.2
+#include <CL/opencl.hpp> // OpenCL 1.0, 1.1, 1.2, now 2.0
 #include "utilities.hpp"
 using cl::Event;
 
@@ -185,7 +187,7 @@ public:
 		const string kernel_code = enable_device_capabilities()+"\n"+opencl_c_code;
 		cl_source.push_back({ kernel_code.c_str(), kernel_code.length() });
 		this->cl_program = cl::Program(info.cl_context, cl_source);
-		const string build_options = string("-cl-finite-math-only -cl-no-signed-zeros -cl-mad-enable")+(info.intel_gpu_above_4gb_patch ? " -cl-intel-greater-than-4GB-buffer-required"  : "");
+		const string build_options = string("-cl-finite-math-only -cl-no-signed-zeros -cl-mad-enable -cl-std=CL2.0")+(info.intel_gpu_above_4gb_patch ? " -cl-intel-greater-than-4GB-buffer-required"  : "");
 #ifndef LOG
 		int error = cl_program.build({ info.cl_device }, (build_options+" -w").c_str()); // compile OpenCL C code, disable warnings
 		if(error) print_warning(cl_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(info.cl_device)); // print build log
@@ -373,7 +375,6 @@ public:
 	inline void enqueue_fill_device(T value)
 	{
 		cl_queue.enqueueFillBuffer(device_buffer, value, 0u, arr_range * sizeof(T));
-
 	}
 
 	inline void fill_host(T value)
@@ -500,44 +501,6 @@ public:
 	inline const cl::Buffer& get_cl_buffer() const { return device_buffer; }
 };
 
-class Image3D
-{
-private:
-	cl::Image3D image;
-	float* host_buffer;
-	cl::CommandQueue cl_queue;
-public:
-	inline Image3D(Device& device, cl::ImageFormat format, uint width, uint height, uint depth)
-	{
-		if(!device.is_initialized()) print_error("No Device selected. Call Device constructor.");
-		this->cl_queue = device.get_cl_queue();
-		cl_int err;
-		image = cl::Image3D(device.get_cl_context(), CL_MEM_READ_WRITE, format, width, height, depth, 0Ui64, 0Ui64, nullptr, &err);
-		if(err) print_error("Error creating image");
-		host_buffer = new float[width * height * depth];
-	}
-
-	inline Image3D() {};
-
-	inline void write_to_device(const cl::size_t<3> region, const cl::size_t<3> origin = cl::size_t<3>())
-	{
-		cl_queue.enqueueWriteImage(image, true, origin, region, 0, 0, host_buffer);
-	}
-
-	inline void read_from_device(const cl::size_t<3> region, const cl::size_t<3> origin = cl::size_t<3>())
-	{
-		cl_queue.enqueueReadImage(image, true, origin, region, 0, 0, host_buffer);
-	}
-
-	inline ~Image3D()
-	{
-		delete host_buffer;
-	}
-
-	inline float& operator[](const ulong i) { return host_buffer[i]; }
-	inline const float& operator[](const ulong i) const { return host_buffer[i]; }
-};
-
 class Kernel {
 private:
 	ulong N = 0ull; // kernel range
@@ -614,7 +577,8 @@ public:
 
 	inline void enqueue_run()
 	{
-		cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, nullptr, nullptr);
+		cl_int res = cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, nullptr, nullptr);
+		std::cout << "result of run " << res << std::endl;
 	}
 
 	/*inline Kernel& run(const uint t = 1u, const vector<Event>* event_waitlist = nullptr, Event* event_returned = nullptr) {

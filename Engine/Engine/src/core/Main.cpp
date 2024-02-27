@@ -156,6 +156,8 @@ static const std::shared_ptr<int> m = std::make_shared<int>(20);
 int main()
 {
 
+	test();
+	return 0;
 
 	glfwInit();
 	// opengl 3.3

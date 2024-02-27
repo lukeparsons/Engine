@@ -138,7 +138,7 @@
     <ClCompile Include="src\core\StableFluids\OpenCL\RenderingCL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernel.cpp">
+    <ClCompile Include="src\core\StableFluids\OpenCL\Test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

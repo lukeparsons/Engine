@@ -78,12 +78,4 @@ public:
 
 	void InitVelocityRender();
 	void VelocityRender(Matrix4f& cameraMatrix);
-
-	~OpenCLFluids()
-	{
-		prevUVelocity.disable_mapping(arr);
-		prevVVelocity.disable_mapping(arr);
-		prevWVelocity.disable_mapping(arr);
-		prevSmoke.disable_mapping(arr);
-	}
 };

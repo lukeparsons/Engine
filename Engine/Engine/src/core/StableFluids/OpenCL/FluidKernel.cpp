@@ -6,6 +6,12 @@ string opencl_c_container()
 
 	#define IX(i,j,k,column,row)((i)+(column+2)*(j)+(column+2)*(row+2)*(k)) 
 
+	kernel void density_step(global float* smoke, global float* prevSmoke, const float scale, global float* uVelocity, global float* vVelocity, global float* wVelocity, const uint column, const uint row,
+			const uint depth)
+	{
+
+	}
+
 	kernel void advect(global float* grid, global float* prevGrid, global float* u, global float* v, global float* w, const float timeStep,
 		const uint N, const uint column, const uint row, const uint depth)
 	{
