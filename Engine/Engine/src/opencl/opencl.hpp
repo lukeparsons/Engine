@@ -84,6 +84,7 @@ struct Device_Info {
 };
 
 string get_opencl_c_code(); // implemented in kernel.hpp
+string get_fluid_code();
 inline void print_device_info(const Device_Info& d) { // print OpenCL device info
 #if defined(_WIN32)
 	const string os = "Windows";
@@ -179,10 +180,13 @@ private:
 	;}
 public:
 	Device_Info info;
-	inline Device(const Device_Info& info, const string& opencl_c_code=get_opencl_c_code()) {
+	inline Device(const Device_Info& info, const string& opencl_c_code=get_fluid_code()) {
 		print_device_info(info);
 		this->info = info;
-		this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device); // queue to push commands for the device
+
+		cl_command_queue_properties props = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
+		this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device, props);
+
 		cl::Program::Sources cl_source;
 		const string kernel_code = enable_device_capabilities()+"\n"+opencl_c_code;
 		cl_source.push_back({ kernel_code.c_str(), kernel_code.length() });
@@ -536,6 +540,14 @@ public:
 		set_ranges(N, (ulong)workgroup_size);
 		cl_queue = device.get_cl_queue();
 	}
+	template<class... T> inline Kernel(const Device& device, cl::CommandQueue queue, const ulong N, const uint workgroup_size, const string& name, const T&... parameters)
+	{ // accepts Memory<T> objects and fundamental data type constants
+		if(!device.is_initialized()) print_error("No Device selected. Call Device constructor.");
+		cl_kernel = cl::Kernel(device.get_cl_program(), name.c_str());
+		link_parameters(number_of_parameters, parameters...); // expand variadic template to link kernel parameters
+		set_ranges(N, (ulong)workgroup_size);
+		cl_queue = queue;
+	}
 	inline Kernel() {} // default constructor
 	inline Kernel& set_ranges(const ulong N, const ulong workgroup_size=(ulong)WORKGROUP_SIZE) {
 		this->N = N;
@@ -564,31 +576,27 @@ public:
 		link_parameters(starting_position, parameters...); // expand variadic template to link kernel parameters
 		return *this;
 	}
-	/*inline void enqueue_run(const uint t = 1u, const vector<Event>* event_waitlist = nullptr, Event* event_returned = nullptr) {
-		for(uint i=0u; i<t; i++) {
-			cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, event_waitlist, event_returned);
-		}
-	}*/
 
-	inline void enqueue_run(cl::NDRange&& offset)
+	inline void enqueue_run(cl::NDRange&& offset, const cl::vector<Event> event_waitlist, Event* event_returned = nullptr)
 	{
-		cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, cl_range_local, nullptr, nullptr);
+		cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, event_waitlist, cl_range_local, event_returned);
 	}
 
-	inline void enqueue_run()
+	inline void enqueue_run(cl::NDRange&& offset, Event* event_returned = nullptr)
 	{
-		cl_int res = cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, nullptr, nullptr);
-		std::cout << "result of run " << res << std::endl;
+		cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, cl_range_local, event_returned);
 	}
 
-	/*inline Kernel& run(const uint t = 1u, const vector<Event>* event_waitlist = nullptr, Event* event_returned = nullptr) {
-		enqueue_run(t, event_waitlist, event_returned);
-		finish_queue();
-		return *this;
-	}*/
-	/*inline Kernel& operator()(const uint t = 1u, const vector<Event>* event_waitlist = nullptr, Event* event_returned = nullptr) {
-		return run(t, event_waitlist, event_returned);
-	} */
+	inline void enqueue_run(const cl::vector<Event> event_waitlist, Event* event_returned = nullptr)
+	{
+		cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, event_waitlist, cl_range_local, event_returned);
+	}
+
+	inline void enqueue_run(Event* event_returned = nullptr)
+	{
+		cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, event_returned);
+	}
+
 	inline Kernel& finish_queue() {
 		cl_queue.finish();
 		return *this;

@@ -3,9 +3,8 @@
 #include "utilities.hpp"
 #define R(...) string(" "#__VA_ARGS__" ") // evil stringification macro, similar syntax to raw string R"(...)"
 
-string opencl_c_container(); // outsourced to kernel.cpp
-string get_opencl_c_code() {
-	string r = opencl_c_container();
+inline void replace(std::string& r)
+{
 	r = replace(r, " ", "\n"); // replace all spaces by new lines
 	r = replace(r, "#ifdef\n", "#ifdef "); // except for the arguments after some preprocessor options that need to be in the same line
 	r = replace(r, "#ifndef\n", "#ifndef ");
@@ -13,9 +12,16 @@ string get_opencl_c_code() {
 	r = replace(r, "#if\n", "#if "); // don't leave any spaces in arguments
 	r = replace(r, "#elif\n", "#elif "); // don't leave any spaces in arguments
 	r = replace(r, "#pragma\n", "#pragma ");
-	return "\n"+r;
+	r = "\n" + r;
 }
 
+
+string opencl_c_container(); // outsourced to kernel.cpp
+string get_opencl_c_code();
+
+string actions_code();
+string main_code();
+string get_fluid_code();
 // everything below is just for syntax highlighting in the editor, this does not change any functionality
 // full catalogue: https://www.khronos.org/files/opencl-1-2-quick-reference-card.pdf
 
@@ -45,6 +51,23 @@ string get_opencl_c_code() {
 #define __global
 #define __local
 #define __private // private keyword already exists in C++
+#define enqueue_kernel(a, b, c, d)
+#define get_default_queue()
+#define queue_t
+#define ndrange_t
+#define ndrange_1D
+#define ndrange_2D
+#define ndrange_3D
+#define clk_event_t
+
+#define CLK_ENQUEUE_FLAGS_NO_WAIT
+#define CLK_ENQUEUE_FLAGS_WAIT_KERNEL
+#define CLK_ENQUEUE_FLAGS_WAIT_WORK_GROUP
+
+#define printf(x)
+#define create_user_event()
+#define release_event(x)
+#define enqueue_marker(a, b, c, d)
 
 // 32-bit integer atomics
 #define atomic_add(p,x) // (*p)+=x
@@ -221,6 +244,7 @@ string get_opencl_c_code() {
 #define ulong4
 #define ulong8
 #define ulong16
+#define size_t
 
 // interpret functions
 #define as_half(x)

@@ -8,12 +8,18 @@ private:
 	unsigned int column, row, depth, N;
 
 	float viscosity;
-	float* arr;
 
-	Kernel addSource, project1, linsolve, project2, advect;
-	Kernel sidesBoundaryFace, topBottomBoundaryFace, frontBackBoundaryFace, boundaryIEdge, boundaryJEdge, boundaryKEdge, boundaryCorners;
+	Device device;
+
+	Kernel add_vel_sources, add_smoke_source;
+	Kernel project1, linsolve, project2, advect;
+
+	Kernel set_boundary;
+
+	Kernel vel_step, dens_step;
 
 	cl::CommandQueue cl_queue;
+	cl::CommandQueue device_queue;
 
 	Memory<float> uVelocity;
 	Memory<float> vVelocity;
@@ -61,7 +67,7 @@ private:
 	void density_step(float timeStep, float diffRate);
 	void velocity_step(float timeStep);
 
-	void set_boundary(int b, Memory<float>& grid);
+	//void set_boundary(int b, Memory<float>& grid);
 
 	std::shared_ptr<LineShader> lineShader;
 	GLuint VAO, VBO, textureID;

@@ -8605,8 +8605,8 @@ public:
         const Kernel& kernel,
         const NDRange& offset,
         const NDRange& global,
+        const vector<Event> events,
         const NDRange& local = NullRange,
-        const vector<Event>* events = NULL,
         Event* event = NULL) const
     {
         cl_event tmp;
@@ -8616,12 +8616,37 @@ public:
                 offset.dimensions() != 0 ? (const size_type*) offset : NULL,
                 (const size_type*) global,
                 local.dimensions() != 0 ? (const size_type*) local : NULL,
-                (events != NULL) ? (cl_uint) events->size() : 0,
-                (events != NULL && events->size() > 0) ? (cl_event*) &events->front() : NULL,
+                (cl_uint)events.size(),
+                (events.size() > 0) ? (cl_event*) &events.front() : NULL,
                 (event != NULL) ? &tmp : NULL),
             __ENQUEUE_NDRANGE_KERNEL_ERR);
 
         if (event != NULL && err == CL_SUCCESS)
+            *event = tmp;
+
+        return err;
+    }
+
+    cl_int enqueueNDRangeKernel(
+        const Kernel& kernel,
+        const NDRange& offset,
+        const NDRange& global,
+        const NDRange& local = NullRange,
+        Event* event = NULL) const
+    {
+        cl_event tmp;
+        cl_int err = detail::errHandler(
+            ::clEnqueueNDRangeKernel(
+                object_, kernel(), (cl_uint)global.dimensions(),
+                offset.dimensions() != 0 ? (const size_type*)offset : NULL,
+                (const size_type*)global,
+                local.dimensions() != 0 ? (const size_type*)local : NULL,
+                0,
+                NULL,
+                (event != NULL) ? &tmp : NULL),
+            __ENQUEUE_NDRANGE_KERNEL_ERR);
+
+        if(event != NULL && err == CL_SUCCESS)
             *event = tmp;
 
         return err;
