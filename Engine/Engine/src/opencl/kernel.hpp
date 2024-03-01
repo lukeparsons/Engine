@@ -19,9 +19,6 @@ inline void replace(std::string& r)
 string opencl_c_container(); // outsourced to kernel.cpp
 string get_opencl_c_code();
 
-string actions_code();
-string main_code();
-string get_fluid_code();
 // everything below is just for syntax highlighting in the editor, this does not change any functionality
 // full catalogue: https://www.khronos.org/files/opencl-1-2-quick-reference-card.pdf
 

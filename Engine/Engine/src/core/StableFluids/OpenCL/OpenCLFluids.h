@@ -14,7 +14,7 @@ private:
 	Kernel add_vel_sources, add_smoke_source;
 	Kernel project1, linsolve, project2, advect;
 
-	Kernel set_boundary;
+	Kernel sidesBoundaryFace, topBottomBoundaryFace, frontBackBoundaryFace, boundaryIEdge, boundaryJEdge, boundaryKEdge, boundaryCorners;
 
 	Kernel vel_step, dens_step;
 
@@ -62,13 +62,11 @@ private:
 	}
 
 	void project(Memory<float>& u, Memory<float>& v, Memory<float>& w, Memory<float>& u0, Memory<float>& v0);
-	void lin_solve(const int b, Memory<float>& grid);
 
 	void density_step(float timeStep, float diffRate);
 	void velocity_step(float timeStep);
 
-	//void set_boundary(int b, Memory<float>& grid);
-
+	cl::vector<Event> enqueue_set_boundary(Memory<float>& grid, const int f1, const int f2, const int f3, const cl::vector<Event>& waitEvent);
 	std::shared_ptr<LineShader> lineShader;
 	GLuint VAO, VBO, textureID;
 

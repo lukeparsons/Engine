@@ -180,7 +180,7 @@ private:
 	;}
 public:
 	Device_Info info;
-	inline Device(const Device_Info& info, const string& opencl_c_code=get_fluid_code()) {
+	inline Device(const Device_Info& info, const string& opencl_c_code=get_opencl_c_code()) {
 		print_device_info(info);
 		this->info = info;
 
@@ -399,12 +399,12 @@ public:
 		cl_queue.finish();
 	}
 
-	inline void enqueue_read(const bool blocking = CL_FALSE)
+	inline void enqueue_read(const bool blocking = CL_TRUE)
 	{
 		cl_queue.enqueueReadBuffer(device_buffer, blocking, 0ull, arr_range * sizeof(T), (void*)(host_buffer), nullptr, nullptr);
 	}
 
-	inline void enqueue_write(const bool blocking = CL_FALSE)
+	inline void enqueue_write(const bool blocking = CL_TRUE)
 	{
 		cl_queue.enqueueWriteBuffer(device_buffer, blocking, 0ull, arr_range * sizeof(T), (void*)(host_buffer), nullptr, nullptr);
 	}
@@ -509,9 +509,7 @@ class Kernel {
 private:
 	ulong N = 0ull; // kernel range
 	uint number_of_parameters = 0u;
-	cl::Kernel cl_kernel;
 	cl::NDRange cl_range_global, cl_range_local;
-	cl::CommandQueue cl_queue;
 	template<typename T> inline void link_parameter(const uint position, const Memory<T>& memory) {
 		cl_kernel.setArg(position, memory.get_cl_buffer());
 	}
@@ -526,6 +524,9 @@ private:
 		link_parameters(starting_position+1u, parameters...);
 	}
 public:
+	cl::CommandQueue cl_queue;
+	cl::Kernel cl_kernel;
+
 	template<class... T> inline Kernel(const Device& device, const ulong N, const string& name, const T&... parameters) { // accepts Memory<T> objects and fundamental data type constants
 		if(!device.is_initialized()) print_error("No Device selected. Call Device constructor.");
 		cl_kernel = cl::Kernel(device.get_cl_program(), name.c_str());
@@ -540,7 +541,7 @@ public:
 		set_ranges(N, (ulong)workgroup_size);
 		cl_queue = device.get_cl_queue();
 	}
-	template<class... T> inline Kernel(const Device& device, cl::CommandQueue queue, const ulong N, const uint workgroup_size, const string& name, const T&... parameters)
+	template<class... T> inline Kernel(const Device& device, cl::CommandQueue& queue, const ulong N, const uint workgroup_size, const string& name, const T&... parameters)
 	{ // accepts Memory<T> objects and fundamental data type constants
 		if(!device.is_initialized()) print_error("No Device selected. Call Device constructor.");
 		cl_kernel = cl::Kernel(device.get_cl_program(), name.c_str());
@@ -577,28 +578,27 @@ public:
 		return *this;
 	}
 
-	inline void enqueue_run(cl::NDRange&& offset, const cl::vector<Event> event_waitlist, Event* event_returned = nullptr)
+	inline int enqueue_run(cl::NDRange&& offset, const cl::vector<Event>& event_waitlist, Event* event_returned = nullptr)
 	{
-		cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, event_waitlist, cl_range_local, event_returned);
+		return cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, event_waitlist, cl_range_local, event_returned);
 	}
 
-	inline void enqueue_run(cl::NDRange&& offset, Event* event_returned = nullptr)
+	inline int enqueue_run(cl::NDRange&& offset, Event* event_returned = nullptr)
 	{
-		cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, cl_range_local, event_returned);
+		return cl_queue.enqueueNDRangeKernel(cl_kernel, offset, cl_range_global, cl_range_local, event_returned);
 	}
 
-	inline void enqueue_run(const cl::vector<Event> event_waitlist, Event* event_returned = nullptr)
+	inline int enqueue_run(const cl::vector<Event>& event_waitlist, Event* event_returned = nullptr)
 	{
-		cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, event_waitlist, cl_range_local, event_returned);
+		return cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, event_waitlist, cl_range_local, event_returned);
 	}
 
-	inline void enqueue_run(Event* event_returned = nullptr)
+	inline int enqueue_run(Event* event_returned = nullptr)
 	{
-		cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, event_returned);
+		return cl_queue.enqueueNDRangeKernel(cl_kernel, cl::NullRange, cl_range_global, cl_range_local, event_returned);
 	}
 
-	inline Kernel& finish_queue() {
-		cl_queue.finish();
-		return *this;
+	inline int finish_queue() {
+		return cl_queue.finish();
 	}
 };

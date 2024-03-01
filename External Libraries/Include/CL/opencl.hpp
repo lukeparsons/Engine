@@ -8605,7 +8605,7 @@ public:
         const Kernel& kernel,
         const NDRange& offset,
         const NDRange& global,
-        const vector<Event> events,
+        const vector<Event>& events,
         const NDRange& local = NullRange,
         Event* event = NULL) const
     {
@@ -8641,7 +8641,7 @@ public:
                 offset.dimensions() != 0 ? (const size_type*)offset : NULL,
                 (const size_type*)global,
                 local.dimensions() != 0 ? (const size_type*)local : NULL,
-                0,
+                (cl_uint)0,
                 NULL,
                 (event != NULL) ? &tmp : NULL),
             __ENQUEUE_NDRANGE_KERNEL_ERR);

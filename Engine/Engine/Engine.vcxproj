@@ -185,9 +185,7 @@
     <ClCompile Include="src\core\3DGrid\Grid3D.cpp" />
     <ClCompile Include="src\core\3DGrid\LevelSet.cpp" />
     <ClCompile Include="src\core\3DGrid\PCG.cpp" />
-    <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernel.cpp" />
     <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernelMain.cpp" />
-    <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernelActions.cpp" />
     <ClCompile Include="src\core\StableFluids\OpenCL\OpenCLFluids.cpp" />
     <ClCompile Include="src\core\StableFluids\OpenCL\RenderingCL.cpp" />
     <ClCompile Include="src\core\StableFluids\Rendering.cpp" />

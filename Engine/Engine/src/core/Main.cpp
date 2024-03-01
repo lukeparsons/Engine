@@ -26,9 +26,9 @@
 #include "StableFluids/OpenCL/OpenCLFluids.h"
 #include "StableFluids/OpenCL/Test.h"
 
-#define row 24
-#define column 24
-#define depth 24
+#define row 100
+#define column 100
+#define depth 100
 
 static const int width = 768;
 static const int height = 768;
@@ -155,8 +155,6 @@ static const std::shared_ptr<int> m = std::make_shared<int>(20);
 
 int main()
 {
-
-
 	glfwInit();
 	// opengl 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -206,14 +204,14 @@ int main()
 
 	//StableFluids fluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
 	OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
-	openCLfluid.InitVelocityRender();
+	//openCLfluid.InitVelocityRender();
 
 	float currentFrameTime = 0;
 	float frameTime = 0.f;
 	unsigned int frameCount = 0;
 	float timeStep = 0.4f;
 
-	//VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data());
+	VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data());
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	while(!glfwWindowShouldClose(window))
 	{ 
@@ -237,9 +235,9 @@ int main()
 		openCLfluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
 		//scene.Update(cameraMatrix);
 
-		openCLfluid.VelocityRender(cameraMatrix);
+		//openCLfluid.VelocityRender(cameraMatrix);
 
-		//volRender.RenderVolume(cameraMatrix, camera);
+		volRender.RenderVolume(cameraMatrix, camera);
 
 		//RenderUI();
 
