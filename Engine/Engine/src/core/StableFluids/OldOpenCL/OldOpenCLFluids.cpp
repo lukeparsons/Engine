@@ -57,7 +57,7 @@ OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsign
 	const float timeStep = 0.4f;
 	viscosity = 0.0f;
 
-	const uint workgroup_size = 256u;
+	const uint workgroup_size = 128u;
 
 	addSource = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "add_source", smoke, prevSmoke, timeStep, column, row), column + 2u, row + 2u, depth + 2u);
 
@@ -148,7 +148,7 @@ void OldOpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, 
 		prevSmoke.fill_host(0.0f);
 		if(addSmoke)
 		{
-			prevSmoke[IX(column / 2, 2, depth / 2)] = 200.f;
+			prevSmoke[IX(column / 2, 2, depth / 2)] = 600.f;
 			addSmoke = false;
 		}
 

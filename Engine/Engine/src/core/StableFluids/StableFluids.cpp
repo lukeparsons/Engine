@@ -336,7 +336,7 @@ void StableFluids::Profile(float timeStep, float diffRate, float addForceU, floa
 
 	prevWVelocity(column / 2, row / 2, depth - 2) = negAddForceW;
 
-	prevSmoke(column / 2, 2, depth / 2) = 75.f;
+	prevSmoke(column / 2, 2, depth / 2) = addSmoke;
 
 	velocity_step(&uVelocity, &vVelocity, &wVelocity, &prevUVelocity, &prevVVelocity, &prevWVelocity, timeStep);
 	density_step(&smoke, &prevSmoke, timeStep);
