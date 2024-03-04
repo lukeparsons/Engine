@@ -206,18 +206,18 @@ int main()
 	OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
 	//openCLfluid.InitVelocityRender();
 
-	float currentFrameTime = 0;
-	float frameTime = 0.f;
-	unsigned int frameCount = 0;
+	double currentFrameTime = 0;
+	double frameTime = 0.f;
+	unsigned int frameCount = 1000;
 	float timeStep = 0.4f;
 
 	VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data());
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
-	while(!glfwWindowShouldClose(window))
-	{ 
-		//currentFrameTime = glfwGetTime();
+	float f, f2, f3, f4;
+	for(uint i = 0; i < frameCount; i++)
+	{
+		currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
-
 
 		glClearColor(0.5f, 0.4f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -232,7 +232,12 @@ int main()
 
 		//fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
-		openCLfluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
+		//openCLfluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
+		f = (float)i;
+		f2 = f / 2.0f;
+		f3 = f / 3.0f;
+		f4 = f / 4.0f;
+		openCLfluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
 		//scene.Update(cameraMatrix);
 
 		//openCLfluid.VelocityRender(cameraMatrix);
@@ -243,10 +248,10 @@ int main()
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		//frameTime = glfwGetTime() - currentFrameTime;
-		//frameCount++;
+		frameTime += glfwGetTime() - currentFrameTime;
 	}
-	//std::cout << "Average Frametime " << (frameTime / frameCount) << std::endl;
+
+	std::cout << "Average Frametime " << (frameTime / (double)frameCount) << std::endl;
 	//ShutdownUI();
 	glfwTerminate();
 	return 0;

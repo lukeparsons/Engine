@@ -32,7 +32,6 @@ string opencl_c_container()
 	kernel void advect(const float timeStep, global float* grid, global float* prevGrid, global float* u, global float* v, global float* w,
 		const uint N, const uint column, const uint row, const uint depth)
 	{
-
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);
 		const uint k = get_global_id(2);

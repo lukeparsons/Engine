@@ -72,6 +72,20 @@ private:
 
 	std::array<float, 6> vertices = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 
+	cl::Event project_event;
+	cl::Event solveP_event;
+	cl::Event project2_event;
+	cl::Event solveU_event, solveV_event, solveW_event;
+	cl::Event advect_event;
+	cl::Event linsolve_event;
+	cl::Event source_event;
+	cl::Event advect_u, advect_v, advect_w;
+	cl::Event frontBack, topBottom, sidesBoundary, boundaryI, boundaryJ, boundaryK, boundaryCorner;
+	cl::vector<Event> advect_bnd_u, advect_bnd_v, advect_bnd_w;
+	cl::vector<Event> bnd_event;
+	cl::vector<Event> uBnd, vBnd, wBnd;
+	cl::vector<Event> div_bnd_event, p_bnd_event;
+
 public:
 	Memory<float> smoke;
 
@@ -79,6 +93,8 @@ public:
 
 	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear,
 		float xForce, float yForce);
+
+	void Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke);
 
 	void InitVelocityRender();
 	void VelocityRender(Matrix4f& cameraMatrix);

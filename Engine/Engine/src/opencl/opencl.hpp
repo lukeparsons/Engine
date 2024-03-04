@@ -67,6 +67,12 @@ struct Device_Info {
 		const float arm = (float)(contains(to_lower(vendor), "arm"))*(is_gpu?8.0f:1.0f); // ARM GPUs usually have 8 cores/CU, ARM CPUs have 1 core/CU
 		cores = to_uint((float)compute_units*(nvidia+amd+intel+apple+arm)); // for CPUs, compute_units is the number of threads (twice the number of cores with hyperthreading)
 		tflops = 1E-6f*(float)cores*(float)ipc*(float)clock_frequency; // estimated device floating point performance in TeraFLOPs/s
+		size_t f[3];
+		cl_device.getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &f);
+		for(size_t t : f)
+		{
+			std::cout << t << std::endl;
+		}
 		if(intel==8.0f) { // fix wrong global memory reporting for Intel Arc GPUs
 			if((contains_any(name, {"A770", "0x56a0"})&&memory>=11739u&&memory<14168u)||(contains_any(name, {"A770", "A750", "A580", "0x56a0", "0x56a1", "0x56a2"})&&memory>=5869u&&memory<7084u)||(contains_any(name, {"A380", "0x56a5"})&&memory>=4402u&&memory<5313u)) { // 72.5%-87.5% reporting -> /0.8
 				memory = (uint)((cl_device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>()*5ull/4ull)/1048576ull); // fix wrong (80% on Windows) memory reporting on Intel Arc
@@ -214,6 +220,7 @@ public:
 	inline cl::Context get_cl_context() const { return info.cl_context; }
 	inline cl::Program get_cl_program() const { return cl_program; }
 	inline cl::CommandQueue get_cl_queue() const { return cl_queue; }
+	inline cl::Device get_cl_device() const { return info.cl_device; }
 	inline bool is_initialized() const { return exists; }
 };
 
