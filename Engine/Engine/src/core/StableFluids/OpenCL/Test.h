@@ -3,7 +3,7 @@
 
 inline void test()
 {
-	Device device(select_device_with_most_flops()); // compile OpenCL C code for the fastest available device
+	Device device(select_device_with_most_flops(), false, get_opencl_c_code()); // compile OpenCL C code for the fastest available device
 	Memory<float> grid(device, 10);
 
 	cl::CommandQueue queue = device.get_cl_queue();

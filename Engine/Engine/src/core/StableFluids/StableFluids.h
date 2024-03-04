@@ -56,9 +56,13 @@ public:
 	void project(GridStructure<float>& u, GridStructure<float>& v, GridStructure<float>& w, GridStructure<float>& p, GridStructure<float>& div);
 	void set_boundary(int b, GridStructure<float>& grid);
 
+	void Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke);
+
 	void InitVelocityRender();
 	void VelocityRender(Matrix4f& cameraMatrix);
 	void InitModelRender();
 	void ModelRender(Matrix4f& cameraMatrix);
+
+
 
 };

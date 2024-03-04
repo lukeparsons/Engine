@@ -17,7 +17,9 @@ inline void replace(std::string& r)
 
 
 string opencl_c_container(); // outsourced to kernel.cpp
+string old_opencl_c_container(); // outsourced to kernel.cpp
 string get_opencl_c_code();
+string get_opencl_c_code_old();
 
 // everything below is just for syntax highlighting in the editor, this does not change any functionality
 // full catalogue: https://www.khronos.org/files/opencl-1-2-quick-reference-card.pdf

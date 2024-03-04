@@ -315,3 +315,29 @@ void StableFluids::velocity_step(GridStructure<float>* u, GridStructure<float>* 
 
 	project(*u, *v, *w, *u0, *v0);
 }
+
+void StableFluids::Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke)
+{
+
+	prevUVelocity.fill(0.f);
+	prevVVelocity.fill(0.f);
+	prevWVelocity.fill(0.f);
+	prevSmoke.fill(0.f);
+
+	prevUVelocity(column / 2, 2, depth / 2) = addForceU;
+
+	prevVVelocity(column / 2, 2, depth / 2) = addForceV;
+
+	prevWVelocity(column / 2, row / 2, 2) = addForceW;
+
+	prevUVelocity(column - 2, row / 2, depth / 2) = negAddForceU;
+
+	prevVVelocity(column / 2, row - 2, depth / 2) = negAddForceV;
+
+	prevWVelocity(column / 2, row / 2, depth - 2) = negAddForceW;
+
+	prevSmoke(column / 2, 2, depth / 2) = 75.f;
+
+	velocity_step(&uVelocity, &vVelocity, &wVelocity, &prevUVelocity, &prevVVelocity, &prevWVelocity, timeStep);
+	density_step(&smoke, &prevSmoke, timeStep);
+}

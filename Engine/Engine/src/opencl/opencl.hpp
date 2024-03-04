@@ -90,7 +90,7 @@ struct Device_Info {
 };
 
 string get_opencl_c_code(); // implemented in kernel.hpp
-string get_fluid_code();
+string get_opencl_c_code_old(); // implemented in kernel.hpp
 inline void print_device_info(const Device_Info& d) { // print OpenCL device info
 #if defined(_WIN32)
 	const string os = "Windows";
@@ -186,12 +186,19 @@ private:
 	;}
 public:
 	Device_Info info;
-	inline Device(const Device_Info& info, const string& opencl_c_code=get_opencl_c_code()) {
+	inline Device(const Device_Info& info, bool outoforder, const string& opencl_c_code) {
 		print_device_info(info);
 		this->info = info;
 
-		cl_command_queue_properties props = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
-		this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device, props);
+		if(outoforder)
+		{
+			cl_command_queue_properties props = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
+			this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device, props);
+		} else
+		{
+			this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device);
+		}
+
 
 		cl::Program::Sources cl_source;
 		const string kernel_code = enable_device_capabilities()+"\n"+opencl_c_code;
@@ -565,11 +572,6 @@ public:
 	}
 	inline Kernel& set_ranges(const cl::NDRange global, const cl::NDRange local)
 	{
-		this->N = 1;
-		for(size_t i = 0; i < global.dimensions(); i++)
-		{
-			this->N *= global[i];
-		}
 		cl_range_global = global;
 		cl_range_local = local;
 		return *this;

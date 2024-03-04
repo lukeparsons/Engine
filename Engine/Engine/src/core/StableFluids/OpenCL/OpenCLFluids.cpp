@@ -41,7 +41,7 @@ static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
 
 OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth) : column(_column), row(_row), depth(_depth), N(std::max(std::max(column, row), depth))
 {
-	device = Device(select_device_with_most_flops()); // compile OpenCL C code for the fastest available device
+	device = Device(select_device_with_most_flops(), true, get_opencl_c_code()); // compile OpenCL C code for the fastest available device
 	cldevice = device.get_cl_device();
 	cl_queue = device.get_cl_queue();
 
@@ -180,42 +180,26 @@ void OpenCLFluids::Profile(float timeStep, float diffRate, float addForceU, floa
 {
 
 	prevUVelocity.fill_host(0.0f);
-	if(addForceU)
-	{
-		prevUVelocity[IX(column / 2, row / 2, depth / 2)] = addForceU;
-	}
 
-	if(negAddForceU)
-	{
-		prevUVelocity[IX(column / 2, row / 2, depth / 2)] = negAddForceU;
-	}
+	prevUVelocity[IX(column / 2, row / 2, depth / 2)] = addForceU;
 
+	prevUVelocity[IX(column / 2, row / 2, depth / 2)] = negAddForceU;
+	
 	prevVVelocity.fill_host(0.0f);
-	if(addForceV)
-	{
-		prevVVelocity[IX(column / 2, 2, depth / 2)] = addForceV;
-	}
 
-	if(negAddForceV)
-	{
-		prevVVelocity[IX(column / 2, row / 2, depth / 2)] = negAddForceV;
-	}
+	prevVVelocity[IX(column / 2, 2, depth / 2)] = addForceV;
+
+	prevVVelocity[IX(column / 2, row / 2, depth / 2)] = negAddForceV;
 
 	prevWVelocity.fill_host(0.0f);
-	if(addForceW)
-	{
-		prevWVelocity[IX(column / 2, row / 2, 2)] = addForceW;
-	}
-	if(negAddForceW)
-	{
-		prevWVelocity[IX(column / 2, row / 2, depth - 2)] = -addForceW;
-	}
+
+	prevWVelocity[IX(column / 2, row / 2, 2)] = addForceW;
+	
+	prevWVelocity[IX(column / 2, row / 2, depth - 2)] = -addForceW;
 
 	prevSmoke.fill_host(0.0f);
-	if(addSmoke)
-	{
-		prevSmoke[IX(column / 2, 2, depth / 2)] = addSmoke;
-	}
+
+	prevSmoke[IX(column / 2, 2, depth / 2)] = addSmoke;
 
 	prevUVelocity.enqueue_write();
 	prevVVelocity.enqueue_write();
