@@ -4,16 +4,14 @@
 #include "../../../opencl/opencl.hpp"
 
 /*TODO:
-	- Mouse control
-	- UI
+	- Advection
 	- Ink
-	- Different advection
-	- Test different workgroup sizes
-	- Non-sequential enqueue_running*/
+	- UI
+	- Weird workgroup size*/
 
 #define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k)) 
 
-#define MAX_ITERATIONS 10
+#define MAX_ITERATIONS 100
 
 static std::array<int, 3> index_to_coords(uint idx, uint column, uint row)
 {
@@ -116,7 +114,7 @@ void OldOpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, 
 
 		if(negAddForceU)
 		{
-			prevUVelocity[IX(column - 2, 2, depth / 2)] = -vel;
+			prevUVelocity[IX(column / 2, 2, depth / 2)] = -vel;
 			negAddForceU = false;
 		}
 
