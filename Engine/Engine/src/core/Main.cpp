@@ -27,7 +27,7 @@
 #include "StableFluids/OldOpenCL/OldOpenCLFluids.h"
 #include "StableFluids/OpenCL/Test.h"
 
-#define row 80
+#define row 100
 #define column 80
 #define depth 80
 
@@ -199,13 +199,15 @@ int main()
 
 	std::shared_ptr<Texture> wallTex = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
 
+	std::shared_ptr<Texture> noiseTex = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/noise.png"));
+
 	//Scene scene;
 
 	//InitUI(window);
 
 	//StableFluids stablefluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
-	//OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
-	OldOpenCLFluids oldCLFluid = OldOpenCLFluids(column, row, depth);
+	OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
+	//OldOpenCLFluids oldCLFluid = OldOpenCLFluids(column, row, depth);
 	
 	//openCLfluid.InitVelocityRender();
 
@@ -214,12 +216,12 @@ int main()
 	unsigned int frameCount = 1000;
 	float timeStep = 0.4f;
 
-	//VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data());
+	VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data(), noiseTex);
 	//VolumeRender volRender = VolumeRender(column, row, depth, stablefluid.smoke.grid.data());
-	VolumeRender volRender = VolumeRender(column, row, depth, oldCLFluid.smoke.data());
+	//VolumeRender volRender = VolumeRender(column, row, depth, oldCLFluid.smoke.data());
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	float f, f2, f3, f4;
-	while(!glfwWindowShouldClose(window))
+	for(uint i = 0; i < frameCount; i++)
 	{
 		currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
@@ -237,19 +239,19 @@ int main()
 
 		//fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
-		oldCLFluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
-		//f = (float)i;
-		//f2 = f / 2.0f;
-		///f3 = f / 3.0f;
-		//f4 = f / 4.0f;
-		//openCLfluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
+		//oldCLFluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
+		f = (float)i;
+		f2 = f / 2.0f;
+		f3 = f / 3.0f;
+		f4 = f / 4.0f;
+		openCLfluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
 		//oldCLFluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
 		//stablefluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
 		//scene.Update(cameraMatrix);
 
 		//openCLfluid.VelocityRender(cameraMatrix);
 		
-		volRender.RenderVolume(cameraMatrix, camera);
+		volRender.RenderVolume(cameraMatrix, camera, currentFrameTime);
 
 		//RenderUI();
 

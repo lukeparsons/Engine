@@ -12,6 +12,8 @@ struct VolumeShader : public ShaderProgram
 	unsigned int cameraPosLoc;
 	unsigned int smokeLoc;
 	unsigned int halfBoxSizeLoc;
+	unsigned int timeLoc;
+	unsigned int noiseTexLoc;
 
 	VolumeShader(std::string vertexFile, std::string fragmentFile) : ShaderProgram(vertexFile, fragmentFile)
 	{
@@ -22,6 +24,8 @@ struct VolumeShader : public ShaderProgram
 		cameraPosLoc = glGetUniformLocation(this->id, "CameraPos");
 		smokeLoc = glGetUniformLocation(this->id, "smoke");
 		halfBoxSizeLoc = glGetUniformLocation(this->id, "halfBoxSize");
+		timeLoc = glGetUniformLocation(this->id, "time");
+		noiseTexLoc = glGetUniformLocation(this->id, "noiseTex");
 	};
 
 	virtual void Configure(const Matrix4f& cameraMatrix, const Matrix4f& modelMatrix) override
@@ -30,6 +34,7 @@ struct VolumeShader : public ShaderProgram
 		glUniformMatrix4fv(transformLoc, 1, GL_TRUE, cameraMatrix.matrix[0]);
 		glUniformMatrix4fv(modelLoc, 1, GL_TRUE, modelMatrix.matrix[0]);
 		glUniform2f(windowSizeLoc, 768, 768);
+
 	}
 
 };
@@ -43,10 +48,25 @@ struct VolumeRender
 	std::array<float, 3> scale = { 1, 1, 1 };
 	std::shared_ptr<VolumeShader> volShader;
 
-	VolumeRender(int _column, int _row, int _depth, const float* _smoke) : column(_column + 2), row(_row + 2), depth(_depth + 2), smoke(_smoke)
+	VolumeRender(int _column, int _row, int _depth, const float* _smoke, std::shared_ptr<Texture>& noiseTex) : column(_column + 2), row(_row + 2), depth(_depth + 2), smoke(_smoke)
 	{
 		rect = std::make_shared<Mesh>("../Engine/assets/box.obj");
 		volShader = g_shaderStore.LoadShader<VolumeShader>("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex", "../Engine/src/renderer/shaders/shaderfiles/RayMarch.fragment");
+
+		glActiveTexture(GL_TEXTURE1);
+		GLuint noiseID;
+		glGenTextures(1, &noiseID);
+		glBindTexture(GL_TEXTURE_2D, noiseID);
+		glUniform1i(volShader->noiseTexLoc, 1);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, noiseTex->width, noiseTex->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, noiseTex->GetPixelData());
 
 		glActiveTexture(GL_TEXTURE0);
 		glGenTextures(1, &textureID);
@@ -62,5 +82,5 @@ struct VolumeRender
 		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, column, row, depth, 0, GL_RED, GL_FLOAT, smoke);
 	}
 
-	void RenderVolume(Matrix4f& cameraMatrix, Camera& camera);
+	void RenderVolume(Matrix4f& cameraMatrix, Camera& camera, float time);
 };

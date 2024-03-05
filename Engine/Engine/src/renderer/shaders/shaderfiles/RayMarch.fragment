@@ -6,6 +6,8 @@ out vec4 FragColor;
 uniform vec2 WindowSize;
 uniform vec3 CameraPos;
 uniform vec3 halfBoxSize;
+uniform float time;
+uniform sampler2D noiseTex;
 
 uniform sampler3D smoke;
 
@@ -16,15 +18,55 @@ float sdf_cuboid(vec3 pos, vec3 size)
 		  + length(max(d,0.0));
 }
 
-float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
+float noise(vec3 x ) {
+	vec3 p = floor(x);
+	vec3 f = fract(x);
+	f = f*f*(3.0-2.0*f);
+
+	vec2 uv = (p.xy+vec2(37.0,239.0)*p.z) + f.xy;
+	vec2 tex = textureLod(noiseTex,(uv+0.5)/256.0,0.0).yx;
+
+	return mix( tex.x, tex.y, f.z ) * 2.0 - 1.0;
+}
+
+float fbm(vec3 p) {
+	  vec3 q = p + time * 0.5 * vec3(1.0, -0.2, -1.0);
+	  float g = noise(q);
+
+	  float f = 0.0;
+	  float scale = 0.5;
+	  float factor = 2.02;
+
+	  for (int i = 0; i < 6; i++) {
+		  f += scale * noise(q);
+		  q *= factor;
+		  factor += 0.21;
+		  scale *= 0.5;
+	  }
+
+	  return f;
+}
+
+float scene(vec3 p) {
+	float distance = sdf_cuboid(p, halfBoxSize);
+
+	float f = fbm(p);
+
+	return -distance + f;
+}
+
+
+vec4 ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 {
 	float depth = sdf_cuboid(rayorigin, halfBoxSize);
 
 	vec3 current_pos = vec3((FragPos.xy + 1.0) / 2.0, (-FragPos.z + 1.0) / 2.0);
 
 	const float MARCH_SIZE = 0.05;
+	const vec3 SUN_POSITION = vec3(1.0, 0.0, 0.0);
+	vec3 sunDirection = normalize(SUN_POSITION);
 
-	float res = 0.2;
+	vec4 res = vec4(0.0, 0.0, 0.0, 0.2);
 
 	float hypotenuse = length(vec3(2, 2, 2));
 
@@ -36,9 +78,21 @@ float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 		current_pos = vec3((current_pos.xy + 1.0) / 2.0, (-current_pos.z + 1.0) / 2.0);
 
 		float dist = sdf_cuboid(current_pos, halfBoxSize);
+		float density = scene(current_pos);
 
 		if(dist < 0.0) {
-			res += texture(smoke, current_pos).r;
+			//res += texture(smoke, current_pos).r;
+
+			float diffuse = clamp((scene(current_pos) - scene(current_pos + 0.3 * sunDirection)) / 0.3, 0.0, 1.0 );
+
+			vec3 lin = vec3(0.60,0.60,0.75) * 1.1 + 0.8 * vec3(1.0,0.6,0.3) * diffuse;
+
+			vec4 color = vec4(mix(vec3(1.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), texture(smoke, current_pos).r), texture(smoke, current_pos).r);
+
+			color.rgb *= lin;
+			color.rgb *= color.a;
+			res += color * (1.0 - res.a);
+			
 		} else if(dist > hypotenuse) {
 			break;
 		}
@@ -54,6 +108,6 @@ void main()
 	vec4 FragPos = VertexPos;
 	vec3 raydir = normalize(FragPos.xyz - CameraPos);
 
-	float res = ray_march(CameraPos, raydir, FragPos.xyz);
-	FragColor = vec4(0.6, 0.6, 0.6, res);
+	vec4 res = ray_march(CameraPos, raydir, FragPos.xyz);
+	FragColor = res;
 }

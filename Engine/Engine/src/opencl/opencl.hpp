@@ -193,7 +193,7 @@ public:
 		if(outoforder)
 		{
 			cl_command_queue_properties props = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
-			this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device, props);
+			this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device, cl::QueueProperties::OutOfOrder);
 		} else
 		{
 			this->cl_queue = cl::CommandQueue(info.cl_context, info.cl_device);
