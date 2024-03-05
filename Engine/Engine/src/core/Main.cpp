@@ -27,9 +27,9 @@
 #include "StableFluids/OldOpenCL/OldOpenCLFluids.h"
 #include "StableFluids/OpenCL/Test.h"
 
-#define row 100
-#define column 80
-#define depth 80
+#define row 42
+#define column 42
+#define depth 42
 
 static const int width = 768;
 static const int height = 768;
@@ -206,8 +206,8 @@ int main()
 	//InitUI(window);
 
 	//StableFluids stablefluid = StableFluids(row, column, depth, Vector3f(0, 0, 0), 0.0f, 0.01f);
-	OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
-	//OldOpenCLFluids oldCLFluid = OldOpenCLFluids(column, row, depth);
+	//OpenCLFluids openCLfluid = OpenCLFluids(column, row, depth);
+	OldOpenCLFluids oldCLFluid = OldOpenCLFluids(column, row, depth);
 	
 	//openCLfluid.InitVelocityRender();
 
@@ -216,12 +216,12 @@ int main()
 	unsigned int frameCount = 1000;
 	float timeStep = 0.4f;
 
-	VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data(), noiseTex);
+	//VolumeRender volRender = VolumeRender(column, row, depth, openCLfluid.smoke.data(), noiseTex);
 	//VolumeRender volRender = VolumeRender(column, row, depth, stablefluid.smoke.grid.data());
-	//VolumeRender volRender = VolumeRender(column, row, depth, oldCLFluid.smoke.data());
+	VolumeRender volRender = VolumeRender(column, row, depth, oldCLFluid.smoke.data(), noiseTex);
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
 	float f, f2, f3, f4;
-	for(uint i = 0; i < frameCount; i++)
+	while(!glfwWindowShouldClose(window))
 	{
 		currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
@@ -240,11 +240,12 @@ int main()
 		//fluid.Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
 		//oldCLFluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
-		f = (float)i;
-		f2 = f / 2.0f;
-		f3 = f / 3.0f;
-		f4 = f / 4.0f;
-		openCLfluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
+		oldCLFluid.Simulate(0.4f, 0.0f, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear, xForceMotion, yForceMotion);
+		//f = (float)i;
+		//f2 = f / 2.0f;
+		//f3 = f / 3.0f;
+		//f4 = f / 4.0f;
+		//openCLfluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
 		//oldCLFluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
 		//stablefluid.Profile(0.4f, 0.0f, f, -f2, f3, -f, f4, -f3, f2);
 		//scene.Update(cameraMatrix);
@@ -257,10 +258,10 @@ int main()
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		frameTime += glfwGetTime() - currentFrameTime;
+		//frameTime += glfwGetTime() - currentFrameTime;
 	}
 
-	std::cout << "Average Frametime " << (frameTime / (double)frameCount) << std::endl;
+	//std::cout << "Average Frametime " << (frameTime / (double)frameCount) << std::endl;
 	//ShutdownUI();
 	glfwTerminate();
 	return 0;
