@@ -20,7 +20,7 @@ float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 {
 	float depth = sdf_cuboid(rayorigin, halfBoxSize);
 
-	vec3 current_pos = vec3((FragPos.xy + 1.0) / 2.0, (-FragPos.z + 1.0) / 2.0);
+	vec3 current_pos;
 
 	const float MARCH_SIZE = 0.05;
 
@@ -33,15 +33,9 @@ float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 	for(int i = 0; i < NUMBER_STEPS; ++i) 
 	{
 		current_pos = rayorigin + depth * raydir;
-		current_pos = vec3((current_pos.xy + 1.0) / 2.0, (-current_pos.z + 1.0) / 2.0);
 
-		float dist = sdf_cuboid(current_pos, halfBoxSize);
-
-		if(dist < 0.0) {
-			res += texture(smoke, current_pos).r;
-		} else if(dist > hypotenuse) {
-			break;
-		}
+		res += texture(smoke, current_pos).r;
+		
 
 		depth += MARCH_SIZE;
 	}

@@ -45,7 +45,7 @@ struct VolumeRender
 
 	VolumeRender(int _column, int _row, int _depth, const float* _smoke) : column(_column + 2), row(_row + 2), depth(_depth + 2), smoke(_smoke)
 	{
-		rect = std::make_shared<Mesh>("../Engine/assets/box.obj");
+		rect = std::make_shared<Mesh>("../Engine/assets/halfcube.obj");
 		volShader = g_shaderStore.LoadShader<VolumeShader>("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex", "../Engine/src/renderer/shaders/shaderfiles/RayMarch.fragment");
 
 		glActiveTexture(GL_TEXTURE0);

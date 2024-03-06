@@ -192,13 +192,6 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj");
-	//Mesh torus("../Engine/assets/torus.obj", "../Engine/assets/wall2.png", &basicShader);
-
-	std::shared_ptr<Mesh> square = std::make_shared<Mesh>("../Engine/assets/square.obj");
-
-	std::shared_ptr<Texture> wallTex = std::make_shared<TextureData<unsigned char>>(LoadPng("../Engine/assets/wall2.png"));
-
 	//Scene scene;
 
 	//InitUI(window);
