@@ -18,89 +18,87 @@ float sdf_cuboid(vec3 pos, vec3 size)
 		  + length(max(d,0.0));
 }
 
-float noise(vec3 x ) {
-	vec3 p = floor(x);
-	vec3 f = fract(x);
-	f = f*f*(3.0-2.0*f);
-
-	vec2 uv = (p.xy+vec2(37.0,239.0)*p.z) + f.xy;
-	vec2 tex = textureLod(noiseTex,(uv+0.5)/256.0,0.0).yx;
-
-	return mix( tex.x, tex.y, f.z ) * 2.0 - 1.0;
-}
-
-float fbm(vec3 p) {
-	  vec3 q = p + time * 0.5 * vec3(1.0, -0.2, -1.0);
-	  float g = noise(q);
-
-	  float f = 0.0;
-	  float scale = 0.5;
-	  float factor = 2.02;
-
-	  for (int i = 0; i < 6; i++) {
-		  f += scale * noise(q);
-		  q *= factor;
-		  factor += 0.21;
-		  scale *= 0.5;
-	  }
-
-	  return f;
-}
-
-float scene(vec3 p) {
-	float distance = sdf_cuboid(p, halfBoxSize);
-
-	float f = fbm(p);
-
-	return -distance + f;
-}
-
-
 vec4 ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 {
+
+	vec3 current_pos;
 	float depth = sdf_cuboid(rayorigin, halfBoxSize);
 
-	vec3 current_pos = vec3((FragPos.xy + 1.0) / 2.0, (-FragPos.z + 1.0) / 2.0);
-
 	const float MARCH_SIZE = 0.05;
-	const vec3 SUN_POSITION = vec3(1.0, 0.0, 0.0);
-	vec3 sunDirection = normalize(SUN_POSITION);
-
-	vec4 res = vec4(0.0, 0.0, 0.0, 0.2);
-
-	float hypotenuse = length(vec3(2, 2, 2));
-
 	const int NUMBER_STEPS = 70;
+
+    vec3 LightVector = vec3(-2.0, -5.0, 0.0);
+    vec3 LightColour = vec3(1.0, 1.0, 1.0);
+    float Density = 16.0;
+    vec3 ShadowDensity = vec3(8.0, 16.0, 32.0);
+    const float ShadowThreshold = 0.01;
+
+    vec3 SkyColour = vec3(0.6, 0.2, 0.5);
+    float AmbientDensity = 2.0;
+
+    const int SHADOW_STEPS = 16;
+    const float SHADOW_STEP_SIZE = 1 / SHADOW_STEPS;
+
+    float transmittance = 0.8;
+    vec3 lightenergy = vec3(0.0);
+    float current_density = 0.0;
+    float shadowthresh = -log(ShadowThreshold) / ShadowDensity.x;
+
+    LightVector *= SHADOW_STEP_SIZE;
+    ShadowDensity *= SHADOW_STEP_SIZE;
+    Density *= MARCH_SIZE;
 
 	for(int i = 0; i < NUMBER_STEPS; ++i) 
 	{
 		current_pos = rayorigin + depth * raydir;
 		current_pos = vec3((current_pos.xy + 1.0) / 2.0, (-current_pos.z + 1.0) / 2.0);
 
-		float dist = sdf_cuboid(current_pos, halfBoxSize);
-		float density = scene(current_pos);
+		float sample = texture(smoke, current_pos).r;
 
-		if(dist < 0.0) {
-			//res += texture(smoke, current_pos).r;
+		if(sample > 0.001) {
 
-			float diffuse = clamp((scene(current_pos) - scene(current_pos + 0.3 * sunDirection)) / 0.3, 0.0, 1.0 );
+            vec3 lightpos = current_pos;
+            float shadowdist = 0.0;
+            float lightsample;
+            for(int s = 0; s < SHADOW_STEPS; s++) 
+            {
+                lightpos += LightVector;
+                lightsample = texture(smoke, lightpos).r;
 
-			vec3 lin = vec3(0.60,0.60,0.75) * 1.1 + 0.8 * vec3(1.0,0.6,0.3) * diffuse;
+                vec3 shadowboxtest = floor(0.5 + (abs(0.5 - lightpos)));
+                float exitshadowbox = shadowboxtest.x + shadowboxtest.y + shadowboxtest.z;
 
-			vec4 color = vec4(mix(vec3(1.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), texture(smoke, current_pos).r), texture(smoke, current_pos).r);
+                if(shadowdist > shadowthresh || exitshadowbox >= 1) {
+                    break;
+                }
 
-			color.rgb *= lin;
-			color.rgb *= color.a;
-			res += color * (1.0 - res.a);
-			
-		} else if(dist > hypotenuse) {
-			break;
+                shadowdist += lightsample;
+            }
+
+            sample = 1 - exp(-sample * Density);
+            lightenergy += exp(-shadowdist * ShadowDensity) * sample * transmittance * LightColour;
+            transmittance *= 1 - sample;
+
+            // ambient lighting
+            shadowdist = 0;
+            lightpos = current_pos + vec3(0, 0, 0.025);
+            lightsample = texture(smoke, lightpos).r;
+            shadowdist += lightsample;
+
+            lightpos = current_pos + vec3(0, 0, 0.05);
+            lightsample = texture(smoke, lightpos).r;
+            shadowdist += lightsample;
+
+            lightpos = current_pos + vec3(0, 0, 0.15);
+            lightsample = texture(smoke, lightpos).r;
+            shadowdist += lightsample;
+
+            lightenergy += exp(-shadowdist * AmbientDensity) * sample * SkyColour * transmittance;
 		}
 
 		depth += MARCH_SIZE;
 	}
-
-	return res;
+	return vec4(lightenergy, 1 - transmittance);
 }
 
 void main() 
