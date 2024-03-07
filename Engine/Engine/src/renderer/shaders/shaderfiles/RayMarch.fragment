@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec4 VertexPos;
+in vec3 VertexPos;
 out vec4 FragColor;
 
 uniform vec2 WindowSize;
@@ -18,11 +18,11 @@ float sdf_cuboid(vec3 pos, vec3 size)
 
 float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 {
-	float depth = sdf_cuboid(rayorigin, halfBoxSize);
+	float depth = 0.0;
 
 	vec3 current_pos;
 
-	const float MARCH_SIZE = 0.05;
+	const float MARCH_SIZE = 0.01;
 
 	float res = 0.2;
 
@@ -32,10 +32,9 @@ float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 
 	for(int i = 0; i < NUMBER_STEPS; ++i) 
 	{
-		current_pos = rayorigin + depth * raydir;
-
-		res += texture(smoke, current_pos).r;
+		current_pos = FragPos + depth * raydir;
 		
+		res += texture(smoke, current_pos).r;
 
 		depth += MARCH_SIZE;
 	}
@@ -45,9 +44,10 @@ float ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 
 void main() 
 {
-	vec4 FragPos = VertexPos;
+	vec3 FragPos = VertexPos;
 	vec3 raydir = normalize(FragPos.xyz - CameraPos);
-
-	float res = ray_march(CameraPos, raydir, FragPos.xyz);
+	
+	vec3 MappedFragPos = (FragPos.xyz + 1.0) / 2.0;
+	float res = ray_march(CameraPos, raydir, MappedFragPos);
 	FragColor = vec4(0.6, 0.6, 0.6, res);
-}
+ }

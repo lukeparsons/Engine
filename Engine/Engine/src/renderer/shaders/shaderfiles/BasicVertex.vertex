@@ -7,11 +7,11 @@ uniform mat4 transform;
 uniform mat4 mesh;
 out vec2 TexCoord;
 
-out vec4 VertexPos;
+out vec3 VertexPos;
 
 void main()
 {
-	VertexPos = mesh * vec4(aPos, 1.0f);
+	VertexPos = (mesh * vec4(aPos, 1.0f)).xyz;
 	gl_Position = transform * mesh * vec4(aPos, 1.0f);
 	TexCoord = aTexCoord;
 }
