@@ -1,11 +1,10 @@
 #pragma once
-#include "../core/StableFluids/StableFluids.h"
-#include <GLFW/glfw3.h>
+#include "../core/StableFluids/Fluid.h"
 #include "../core/StableFluids/VolumeRendering.h"
 
 void InitUI(GLFWwindow* window);
 
-void PrepareFrameUI(StableFluids& fluid, VolumeRender& volRender, float* timeStep);
+void PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std::array<int, 3>* gridsize, float* timeStep, bool* enableLighting);
 
 void RenderUI();
 

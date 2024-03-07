@@ -11,8 +11,6 @@
 
 #define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k)) 
 
-#define MAX_ITERATIONS 20
-
 static std::array<int, 3> index_to_coords(uint idx, uint column, uint row)
 {
 	int k = idx / (column * row);
@@ -33,7 +31,7 @@ static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
 	return kernel;
 }
 
-OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth) : column(_column), row(_row), depth(_depth), N(std::max(std::max(column, row), depth))
+OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth) : Fluid(_column, _row, _depth)
 {
 	Device device(select_device_with_most_flops(), false, get_opencl_c_code_old()); // compile OpenCL C code for the fastest available device
 
@@ -55,7 +53,7 @@ OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsign
 	const float timeStep = 0.4f;
 	viscosity = 0.0f;
 
-	const uint workgroup_size = 128u;
+	const uint workgroup_size = 256u;
 
 	addSource = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "add_source", smoke, prevSmoke, timeStep, column, row), column + 2u, row + 2u, depth + 2u);
 
@@ -86,11 +84,8 @@ OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsign
 	prevSmoke.enqueue_fill_device(0.0f);
 }
 
-void OldOpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear,
-	float xForce, float yForce)
+void OldOpenCLFluids::Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear)
 {
-
-	const float vel = 400.0f;
 
 	if(clear)
 	{
@@ -108,45 +103,45 @@ void OldOpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, 
 		prevUVelocity.fill_host(0.0f);
 		if(addForceU)
 		{
-			prevUVelocity[IX(column / 2, 2, depth / 2)] = vel;
+			prevUVelocity[IX(column / 2, 2, depth / 2)] = addvel;
 			addForceU = false;
 		}
 
 		if(negAddForceU)
 		{
-			prevUVelocity[IX(column / 2, 2, depth / 2)] = -vel;
+			prevUVelocity[IX(column / 2, 2, depth / 2)] = -addvel;
 			negAddForceU = false;
 		}
 
 		prevVVelocity.fill_host(0.0f);
 		if(addForceV)
 		{
-			prevVVelocity[IX(column / 2, 2, depth / 2)] = vel;
+			prevVVelocity[IX(column / 2, 2, depth / 2)] = addvel;
 			addForceV = false;
 		}
 
 		if(negAddForceV)
 		{
-			prevVVelocity[IX(column / 2, row / 2, depth / 2)] = -vel;
+			prevVVelocity[IX(column / 2, row / 2, depth / 2)] = -addvel;
 			negAddForceV = false;
 		}
 
 		prevWVelocity.fill_host(0.0f);
 		if(addForceW)
 		{
-			prevWVelocity[IX(column / 2, row / 2, 2)] = vel;
+			prevWVelocity[IX(column / 2, row / 2, 2)] = addvel;
 			addForceW = false;
 		}
 		if(negAddForceW)
 		{
-			prevWVelocity[IX(column / 2, row / 2, depth - 2)] = -vel;
+			prevWVelocity[IX(column / 2, row / 2, depth - 2)] = -addvel;
 			negAddForceW = false;
 		}
 
 		prevSmoke.fill_host(0.0f);
 		if(addSmoke)
 		{
-			prevSmoke[IX(column / 2, 2, depth / 2)] = 1000.f;
+			prevSmoke[IX(column / 2, 2, depth / 2)] = addsmoke;
 			addSmoke = false;
 		}
 
@@ -157,14 +152,14 @@ void OldOpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, 
 	}
 
 	velocity_step(timeStep);
-	density_step(timeStep, diffRate);
+	density_step(timeStep);
 
 	smoke.enqueue_read();
 
 	cl_queue.finish();
 }
 
-void OldOpenCLFluids::Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke)
+void OldOpenCLFluids::Profile(float timeStep, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke)
 {
 
 	prevUVelocity.fill_host(0.0f);
@@ -211,7 +206,7 @@ void OldOpenCLFluids::Profile(float timeStep, float diffRate, float addForceU, f
 	prevSmoke.enqueue_write();
 
 	velocity_step(timeStep);
-	density_step(timeStep, diffRate);
+	density_step(timeStep);
 
 	smoke.enqueue_read();
 	//uVelocity.enqueue_read();
@@ -221,9 +216,9 @@ void OldOpenCLFluids::Profile(float timeStep, float diffRate, float addForceU, f
 	cl_queue.finish();
 }
 
-void OldOpenCLFluids::density_step(const float timeStep, const float diffRate)
+void OldOpenCLFluids::density_step(const float timeStep)
 {
-	scale = timeStep * diffRate * N * N * N;
+	scale = timeStep * diffusionRate * N * N * N;
 
 	addSource.set_parameters(0, smoke, prevSmoke, timeStep);
 	addSource.enqueue_run();
@@ -242,18 +237,14 @@ void OldOpenCLFluids::velocity_step(float timeStep)
 {
 	scale = timeStep * viscosity * N * N * N;
 
-	// TODO: non-in-order enqueue for speed up
 	addSource.set_parameters(0, uVelocity, prevUVelocity, timeStep);
 	addSource.enqueue_run();
-	addSource.set_parameters(0, vVelocity, prevVVelocity, timeStep);
+	addSource.set_parameters(0, vVelocity, prevVVelocity);
 	addSource.enqueue_run();
-	addSource.set_parameters(0, wVelocity, prevWVelocity, timeStep);
+	addSource.set_parameters(0, wVelocity, prevWVelocity);
 	addSource.enqueue_run();
 
-	// diffuse
-	//SWAP(prevUVelocity, uVelocity);
-	//SWAP(prevVVelocity, vVelocity);
-	//SWAP(prevWVelocity, wVelocity);
+	// diffuse (SWAP)
 
 	linsolve.set_parameters(0, prevUVelocity, uVelocity, scale, (float)(1.0f + 6.0f * scale));
 	lin_solve(1, prevUVelocity);
@@ -266,28 +257,20 @@ void OldOpenCLFluids::velocity_step(float timeStep)
 
 	project(prevUVelocity, prevVVelocity, prevWVelocity, uVelocity, vVelocity);
 
-	//SWAP(prevUVelocity, uVelocity);
-	//SWAP(prevVVelocity, vVelocity);
-	//SWAP(prevWVelocity, wVelocity);
+	// SWAP
 
 	// TODO: only update timestep and dont need to enqueue_run sequentially
 	advect.set_parameters(0, uVelocity, prevUVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep);
 	advect.enqueue_run(cl::NDRange{ 1, 1, 1 });
-	//uVelocity.read_from_device();
 	set_boundary(1, uVelocity);
-	//uVelocity.write_to_device();
 
-	advect.set_parameters(0, vVelocity, prevVVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep);
+	advect.set_parameters(0, vVelocity, prevVVelocity, prevUVelocity, prevVVelocity, prevWVelocity);
 	advect.enqueue_run(cl::NDRange{ 1, 1, 1 });
-	//vVelocity.read_from_device();
 	set_boundary(2, vVelocity);
-	//vVelocity.write_to_device();
 
-	advect.set_parameters(0, wVelocity, prevWVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep);
+	advect.set_parameters(0, wVelocity, prevWVelocity, prevUVelocity, prevVVelocity, prevWVelocity);
 	advect.enqueue_run(cl::NDRange{ 1, 1, 1 });
-	//wVelocity.read_from_device();
 	set_boundary(3, wVelocity);
-	//wVelocity.write_to_device();
 
 	project(uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity);
 
@@ -298,12 +281,8 @@ void OldOpenCLFluids::project(Memory<float>& u, Memory<float>& v, Memory<float>&
 	project1.set_parameters(0, u, v, w, p, div);
 	project1.enqueue_run(cl::NDRange{ 1, 1, 1 });
 
-	//p.read_from_device();
-	//div.read_from_device();
 	set_boundary(0, div);
 	set_boundary(0, p);
-	//p.write_to_device();
-	//div.write_to_device();
 
 	linsolve.set_parameters(0, p, div, 1.0f, 6.0f);
 	lin_solve(0, p);
@@ -311,31 +290,22 @@ void OldOpenCLFluids::project(Memory<float>& u, Memory<float>& v, Memory<float>&
 	project2.set_parameters(0, u, v, w, p);
 	project2.enqueue_run(cl::NDRange{ 1, 1, 1 });
 
-	//u->read_from_device();
-	//v->read_from_device();
-	//w->read_from_device();
 	set_boundary(1, u);
 	set_boundary(2, v);
 	set_boundary(3, w);
-	//u->write_to_device();
-	//v->write_to_device();
-	//w->write_to_device();
 }
 
 void OldOpenCLFluids::lin_solve(const int b, Memory<float>& grid)
 {
-	for(int t = 0; t < MAX_ITERATIONS; t++)
+	for(int t = 0; t < max_iterations; t++)
 	{
 		linsolve.enqueue_run(cl::NDRange{ 1, 1, 1 });
-		//grid.read_from_device();
 		set_boundary(b, grid);
-		//grid.write_to_device();
 	}
 }
 
 void OldOpenCLFluids::set_boundary(int b, Memory<float>& grid)
 {
-	// TODO: non sequential
 	b == 3 ? sidesBoundaryFace.set_parameters(0, grid, -1) : sidesBoundaryFace.set_parameters(0, grid, 1);
 	sidesBoundaryFace.enqueue_run(cl::NDRange{ 1, 1 });
 

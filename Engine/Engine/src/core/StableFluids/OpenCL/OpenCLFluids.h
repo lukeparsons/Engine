@@ -1,13 +1,12 @@
 #pragma once
 #include "../../../opencl/opencl.hpp"
 #include "../../../renderer/shaders/LineShader.h"
+#include "../Fluid.h"
 
-class OpenCLFluids
+class OpenCLFluids : public Fluid
 {
 private:
 	unsigned int column, row, depth, N;
-
-	float viscosity;
 
 	Device device;
 
@@ -24,6 +23,7 @@ private:
 	Memory<float> uVelocity;
 	Memory<float> vVelocity;
 	Memory<float> wVelocity;
+	Memory<float> smoke;
 	Memory<float> prevUVelocity;
 	Memory<float> prevVVelocity;
 	Memory<float> prevWVelocity;
@@ -63,7 +63,7 @@ private:
 
 	void project(Memory<float>& u, Memory<float>& v, Memory<float>& w, Memory<float>& u0, Memory<float>& v0);
 
-	void density_step(float timeStep, float diffRate);
+	void density_step(float timeStep);
 	void velocity_step(float timeStep);
 
 	cl::vector<Event> enqueue_set_boundary(Memory<float>& grid, const int f1, const int f2, const int f3, const cl::vector<Event>& waitEvent);
@@ -87,7 +87,6 @@ private:
 	cl::vector<Event> div_bnd_event, p_bnd_event;
 
 public:
-	Memory<float> smoke;
 
 	OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth);
 
@@ -95,6 +94,11 @@ public:
 		float xForce, float yForce);
 
 	void Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke);
+
+	float* GetSmokeData()
+	{
+		return smoke.data();
+	}
 
 	void InitVelocityRender();
 	void VelocityRender(Matrix4f& cameraMatrix);

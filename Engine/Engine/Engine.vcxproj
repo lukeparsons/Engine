@@ -190,8 +190,8 @@
     <ClCompile Include="src\core\StableFluids\OpenCL\FluidKernelMain.cpp" />
     <ClCompile Include="src\core\StableFluids\OpenCL\OpenCLFluids.cpp" />
     <ClCompile Include="src\core\StableFluids\OpenCL\RenderingCL.cpp" />
-    <ClCompile Include="src\core\StableFluids\Rendering.cpp" />
-    <ClCompile Include="src\core\StableFluids\StableFluids.cpp" />
+    <ClCompile Include="src\core\StableFluids\CPUFluid\Rendering.cpp" />
+    <ClCompile Include="src\core\StableFluids\CPUFluid\StableFluids.cpp" />
     <ClCompile Include="src\core\StableFluids\VolumeRendering.cpp" />
     <ClCompile Include="src\opencl\kernel.cpp" />
     <ClCompile Include="src\scene\components\FluidComponent.cpp" />
@@ -231,11 +231,11 @@
     <ClInclude Include="src\core\3DGrid\Grid3D.h" />
     <ClInclude Include="src\core\3DGrid\GridStructures.h" />
     <ClInclude Include="src\core\3DGrid\RowVector.h" />
+    <ClInclude Include="src\core\StableFluids\Fluid.h" />
     <ClInclude Include="src\core\StableFluids\OldOpenCL\OldOpenCLFluids.h" />
     <ClInclude Include="src\core\StableFluids\OpenCL\OpenCLFluids.h" />
-    <ClInclude Include="src\core\StableFluids\OpenCL\Test.h" />
-    <ClInclude Include="src\core\StableFluids\StableFluids.h" />
-    <ClInclude Include="src\core\StableFluids\GridStructures.h" />
+    <ClInclude Include="src\core\StableFluids\CPUFluid\StableFluids.h" />
+    <ClInclude Include="src\core\StableFluids\CPUFluid\GridStructures.h" />
     <ClInclude Include="src\core\StableFluids\VolumeRendering.h" />
     <ClInclude Include="src\math\Matrix.h" />
     <ClInclude Include="src\opencl\kernel.hpp" />
@@ -297,6 +297,7 @@
     <None Include="src\renderer\shaders\shaderfiles\Line.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\Line.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\RayMarch.fragment" />
+    <None Include="src\renderer\shaders\shaderfiles\RayMarchLighting.fragment" />
     <None Include="src\shaderfiles\BasicFragment.fragment" />
     <None Include="src\shaderfiles\BasicVertex.vertex" />
     <None Include="src\shaderfiles\fluids\FluidFragment.fragment" />

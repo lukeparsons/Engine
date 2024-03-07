@@ -3,20 +3,10 @@
 in vec3 VertexPos;
 out vec4 FragColor;
 
-uniform vec2 WindowSize;
 uniform vec3 CameraPos;
-uniform vec3 halfBoxSize;
-uniform float time;
-uniform sampler2D noiseTex;
+uniform vec3 BoxSize;
 
 uniform sampler3D smoke;
-
-float sdf_cuboid(vec3 pos, vec3 size) 
-{
-	  vec3 d = abs(pos) - size;
-	  return min(max(d.x, max(d.y,d.z)), 0.0)
-		  + length(max(d,0.0));
-}
 
 vec4 ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 {
@@ -24,29 +14,10 @@ vec4 ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 	vec3 current_pos;
 	float depth = 0.0;
 
-	const float MARCH_SIZE = 0.05;
 	const int NUMBER_STEPS = 70;
+	const float MARCH_SIZE = 0.05;
 
-    vec3 LightVector = vec3(-2.0, -5.0, 0.0);
-    vec3 LightColour = vec3(1.0, 1.0, 1.0);
-    float Density = 16.0;
-    vec3 ShadowDensity = vec3(8.0, 16.0, 32.0);
-    const float ShadowThreshold = 0.01;
-
-    vec3 SkyColour = vec3(0.6, 0.2, 0.5);
-    float AmbientDensity = 2.0;
-
-    const int SHADOW_STEPS = 16;
-    const float SHADOW_STEP_SIZE = 1 / SHADOW_STEPS;
-
-    float transmittance = 0.8;
-    vec3 lightenergy = vec3(0.0);
-    float current_density = 0.0;
-    float shadowthresh = -log(ShadowThreshold) / ShadowDensity.x;
-
-    LightVector *= SHADOW_STEP_SIZE;
-    ShadowDensity *= SHADOW_STEP_SIZE;
-    Density *= MARCH_SIZE;
+    float res = 0.2;
 
 	for(int i = 0; i < NUMBER_STEPS; ++i) 
 	{
@@ -55,56 +26,19 @@ vec4 ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 		float sample = texture(smoke, current_pos).r;
 
 		if(sample > 0.001) {
-
-            vec3 lightpos = current_pos;
-            float shadowdist = 0.0;
-            float lightsample;
-            for(int s = 0; s < SHADOW_STEPS; s++) 
-            {
-                lightpos += LightVector;
-                lightsample = texture(smoke, lightpos).r;
-
-                vec3 shadowboxtest = floor(0.5 + (abs(0.5 - lightpos)));
-                float exitshadowbox = shadowboxtest.x + shadowboxtest.y + shadowboxtest.z;
-
-                if(shadowdist > shadowthresh || exitshadowbox >= 1) {
-                    break;
-                }
-
-                shadowdist += lightsample;
-            }
-
-            sample = 1 - exp(-sample * Density);
-            lightenergy += exp(-shadowdist * ShadowDensity) * sample * transmittance * LightColour;
-            transmittance *= 1 - sample;
-
-            // ambient lighting
-            shadowdist = 0;
-            lightpos = current_pos + vec3(0, 0, 0.025);
-            lightsample = texture(smoke, lightpos).r;
-            shadowdist += lightsample;
-
-            lightpos = current_pos + vec3(0, 0, 0.05);
-            lightsample = texture(smoke, lightpos).r;
-            shadowdist += lightsample;
-
-            lightpos = current_pos + vec3(0, 0, 0.15);
-            lightsample = texture(smoke, lightpos).r;
-            shadowdist += lightsample;
-
-            lightenergy += exp(-shadowdist * AmbientDensity) * sample * SkyColour * transmittance;
+            res += sample;
 		}
 
 		depth += MARCH_SIZE;
 	}
-	return vec4(lightenergy, 1 - transmittance);
+	return vec4(0.8, 0.8, 0.8, res);
 }
 
 void main() 
 {
 	vec3 raydir = normalize(VertexPos - CameraPos);
 
-    vec3 MappedFragPos = (VertexPos + 1.0) / 2.0;
-	vec4 res = ray_march(CameraPos, raydir, MappedFragPos);
-	FragColor = res;
+    vec3 MappedFragPos = (VertexPos + BoxSize) / (BoxSize * 2.0);
+
+	FragColor = ray_march(CameraPos, raydir, MappedFragPos);
 }

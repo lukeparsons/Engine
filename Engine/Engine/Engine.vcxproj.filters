@@ -99,10 +99,10 @@
     <ClCompile Include="src\core\3DGrid\GaussSeidel3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\StableFluids\StableFluids.cpp">
+    <ClCompile Include="src\core\StableFluids\CPUFluid\StableFluids.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\StableFluids\Rendering.cpp">
+    <ClCompile Include="src\core\StableFluids\CPUFluid\Rendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\imgui\imgui.cpp">
@@ -275,10 +275,10 @@
     <ClInclude Include="src\core\3DGrid\RowVector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\StableFluids\StableFluids.h">
+    <ClInclude Include="src\core\StableFluids\CPUFluid\StableFluids.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\StableFluids\GridStructures.h">
+    <ClInclude Include="src\core\StableFluids\CPUFluid\GridStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\Line.h">
@@ -329,13 +329,13 @@
     <ClInclude Include="src\opencl\utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\StableFluids\OpenCL\Test.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\StableFluids\OpenCL\OpenCLFluids.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\StableFluids\OldOpenCL\OldOpenCLFluids.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\StableFluids\Fluid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -351,7 +351,7 @@
     <None Include="src\renderer\shaders\shaderfiles\fluids\BoundaryFluidFragment.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\Line.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\Line.fragment" />
-    <None Include="src\renderer\shaders\shaderfiles\RayMarch.fragment" />
+    <None Include="src\renderer\shaders\shaderfiles\RayMarchLighting.fragment" />
     <None Include="src\renderer\shaders\shaderfiles\BasicVertex.vertex" />
     <None Include="src\renderer\shaders\shaderfiles\RayMarch.fragment" />
   </ItemGroup>

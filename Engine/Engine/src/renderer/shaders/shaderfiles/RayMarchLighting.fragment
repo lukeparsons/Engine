@@ -1,0 +1,139 @@
+#version 330 core
+
+in vec3 VertexPos;
+out vec4 FragColor;
+
+uniform vec3 CameraPos;
+uniform vec3 BoxSize;
+
+uniform sampler3D smoke;
+
+uniform vec3 LightColour;
+uniform vec3 LightVector;
+uniform vec3 SkyColour;
+uniform float AmbientDensity;
+uniform float ShadowDensity;
+
+vec4 ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
+{
+
+	vec3 current_pos;
+	float depth = 0.0;
+
+	const int NUMBER_STEPS = 70;
+	const float MARCH_SIZE = 0.05;
+    
+    vec3 LVector = LightVector;
+
+    float Density = 16.0;
+    const float ShadowThreshold = 0.2;
+
+    const int SHADOW_STEPS = 16;
+    const float SHADOW_STEP_SIZE = 0.01;
+
+    float transmittance = 1.0;
+    vec3 lightenergy = vec3(0.0);
+    float current_density = 0.0;
+
+    float shadow_density = ShadowDensity;
+
+    LVector *= SHADOW_STEP_SIZE;
+    shadow_density *= SHADOW_STEP_SIZE;
+    Density *= MARCH_SIZE;
+
+    float shadowthresh = -log(ShadowThreshold) / shadow_density;
+
+    float sample = 0.0;
+
+	for(int i = 0; i < NUMBER_STEPS; ++i) 
+	{
+		current_pos = FragPos + depth * raydir;
+
+		sample = texture(smoke, current_pos).r;
+
+		if(sample > 0.001) {
+
+            vec3 lightpos = current_pos;
+            float shadowdist = 0.0;
+            float lightsample;
+            for(int s = 0; s < SHADOW_STEPS; s++) 
+            {
+                lightpos += LVector;
+                lightsample = texture(smoke, lightpos).r;
+
+                vec3 shadowboxtest = floor(0.5 + (abs(0.5 - lightpos)));
+                float exitshadowbox = shadowboxtest.x + shadowboxtest.y + shadowboxtest.z;
+
+                shadowdist += lightsample;
+                if(shadowdist > shadowthresh || exitshadowbox >= 1) {
+                    break;
+                }
+            }
+
+            current_density = clamp(sample * Density, 0.0, 1.0);
+            float shadowterm = exp(-shadowdist * shadow_density);
+            vec3 absorbedlight = vec3(shadowterm * current_density);
+            lightenergy += absorbedlight * transmittance;
+            transmittance *= 1 - current_density;
+
+            sample = 1 - exp(-sample * Density);
+            lightenergy += exp(-shadowdist * shadow_density) * sample * transmittance * LightColour;
+            transmittance *= 1 - sample;
+
+            // ambient lighting
+            shadowdist = 0;
+            lightpos = current_pos + vec3(0, 0, 0.025);
+            lightsample = texture(smoke, lightpos).r;
+            shadowdist += lightsample;
+
+            lightpos = current_pos + vec3(0, 0, 0.05);
+            lightsample = texture(smoke, lightpos).r;
+            shadowdist += lightsample;
+
+            lightpos = current_pos + vec3(0, 0, 0.15);
+            lightsample = texture(smoke, lightpos).r;
+            shadowdist += lightsample;
+
+            lightenergy += exp(-shadowdist * AmbientDensity) * current_density * SkyColour * transmittance;
+		}
+
+		depth += MARCH_SIZE;
+	}
+
+    current_pos = FragPos + (1 - MARCH_SIZE * NUMBER_STEPS) * raydir;
+    sample = texture(smoke, current_pos).r;
+
+    float shadowdist = 0.0;
+
+    for(int s = 0; s < SHADOW_STEPS; s++) 
+    {
+        vec3 lightpos = current_pos;
+        lightpos += LVector;
+        float lightsample = texture(smoke, lightpos).r;
+
+        vec3 shadowboxtest = floor(0.5 + (abs(0.5 - lightpos)));
+        float exitshadowbox = shadowboxtest.x + shadowboxtest.y + shadowboxtest.z;
+
+        shadowdist += lightsample;
+        if(shadowdist > shadowthresh || exitshadowbox >= 1) {
+            break;
+        }
+    }
+
+    current_density = clamp(sample, 0.0, 1.0) * Density;
+    float shadowterm = exp(-shadowdist * shadow_density);
+    vec3 absorbedlight = vec3(shadowterm * current_density);
+    lightenergy += absorbedlight * transmittance;
+    transmittance *= 1 - current_density;
+
+	return vec4(lightenergy, 1 - transmittance);
+}
+
+void main() 
+{
+	vec3 raydir = normalize(VertexPos - CameraPos);
+
+    vec3 MappedFragPos = (VertexPos + BoxSize) / (BoxSize * 2.0);
+
+	FragColor = ray_march(CameraPos, raydir, MappedFragPos);
+}

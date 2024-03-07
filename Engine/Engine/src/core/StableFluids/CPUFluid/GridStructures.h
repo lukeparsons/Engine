@@ -2,13 +2,11 @@
 #include <algorithm>
 #include <array>
 #include <vector>
-#include "../../scene/components/RenderComponent.h"
 
 struct GridDataPoint
 {
 
 	enum CellState { FLUID, SOLID, EMPTY, DEFAULT } cellState;
-	RenderComponent* render;
 
 	/* These 'A' named variables store the coefficient matrix for the pressure calculations
 	Each row of the matrix corresponds to one fluid cell
@@ -24,8 +22,8 @@ struct GridDataPoint
 	float Ay; // Ax stores the coefficient for A(i, j)(i, j + 1)
 	float Az;
 
-	GridDataPoint() : cellState(GridDataPoint::EMPTY), render(nullptr), Adiag(0), Ax(0), Ay(0), Az(0) {};
-	GridDataPoint(CellState state) : cellState(state), render(nullptr), Adiag(0), Ax(0), Ay(0), Az(0) {};
+	GridDataPoint() : cellState(GridDataPoint::EMPTY), Adiag(0), Ax(0), Ay(0), Az(0) {};
+	GridDataPoint(CellState state) : cellState(state), Adiag(0), Ax(0), Ay(0), Az(0) {};
 };
 
 /* This data structure relies on an ordered insertion

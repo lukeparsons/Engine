@@ -1,48 +1,6 @@
 #include "StableFluids.h"
+#include "../../../renderer/shaders/ShaderStore.h"
 
-void StableFluids::InitModelRender()
-{
-	meshShader = g_shaderStore.LoadShader<BasicShader>("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex", "../Engine/src/renderer/shaders/shaderfiles/BasicFragment.fragment");
-	glUseProgram(meshShader->GetID());
-
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, solidTexture->width, solidTexture->height, 0, solidTexture->format, solidTexture->type, solidTexture->GetPixelData());
-}
-
-void StableFluids::ModelRender(Matrix4f& cameraMatrix)
-{
-	Matrix4f modelMatrix;
-	Vector3f scale = Vector3f(0.01, 0.01, 0.01);
-	float x, y, z;
-	float h = 1.0f / N;
-	for(int i = 1; i <= column; i++)
-	{
-		x = (i - 0.5f) * h;
-		for(int j = 1; j <= row; j++)
-		{
-			y = (j - 0.5f) * h;
-			for(int k = 1; k <= depth; k++)
-			{
-				z = (k - 0.5f) * h;
-				if(smoke(i, j, k) >= 0.1f)
-				{
-					modelMatrix = GetTranslationMatrix(Vector3f(x, y, z)) * GetScaleMatrix(scale);
-					meshShader->Configure(cameraMatrix, modelMatrix);
-
-					cellMesh->QuickDraw();
-				}
-			}
-		}
-	}
-}
 
 void StableFluids::InitVelocityRender()
 {

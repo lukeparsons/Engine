@@ -6,7 +6,7 @@ string opencl_c_container()
 
 	#define IX(i,j,k,column,row)((i)+(column+2)*(j)+(column+2)*(row+2)*(k))
 
-	kernel void add_source(global float* grid, global float* prevGrid, const float timeStep, const uint column, const uint row)
+	kernel void add_source(const float timeStep, global float* grid, global float* prevGrid, const uint column, const uint row)
 	{
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);

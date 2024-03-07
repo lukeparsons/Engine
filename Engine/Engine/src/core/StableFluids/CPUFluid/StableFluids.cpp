@@ -2,8 +2,6 @@
 
 #define SWAP(x0, x) {GridStructure<float>* tmp = x0; x0 = x; x = tmp;}
 
-#define MAX_ITERATIONS 10
-
 void StableFluids::add_source(GridStructure<float>& grid, GridStructure<float>& prevGrid, float timeStep)
 {
 	for(int i = 0; i <= column + 1; i++)
@@ -91,7 +89,7 @@ void StableFluids::lin_solve(int b, GridStructure<float>& grid, GridStructure<fl
 {
 	c = 1.0f / c;
 
-	for(int t = 0; t < MAX_ITERATIONS; t++)
+	for(int t = 0; t < max_iterations; t++)
 	{
 		for(int i = 1; i <= column; i++)
 		{

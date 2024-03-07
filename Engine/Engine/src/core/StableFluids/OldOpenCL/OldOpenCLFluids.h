@@ -1,15 +1,11 @@
 #pragma once
-
 #include "../../../opencl/opencl.hpp"
 #include "../../../renderer/shaders/LineShader.h"
+#include "../Fluid.h"
 
-class OldOpenCLFluids
+class OldOpenCLFluids : public Fluid
 {
 private:
-	unsigned int column, row, depth, N;
-
-	float viscosity;
-	float* arr;
 
 	Kernel addSource, project1, linsolve, project2, advect;
 	Kernel sidesBoundaryFace, topBottomBoundaryFace, frontBackBoundaryFace, boundaryIEdge, boundaryJEdge, boundaryKEdge, boundaryCorners;
@@ -19,6 +15,7 @@ private:
 	Memory<float> uVelocity;
 	Memory<float> vVelocity;
 	Memory<float> wVelocity;
+	Memory<float> smoke;
 	Memory<float> prevUVelocity;
 	Memory<float> prevVVelocity;
 	Memory<float> prevWVelocity;
@@ -59,7 +56,7 @@ private:
 	void project(Memory<float>& u, Memory<float>& v, Memory<float>& w, Memory<float>& u0, Memory<float>& v0);
 	void lin_solve(const int b, Memory<float>& grid);
 
-	void density_step(float timeStep, float diffRate);
+	void density_step(float timeStep);
 	void velocity_step(float timeStep);
 
 	void set_boundary(int b, Memory<float>& grid);
@@ -70,12 +67,16 @@ private:
 	std::array<float, 6> vertices = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 
 public:
-	Memory<float> smoke;
+
+	float* GetSmokeData()
+	{
+		return smoke.data();
+	}
+
 
 	OldOpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth);
 
-	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear,
-		float xForce, float yForce);
+	void Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear);
 
-	void Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke);
+	void Profile(float timeStep, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke);
 };

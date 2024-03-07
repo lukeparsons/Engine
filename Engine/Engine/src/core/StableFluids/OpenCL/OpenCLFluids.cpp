@@ -2,17 +2,7 @@
 #include <array>
 #include <iostream>
 
-/*TODO:
-	- Mouse control
-	- UI
-	- Ink
-	- Different advection
-	- Test different workgroup sizes
-	- Non-sequential enqueue_running*/
-
 #define IX(i,j,k) ((i)+(column+2)*(j) + (column+2)*(row+2)*(k)) 
-
-#define MAX_ITERATIONS 10
 
 static cl::Device cldevice;
 
@@ -39,7 +29,7 @@ static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
 	return kernel;
 }
 
-OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth) : column(_column), row(_row), depth(_depth), N(std::max(std::max(column, row), depth))
+OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth) : Fluid(_column, _row, _depth)
 {
 	device = Device(select_device_with_most_flops(), true, get_opencl_c_code()); // compile OpenCL C code for the fastest available device
 	cldevice = device.get_cl_device();
@@ -60,8 +50,6 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 	const float timeStep = 0.4f;
 	viscosity = 0.0f;
 
-	// TODO: Fix weidness and also ocl function best workgroup and local size
-
 	const uint workgroup_size = 256u;
 
 	sidesBoundaryFace = MakeKernel2D(Kernel(device, row * depth, workgroup_size, "sidesBoundaryFace", smoke, 1, column, row), row, depth);
@@ -77,9 +65,9 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 	advect = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "advect", timeStep, smoke, prevSmoke, prevUVelocity, prevVVelocity, prevWVelocity, N, column, row, depth), column, row, depth);
 
 	add_vel_sources = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "add_velocity_sources",
-		uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity, prevWVelocity, timeStep, column, row), column + 2u, row + 2u, depth + 2u);
+		timeStep, uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity, prevWVelocity, column, row), column + 2u, row + 2u, depth + 2u);
 
-	add_smoke_source = MakeKernel3D(Kernel(device, grid_size, 1, "add_source", smoke, prevSmoke, timeStep, column, row), column + 2u, row + 2u, depth + 2u);
+	add_smoke_source = MakeKernel3D(Kernel(device, grid_size, 1, "add_source", timeStep, smoke, prevSmoke, column, row), column + 2u, row + 2u, depth + 2u);
 
 	linsolve = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "lin_solve", smoke, prevSmoke, scale, (float)(1 + 6 * scale), column, row), column, row, depth);
 
@@ -99,7 +87,6 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear,
 	float xForce, float yForce)
 {
-	const float vel = 400.0f;
 
 	if(clear)
 	{
@@ -117,45 +104,45 @@ void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, boo
 		prevUVelocity.fill_host(0.0f);
 		if(addForceU)
 		{
-			prevUVelocity[IX(column / 2, row / 2, depth / 2)] = vel;
+			prevUVelocity[IX(column / 2, row / 2, depth / 2)] = addvel;
 			addForceU = false;
 		}
 
 		if(negAddForceU)
 		{
-			prevUVelocity[IX(column / 2, row / 2, depth / 2)] = -vel;
+			prevUVelocity[IX(column / 2, row / 2, depth / 2)] = -addvel;
 			negAddForceU = false;
 		}
 
 		prevVVelocity.fill_host(0.0f);
 		if(addForceV)
 		{
-			prevVVelocity[IX(column / 2, 2, depth / 2)] = vel;
+			prevVVelocity[IX(column / 2, 2, depth / 2)] = addvel;
 			addForceV = false;
 		}
 
 		if(negAddForceV)
 		{
-			prevVVelocity[IX(column / 2, row / 2, depth / 2)] = -vel;
+			prevVVelocity[IX(column / 2, row / 2, depth / 2)] = -addvel;
 			negAddForceV = false;
 		}
 
 		prevWVelocity.fill_host(0.0f);
 		if(addForceW)
 		{
-			prevWVelocity[IX(column / 2, row / 2, 2)] = vel;
+			prevWVelocity[IX(column / 2, row / 2, 2)] = addvel;
 			addForceW = false;
 		}
 		if(negAddForceW)
 		{
-			prevWVelocity[IX(column / 2, row / 2, depth - 2)] = -vel;
+			prevWVelocity[IX(column / 2, row / 2, depth - 2)] = -addvel;
 			negAddForceW = false;
 		}
 
 		prevSmoke.fill_host(0.0f);
 		if(addSmoke)
 		{
-			prevSmoke[IX(column / 2, 2, depth / 2)] = 400.f;
+			prevSmoke[IX(column / 2, 2, depth / 2)] = addsmoke;
 			addSmoke = false;
 		}
 
@@ -166,7 +153,7 @@ void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, boo
 	}
 
 	velocity_step(timeStep);
-	density_step(timeStep, diffRate);
+	density_step(timeStep);
 
 	smoke.enqueue_read();
 	//uVelocity.enqueue_read();
@@ -207,19 +194,17 @@ void OpenCLFluids::Profile(float timeStep, float diffRate, float addForceU, floa
 	prevSmoke.enqueue_write();
 
 	velocity_step(timeStep);
-	density_step(timeStep, diffRate);
+	density_step(timeStep);
 
 	smoke.enqueue_read();
-	//uVelocity.enqueue_read();
-	//vVelocity.enqueue_read();
-	//wVelocity.enqueue_read();
 
 	cl_queue.finish();
 }
 
-void OpenCLFluids::density_step(const float timeStep, const float diffRate)
+void OpenCLFluids::density_step(const float timeStep)
 {
-	scale = timeStep * diffRate * N * N * N;
+	scale = timeStep * diffusionRate * N * N * N;
+	add_smoke_source.set_parameters(0, timeStep);
 	add_smoke_source.enqueue_run(&source_event);
 
 	//SWAP
@@ -227,7 +212,7 @@ void OpenCLFluids::density_step(const float timeStep, const float diffRate)
 	bnd_event = { source_event };
 
 	linsolve.set_parameters(0, prevSmoke, smoke, scale, (float)(1.0f + 6.0f * scale));
-	for(int t = 0; t < MAX_ITERATIONS; t++)
+	for(int t = 0; t < max_iterations; t++)
 	{
 		linsolve.enqueue_run(cl::NDRange{ 1, 1, 1 }, bnd_event, &linsolve_event);
 		bnd_event = enqueue_set_boundary(prevSmoke, 1, 1, 1, { linsolve_event });
@@ -244,13 +229,14 @@ void OpenCLFluids::velocity_step(float timeStep)
 {
 	scale = timeStep * viscosity * N * N * N;
 
+	add_vel_sources.set_parameters(0, timeStep);
 	add_vel_sources.enqueue_run(&source_event);
 
 	// SWAP
 
 	uBnd = { source_event }, vBnd = { source_event }, wBnd = { source_event };
 
-	for(int t = 0; t < MAX_ITERATIONS; t++)
+	for(int t = 0; t < max_iterations; t++)
 	{
 		linsolve.set_parameters(0, prevUVelocity, uVelocity, scale, (float)(1.0f + 6.0f * scale));
 		linsolve.enqueue_run(cl::NDRange{ 1, 1, 1 }, uBnd, &solveU_event);
@@ -309,7 +295,7 @@ void OpenCLFluids::project(Memory<float>& u, Memory<float>& v, Memory<float>& w,
 	bnd_event = { };
 
 	linsolve.set_parameters(0, p, div, 1.0f, 6.0f);
-	for(int t = 0; t < MAX_ITERATIONS; t++)
+	for(int t = 0; t < max_iterations; t++)
 	{
 		linsolve.enqueue_run(cl::NDRange{ 1, 1, 1 }, bnd_event, &solveP_event);
 		bnd_event = enqueue_set_boundary(p, 1, 1, 1, {solveP_event});
