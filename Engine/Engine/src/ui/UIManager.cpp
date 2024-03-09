@@ -42,7 +42,6 @@ bool PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std:
 
 	ImGui::SliderFloat3("Box Size", volRender.scale.data(), 1.0f, 10.0f);
 
-
 	ImGui::InputInt3("Grid Size", gridsize->data());
 
 	ImGui::SameLine();

@@ -314,7 +314,7 @@ void StableFluids::velocity_step(GridStructure<float>* u, GridStructure<float>* 
 	project(*u, *v, *w, *u0, *v0);
 }
 
-void StableFluids::Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke)
+void StableFluids::Profile(float timeStep, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke)
 {
 
 	prevUVelocity.fill(0.f);
