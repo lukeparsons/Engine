@@ -16,8 +16,8 @@ string opencl_c_container()
 		grid[idx] += timeStep * prevGrid[idx];
 	}
 
-	kernel void add_velocity_sources(global float* uVelocity, global float* vVelocity, global float* wVelocity, global float* prevUVelocity, global float* prevVVelocity, global float* prevWVelocity,
-		const float timeStep, const uint column, const uint row)
+	kernel void add_velocity_sources(const float timeStep, global float* uVelocity, global float* vVelocity, global float* wVelocity, global float* prevUVelocity, global float* prevVVelocity, global float* prevWVelocity,
+		const uint column, const uint row)
 	{
 		const uint i = get_global_id(0);
 		const uint j = get_global_id(1);

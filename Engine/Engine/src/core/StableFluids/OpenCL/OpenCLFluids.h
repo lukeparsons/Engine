@@ -6,7 +6,6 @@
 class OpenCLFluids : public Fluid
 {
 private:
-	unsigned int column, row, depth, N;
 
 	Device device;
 
@@ -90,10 +89,9 @@ public:
 
 	OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth);
 
-	void Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear,
-		float xForce, float yForce);
+	void Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear);
 
-	void Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke);
+	void Profile(float timeStep, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke);
 
 	float* GetSmokeData()
 	{

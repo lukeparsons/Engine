@@ -20,8 +20,8 @@ vec4 ray_march(in vec3 rayorigin, vec3 raydir, vec3 FragPos)
 	vec3 current_pos;
 	float depth = 0.0;
 
-	const int NUMBER_STEPS = 70;
-	const float MARCH_SIZE = 0.05;
+	const int NUMBER_STEPS = 100;
+	const float MARCH_SIZE = 0.03;
     
     vec3 LVector = LightVector;
 

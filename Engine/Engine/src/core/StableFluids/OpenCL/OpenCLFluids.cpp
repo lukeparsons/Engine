@@ -84,8 +84,7 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 	prevSmoke.enqueue_fill_device(0.0f);
 }
 
-void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear,
-	float xForce, float yForce)
+void OpenCLFluids::Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear)
 {
 
 	if(clear)
@@ -163,7 +162,7 @@ void OpenCLFluids::Simulate(float timeStep, float diffRate, bool& addForceU, boo
 	cl_queue.finish();
 }
 
-void OpenCLFluids::Profile(float timeStep, float diffRate, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke)
+void OpenCLFluids::Profile(float timeStep, float addForceU, float addForceV, float addForceW, float negAddForceU, float negAddForceV, float negAddForceW, float addSmoke)
 {
 
 	prevUVelocity.fill_host(0.0f);

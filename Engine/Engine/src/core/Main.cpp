@@ -26,9 +26,9 @@
 #include "StableFluids/OpenCL/OpenCLFluids.h"
 #include "StableFluids/OldOpenCL/OldOpenCLFluids.h"
 
-#define row 100
-#define column 100
-#define depth 100
+#define row 200
+#define column 200
+#define depth 200
 
 static const int width = 1920;
 static const int height = 1080;
@@ -133,10 +133,11 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 	if(!cursorShown)
 	{
 		camera.ProcessCameraMouseInputs(xpos, ypos, pxpos, pypos);
-
-		pxpos = xpos;
-		pypos = ypos;
 	}
+
+
+	pxpos = xpos;
+	pypos = ypos;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -195,7 +196,7 @@ int main()
 	InitUI(window);
 
 	std::array<int, 3> gridsize = { 100, 100, 100 };
-	std::unique_ptr<Fluid> fluid = std::make_unique<OldOpenCLFluids>(column, row, depth);
+	std::unique_ptr<Fluid> fluid = std::make_unique<OpenCLFluids>(column, row, depth);
 
 	double currentFrameTime = 0;
 	double frameTime = 0.f;
