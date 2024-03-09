@@ -69,7 +69,7 @@ private:
 	int column, row, depth;
 	std::shared_ptr<Mesh> rect;
 	GLuint textureID;
-	const float* smoke;
+	float* smoke;
 
 	void RenderVolume(VolumeShader* shader);
 
@@ -82,7 +82,7 @@ public:
 	std::shared_ptr<VolumeShader> volShader;
 	std::shared_ptr<VolumeLightingShader> volLightingShader;
 
-	VolumeRender(int _column, int _row, int _depth, const float* _smoke) : column(_column + 2), row(_row + 2), depth(_depth + 2), smoke(_smoke), enableLighting(false)
+	VolumeRender(int _column, int _row, int _depth, float* _smoke) : column(_column + 2), row(_row + 2), depth(_depth + 2), smoke(_smoke), enableLighting(false)
 	{
 		rect = std::make_shared<Mesh>("../Engine/assets/box.obj");
 		volShader = g_shaderStore.LoadShader<VolumeShader>("../Engine/src/renderer/shaders/shaderfiles/BasicVertex.vertex", "../Engine/src/renderer/shaders/shaderfiles/RayMarch.fragment");
@@ -99,6 +99,16 @@ public:
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, column, row, depth, 0, GL_RED, GL_FLOAT, smoke);
+	}
+
+	void UpdateSize(int _column, int _row, int _depth, float* _smoke)
+	{
+		column = _column + 2;
+		row = _row + 2;
+		depth = _depth + 2;
+		smoke = _smoke;
+		glBindTexture(GL_TEXTURE_3D, textureID);
 		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, column, row, depth, 0, GL_RED, GL_FLOAT, smoke);
 	}
 

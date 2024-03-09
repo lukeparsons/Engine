@@ -26,9 +26,9 @@
 #include "StableFluids/OpenCL/OpenCLFluids.h"
 #include "StableFluids/OldOpenCL/OldOpenCLFluids.h"
 
-#define row 200
-#define column 200
-#define depth 200
+#define row 100
+#define column 100
+#define depth 100
 
 static const int width = 1920;
 static const int height = 1080;
@@ -214,7 +214,11 @@ int main()
 		glClearColor(0.5f, 0.4f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		PrepareFrameUI(fluid, volRender, &gridsize, &timeStep, &volRender.enableLighting);
+		if(PrepareFrameUI(fluid, volRender, &gridsize, &timeStep, &volRender.enableLighting))
+		{
+			fluid = std::make_unique<OpenCLFluids>(gridsize[0], gridsize[1], gridsize[2]);
+			volRender.UpdateSize(gridsize[0], gridsize[1], gridsize[2], fluid->GetSmokeData());
+		}
 
 		processInput(window);
 

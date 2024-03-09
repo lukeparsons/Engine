@@ -15,7 +15,7 @@ void InitUI(GLFWwindow* window)
 	ImGui_ImplOpenGL3_Init();
 }
 
-void PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std::array<int, 3>* gridsize, float* timeStep, bool* enableLighting)
+bool PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std::array<int, 3>* gridsize, float* timeStep, bool* enableLighting)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -38,14 +38,21 @@ void PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std:
 
 	ImGui::SliderFloat("Velocity Source", &fluid->addvel, 0.0f, 5000.f);
 
+	ImGui::Separator();
+
 	ImGui::SliderFloat3("Box Size", volRender.scale.data(), 1.0f, 10.0f);
 
-	//ImGui::InputInt3("Grid Size", &gridsize);
+
+	ImGui::InputInt3("Grid Size", gridsize->data());
+
+	ImGui::SameLine();
 
 	if(ImGui::Button("Save"))
 	{
-
+		return true;
 	}
+
+	ImGui::Separator();
 
 	ImGui::Checkbox("Enable Lighting", enableLighting);
 
@@ -57,6 +64,7 @@ void PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std:
 	ImGui::SliderFloat("Ambient Density", &volRender.volLightingShader->ambientDensity, 0.0f, 10.0f);
 
 	ImGui::End();
+	return false;
 }
 
 void RenderUI()

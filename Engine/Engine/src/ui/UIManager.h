@@ -4,7 +4,7 @@
 
 void InitUI(GLFWwindow* window);
 
-void PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std::array<int, 3>* gridsize, float* timeStep, bool* enableLighting);
+bool PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std::array<int, 3>* gridsize, float* timeStep, bool* enableLighting);
 
 void RenderUI();
 
