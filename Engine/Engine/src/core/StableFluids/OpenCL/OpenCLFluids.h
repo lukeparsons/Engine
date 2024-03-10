@@ -87,7 +87,7 @@ private:
 
 public:
 
-	OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth);
+	OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth, int iterations);
 
 	void Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear);
 

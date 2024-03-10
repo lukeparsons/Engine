@@ -26,9 +26,9 @@
 #include "StableFluids/OpenCL/OpenCLFluids.h"
 #include "StableFluids/OldOpenCL/OldOpenCLFluids.h"
 
-#define row 40
-#define column 40
-#define depth 40
+#define row 220
+#define column 220
+#define depth 220
 
 static const int width = 1920;
 static const int height = 1080;
@@ -150,10 +150,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 }
 
-static const std::shared_ptr<int> h = std::make_shared<int>(10);
-static const std::shared_ptr<int> m = std::make_shared<int>(20);
-
-
 int main()
 {
 	glfwInit();
@@ -196,7 +192,7 @@ int main()
 	//InitUI(window);
 
 	std::array<int, 3> gridsize = { 80, 80, 80 };
-	std::unique_ptr<Fluid> fluid = std::make_unique<StableFluids>(column, row, depth);
+	std::unique_ptr<Fluid> fluid = std::make_unique<OpenCLFluids>(column, row, depth, 10);
 
 	double currentFrameTime = 0;
 	double frameTime = 0.f;

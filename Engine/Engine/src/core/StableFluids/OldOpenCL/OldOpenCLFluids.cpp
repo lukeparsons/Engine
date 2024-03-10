@@ -31,7 +31,7 @@ static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
 	return kernel;
 }
 
-OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth) : Fluid(_column, _row, _depth)
+OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth, int iterations = 20) : Fluid(_column, _row, _depth, iterations)
 {
 	Device device(select_device_with_most_flops(), false, get_opencl_c_code_old()); // compile OpenCL C code for the fastest available device
 

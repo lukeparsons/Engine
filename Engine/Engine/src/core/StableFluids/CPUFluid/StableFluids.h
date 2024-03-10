@@ -27,7 +27,7 @@ public:
 
 	std::shared_ptr<LineShader> lineShader;
 
-	StableFluids(unsigned int column, unsigned int row, unsigned int depth) : Fluid(column, row, depth) {};
+	StableFluids(unsigned int column, unsigned int row, unsigned int depth, int iterations = 20) : Fluid(column, row, depth, iterations) {};
 
 	float* GetSmokeData()
 	{

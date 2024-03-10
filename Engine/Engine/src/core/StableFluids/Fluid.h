@@ -12,13 +12,13 @@ public:
 	int max_iterations;
 	float addvel, addsmoke;
 
-	Fluid(const unsigned int _column, const unsigned int _row, const unsigned int _depth) : column(_column), row(_row), depth(_depth), N(std::max(std::max(column, row), depth))
+	Fluid(const unsigned int _column, const unsigned int _row, const unsigned int _depth, int _max_iterations = 20) : column(_column), row(_row), depth(_depth), N(std::max(std::max(column, row), depth))
 	{
 		addvel = 60.f;
 		addsmoke = 60.f;
 		viscosity = 0.0f;
 		diffusionRate = 0.0f;
-		max_iterations = 20;
+		max_iterations = _max_iterations;
 	}
 
 	virtual void Simulate(float timeStep, bool& addForceU, bool& addForceV, bool& addForceW, bool& negAddForceU, bool& negAddForceV, bool& negAddForceW, bool& addSmoke, bool& clear) = 0;

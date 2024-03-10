@@ -29,7 +29,7 @@ static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
 	return kernel;
 }
 
-OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth) : Fluid(_column, _row, _depth)
+OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth, int iterations = 20) : Fluid(_column, _row, _depth, iterations)
 {
 	device = Device(select_device_with_most_flops(), true, get_opencl_c_code()); // compile OpenCL C code for the fastest available device
 	cldevice = device.get_cl_device();
