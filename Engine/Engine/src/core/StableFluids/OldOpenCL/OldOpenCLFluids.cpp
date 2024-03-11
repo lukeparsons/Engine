@@ -19,19 +19,41 @@ static std::array<int, 3> index_to_coords(uint idx, uint column, uint row)
 	return { i, j, k };
 }
 
+static uint FindMaxDivisible(uint big, uint divis)
+{
+	while(divis > 0)
+	{
+		if(big % divis == 0)
+		{
+			return divis;
+		}
+		divis--;
+	}
+	return divis;
+}
+
 static Kernel& MakeKernel3D(Kernel&& kernel, uint column, uint row, uint depth)
 {
-	kernel.set_ranges({ column, row, depth }, { 6, 6, 6 });
+	/*size_t test;
+	kernel.cl_kernel.getWorkGroupInfo<size_t>(cldevice, CL_KERNEL_WORK_GROUP_SIZE, &test); */
+	uint xSize = FindMaxDivisible(column, 6);
+	uint ySize = FindMaxDivisible(row, 6);
+	uint zSize = FindMaxDivisible(depth, 6);
+
+	kernel.set_ranges({ column, row, depth }, { xSize, ySize, zSize });
 	return kernel;
 }
 
 static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
 {
-	kernel.set_ranges({ x, y }, { 16, 16 });
+	uint xSize = FindMaxDivisible(x, 16);
+	uint ySize = FindMaxDivisible(y, 16);
+	kernel.set_ranges({ x, y }, { xSize, ySize });
 	return kernel;
+
 }
 
-OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth, int iterations = 20) : Fluid(_column, _row, _depth, iterations)
+OldOpenCLFluids::OldOpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth, int iterations) : Fluid(_column, _row, _depth, iterations)
 {
 	Device device(select_device_with_most_flops(), false, get_opencl_c_code_old()); // compile OpenCL C code for the fastest available device
 
@@ -103,13 +125,13 @@ void OldOpenCLFluids::Simulate(float timeStep, bool& addForceU, bool& addForceV,
 		prevUVelocity.fill_host(0.0f);
 		if(addForceU)
 		{
-			prevUVelocity[IX(column / 2, 2, depth / 2)] = addvel;
+			prevUVelocity[IX(column / 2, row / 2, depth / 2)] = addvel;
 			addForceU = false;
 		}
 
 		if(negAddForceU)
 		{
-			prevUVelocity[IX(column / 2, 2, depth / 2)] = -addvel;
+			prevUVelocity[IX(column / 2, row / 2, depth / 2)] = -addvel;
 			negAddForceU = false;
 		}
 

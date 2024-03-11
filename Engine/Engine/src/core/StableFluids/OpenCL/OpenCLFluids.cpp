@@ -14,22 +14,41 @@ static std::array<int, 3> index_to_coords(uint idx, uint column, uint row)
 	return { i, j, k };
 }
 
+static uint FindMaxDivisible(uint big, uint divis)
+{
+	while(divis > 0)
+	{
+		if(big % divis == 0)
+		{
+			return divis;
+		}
+		divis--;
+	}
+	return divis;
+}
+
 static Kernel& MakeKernel3D(Kernel&& kernel, uint column, uint row, uint depth)
 {
-	size_t test;
-	kernel.cl_kernel.getWorkGroupInfo<size_t>(cldevice, CL_KERNEL_WORK_GROUP_SIZE, &test);
-	std::cout << test << std::endl;
-	kernel.set_ranges({ column, row, depth }, { 6, 6, 6 });
+	/*size_t test;
+	kernel.cl_kernel.getWorkGroupInfo<size_t>(cldevice, CL_KERNEL_WORK_GROUP_SIZE, &test); */
+	uint xSize = FindMaxDivisible(column, 6);
+	uint ySize = FindMaxDivisible(row, 6);
+	uint zSize = FindMaxDivisible(depth, 6);
+
+	kernel.set_ranges({ column, row, depth }, { xSize, ySize, zSize });
 	return kernel;
 }
 
 static Kernel& MakeKernel2D(Kernel&& kernel, uint x, uint y)
 {
-	kernel.set_ranges({ x, y }, { 16, 16 });
+	uint xSize = FindMaxDivisible(x, 16);
+	uint ySize = FindMaxDivisible(y, 16);
+	kernel.set_ranges({ x, y }, { xSize, ySize });
 	return kernel;
+
 }
 
-OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth, int iterations = 20) : Fluid(_column, _row, _depth, iterations)
+OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int _depth, int iterations) : Fluid(_column, _row, _depth, iterations)
 {
 	device = Device(select_device_with_most_flops(), true, get_opencl_c_code()); // compile OpenCL C code for the fastest available device
 	cldevice = device.get_cl_device();
@@ -50,11 +69,9 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 	const float timeStep = 0.4f;
 	viscosity = 0.0f;
 
-	const uint workgroup_size = 256u;
-
-	sidesBoundaryFace = MakeKernel2D(Kernel(device, row * depth, workgroup_size, "sidesBoundaryFace", smoke, 1, column, row), row, depth);
-	topBottomBoundaryFace = MakeKernel2D(Kernel(device, column * depth, workgroup_size, "topBottomBoundaryFace", smoke, 1, column, row), column, depth);
-	frontBackBoundaryFace = MakeKernel2D(Kernel(device, column * row, workgroup_size, "frontBackBoundaryFace", smoke, 1, column, row, depth), column, row);
+	sidesBoundaryFace = MakeKernel2D(Kernel(device, row * depth, "sidesBoundaryFace", smoke, 1, column, row), row, depth);
+	topBottomBoundaryFace = MakeKernel2D(Kernel(device, column * depth, "topBottomBoundaryFace", smoke, 1, column, row), column, depth);
+	frontBackBoundaryFace = MakeKernel2D(Kernel(device, column * row, "frontBackBoundaryFace", smoke, 1, column, row, depth), column, row);
 
 	boundaryIEdge = Kernel(device, column, column, "boundaryIEdge", smoke, column, row, depth);
 	boundaryJEdge = Kernel(device, row, row, "boundaryJEdge", smoke, column, row, depth);
@@ -62,17 +79,17 @@ OpenCLFluids::OpenCLFluids(unsigned int _column, unsigned int _row, unsigned int
 
 	boundaryCorners = Kernel(device, 1, 1, "boundaryCorners", smoke, column, row, depth);
 
-	advect = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "advect", timeStep, smoke, prevSmoke, prevUVelocity, prevVVelocity, prevWVelocity, N, column, row, depth), column, row, depth);
+	advect = MakeKernel3D(Kernel(device, grid_size, "advect", timeStep, smoke, prevSmoke, prevUVelocity, prevVVelocity, prevWVelocity, N, column, row, depth), column, row, depth);
 
-	add_vel_sources = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "add_velocity_sources",
+	add_vel_sources = MakeKernel3D(Kernel(device, grid_size, "add_velocity_sources",
 		timeStep, uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity, prevWVelocity, column, row), column + 2u, row + 2u, depth + 2u);
 
 	add_smoke_source = MakeKernel3D(Kernel(device, grid_size, 1, "add_source", timeStep, smoke, prevSmoke, column, row), column + 2u, row + 2u, depth + 2u);
 
-	linsolve = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "lin_solve", smoke, prevSmoke, scale, (float)(1 + 6 * scale), column, row), column, row, depth);
+	linsolve = MakeKernel3D(Kernel(device, grid_size, "lin_solve", smoke, prevSmoke, scale, (float)(1 + 6 * scale), column, row), column, row, depth);
 
-	project1 = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "project1", uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity, N, column, row), column, row, depth);
-	project2 = MakeKernel3D(Kernel(device, grid_size, workgroup_size, "project2", uVelocity, vVelocity, wVelocity, prevUVelocity, N, column, row), column, row, depth);
+	project1 = MakeKernel3D(Kernel(device, grid_size, "project1", uVelocity, vVelocity, wVelocity, prevUVelocity, prevVVelocity, N, column, row), column, row, depth);
+	project2 = MakeKernel3D(Kernel(device, grid_size, "project2", uVelocity, vVelocity, wVelocity, prevUVelocity, N, column, row), column, row, depth);
 
 	uVelocity.enqueue_fill_device(0.0f);
 	vVelocity.enqueue_fill_device(0.0f);

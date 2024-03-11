@@ -26,9 +26,9 @@
 #include "StableFluids/OpenCL/OpenCLFluids.h"
 #include "StableFluids/OldOpenCL/OldOpenCLFluids.h"
 
-#define row 220
-#define column 220
-#define depth 220
+#define row 20
+#define column 20
+#define depth 20
 
 static const int width = 1920;
 static const int height = 1080;
@@ -189,7 +189,7 @@ int main()
 
 	std::shared_ptr<Mesh> box = std::make_shared<Mesh>("../Engine/assets/box.obj");
 
-	//InitUI(window);
+	InitUI(window);
 
 	std::array<int, 3> gridsize = { 80, 80, 80 };
 	std::unique_ptr<Fluid> fluid = std::make_unique<OpenCLFluids>(column, row, depth, 10);
@@ -202,7 +202,7 @@ int main()
 
 	VolumeRender volRender = VolumeRender(column, row, depth, fluid->GetSmokeData());
 	Matrix4f cameraSpaceMatrix = camera.GetCameraSpaceMatrix();
-	for(int i = 0; i < frameCount; i++)
+	while(!glfwWindowShouldClose(window))
 	{
 		currentFrameTime = glfwGetTime();
 		//std::cout << "FPS: " << 60 / (currentFrameTime - previousFrameTime) << std::endl;
@@ -210,11 +210,11 @@ int main()
 		glClearColor(0.5f, 0.4f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		/*if(PrepareFrameUI(fluid, volRender, &gridsize, &timeStep, &volRender.enableLighting))
+		if(PrepareFrameUI(fluid, volRender, &gridsize, &timeStep, &volRender.enableLighting))
 		{
 			fluid = std::make_unique<OpenCLFluids>(gridsize[0], gridsize[1], gridsize[2]);
 			volRender.UpdateSize(gridsize[0], gridsize[1], gridsize[2], fluid->GetSmokeData());
-		} */
+		}
 
 		processInput(window);
 
@@ -222,25 +222,25 @@ int main()
 
 		cameraMatrix = projectionMatrix * cameraSpaceMatrix;
 
-		//fluid->Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
+		fluid->Simulate(timeStep, addForceU, addForceV, addForceW, negaddForceU, negaddForceV, negaddForceW, addSmoke, clear);
 
-		f = (float)i;
+		/*f = (float)i;
 		f2 = f / 2.0f;
 		f3 = f / 3.0f;
 		f4 = f / 4.0f;
-		fluid->Profile(0.4f, f, -f2, f3, -f, f4, -f3, f2);
+		fluid->Profile(0.4f, f, -f2, f3, -f, f4, -f3, f2); */
 
 		volRender.Render(cameraMatrix, camera);
 	
-		//RenderUI();
+		RenderUI();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		frameTime += glfwGetTime() - currentFrameTime;
+		//frameTime += glfwGetTime() - currentFrameTime;
 	}
 
-	std::cout << "Average Frametime " << (frameTime / (double)frameCount) << std::endl;
-	//ShutdownUI();
+	//std::cout << "Average Frametime " << (frameTime / (double)frameCount) << std::endl;
+	ShutdownUI();
 	glfwTerminate();
 
 	return 0;

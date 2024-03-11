@@ -48,6 +48,7 @@ bool PrepareFrameUI(std::unique_ptr<Fluid>& fluid, VolumeRender& volRender, std:
 
 	if(ImGui::Button("Save"))
 	{
+		ImGui::End();
 		return true;
 	}
 

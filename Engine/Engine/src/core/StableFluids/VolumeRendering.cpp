@@ -9,7 +9,7 @@ inline void VolumeRender::SetShaderValues(VolumeShader* shader, Matrix4f& camera
 
 void VolumeRender::Render(Matrix4f& cameraMatrix, Camera& camera) {
 
-	/*if(enableLighting)
+	if(enableLighting)
 	{
 		SetShaderValues(volLightingShader.get(), cameraMatrix, camera);
 		RenderVolumeLighting();
@@ -18,9 +18,7 @@ void VolumeRender::Render(Matrix4f& cameraMatrix, Camera& camera) {
 	{
 		SetShaderValues(volShader.get(), cameraMatrix, camera);
 		RenderVolume(volShader.get());
-	}; */
-	SetShaderValues(volShader.get(), cameraMatrix, camera);
-	RenderVolume(volShader.get());
+	}; 
 }
 
 void VolumeRender::RenderVolume(VolumeShader* shader)

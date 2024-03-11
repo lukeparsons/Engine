@@ -69,9 +69,9 @@ struct Device_Info {
 		tflops = 1E-6f*(float)cores*(float)ipc*(float)clock_frequency; // estimated device floating point performance in TeraFLOPs/s
 		size_t f[3];
 		cl_device.getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &f);
-		for(size_t t : f)
+		for(int i = 0; i < 3; i++)
 		{
-			std::cout << t << std::endl;
+			std::cout << i << ": " << f[i] << std::endl;
 		}
 		if(intel==8.0f) { // fix wrong global memory reporting for Intel Arc GPUs
 			if((contains_any(name, {"A770", "0x56a0"})&&memory>=11739u&&memory<14168u)||(contains_any(name, {"A770", "A750", "A580", "0x56a0", "0x56a1", "0x56a2"})&&memory>=5869u&&memory<7084u)||(contains_any(name, {"A380", "0x56a5"})&&memory>=4402u&&memory<5313u)) { // 72.5%-87.5% reporting -> /0.8
